@@ -10,7 +10,9 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
-  specs2 % Test
+  specs2 % Test,
+  "com.gu" %% "pan-domain-auth-play" % "0.2.7",
+  "com.amazonaws" % "aws-java-sdk" % "1.7.5"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
