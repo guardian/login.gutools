@@ -1,11 +1,7 @@
 package controllers
 
-import com.netaporter.uri.Uri
 import controllers.Login._
-import play.api._
 import play.api.mvc._
-import com.netaporter.uri.Uri.parse
-import com.netaporter.uri.dsl._
 import play.api.Play.current
 
 object Application extends Controller {
