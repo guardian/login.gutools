@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-class Login extends Controller with PanDomainAuthActions {
+object Login extends Controller with PanDomainAuthActions {
 
   def oauthCallback = Action.async { implicit request =>
     processGoogleCallback()

@@ -1,0 +1,4 @@
+name: login
+mappings:
+  - prefix: login
+    port: 9000

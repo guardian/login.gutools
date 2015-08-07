@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   specs2 % Test,
-  "com.gu" %% "pan-domain-auth-play" % "0.2.7",
+  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.7",
   "com.amazonaws" % "aws-java-sdk" % "1.7.5"
 )
 
@@ -19,4 +19,4 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
-routesGenerator := InjectedRoutesGenerator
+//routesGenerator := InjectedRoutesGenerator

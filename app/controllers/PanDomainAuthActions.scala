@@ -23,5 +23,5 @@ trait PanDomainAuthActions extends AuthActions {
   //lazy val awsKeyId: String = config.getString("pandomain.aws.keyId")
   //  override lazy val awscredentials =for (key <- awsKeyId; secret <- awsSecretAccessKey) yield new BasicAWSCredentials(key, secret)
 
-  override lazy val system: String = "workflow"
+  override lazy val system: String = "login"
 }
