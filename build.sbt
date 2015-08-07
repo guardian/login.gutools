@@ -12,7 +12,8 @@ libraryDependencies ++= Seq(
   ws,
   specs2 % Test,
   "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.7",
-  "com.amazonaws" % "aws-java-sdk" % "1.7.5"
+  "com.amazonaws" % "aws-java-sdk" % "1.7.5",
+  "com.netaporter" %% "scala-uri" % "0.4.8"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

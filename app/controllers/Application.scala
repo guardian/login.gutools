@@ -1,15 +1,28 @@
 package controllers
 
+import com.netaporter.uri.Uri
 import controllers.Login._
 import play.api.mvc._
+import com.netaporter.uri.dsl._
 import play.api.Play.current
 
 object Application extends Controller {
 
-  lazy val whitelist = play.api.Play.configuration.getStringList("redirect.whitelist")
+  lazy val domainWhiteList = play.api.Play.configuration.getStringSeq("redirect.whitelist").map(_.toList).getOrElse(Nil)
 
+  /**
+   * returnUrl is a valid domain and host of returnUrl ends with a whitelisted domain
+   * @param returnUrl the url to return to
+   * @return
+   */
   def isGuToolsDomain(returnUrl: String): Boolean = {
-    whitelist.get.contains(returnUrl)
+
+    val uri: Uri = returnUrl
+
+    uri.host match {
+      case Some(host) => domainWhiteList.exists(d => host.endsWith(d))
+      case None => false
+    }
   }
 
   def login(returnUrl: String) = AuthAction { request =>
