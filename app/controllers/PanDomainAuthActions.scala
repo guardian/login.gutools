@@ -1,5 +1,6 @@
 package controllers
 
+import com.amazonaws.auth.BasicAWSCredentials
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 
@@ -18,10 +19,9 @@ trait PanDomainAuthActions extends AuthActions {
 
   override lazy val domain: String = config.getString("pandomain.domain").get
   
-  //if login.gutools is running in the same account, then you shouldn't need special access keys
-  //lazy val awsSecretAccessKey: String = config.getString("pandomain.aws.secret")
-  //lazy val awsKeyId: String = config.getString("pandomain.aws.keyId")
-  //  override lazy val awscredentials =for (key <- awsKeyId; secret <- awsSecretAccessKey) yield new BasicAWSCredentials(key, secret)
+  lazy val awsSecretAccessKey: Option[String] = config.getString("pandomain.aws.secret")
+  lazy val awsKeyId: Option[String] = config.getString("pandomain.aws.keyId")
+  override lazy val awsCredentials = for (key <- awsKeyId; secret <- awsSecretAccessKey) yield new BasicAWSCredentials(key, secret)
 
   override lazy val system: String = "login"
 }
