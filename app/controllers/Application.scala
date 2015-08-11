@@ -40,7 +40,7 @@ object Application extends Controller {
 
   }
 
-  def healthcheck() = {
+  def healthcheck() = Action {
     Ok("Ok")
   }
 
