@@ -11,7 +11,6 @@ object Application extends Controller {
   lazy val pandaDomainOption = play.api.Play.configuration.getString("pandomain.domain")
 
   /**
-<<<<<<< HEAD
    * returnUrl is a valid domain and host of returnUrl ends with a whitelisted domain
    * @param returnUrl the url to return to
    * @return
