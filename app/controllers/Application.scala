@@ -11,10 +11,10 @@ object Application extends Controller {
   lazy val domainWhiteList = play.api.Play.configuration.getStringSeq("redirect.whitelist").map(_.toList).getOrElse(Nil)
 
   /**
-   * returnUrl is a valid domain and host of returnUrl ends with a whitelisted domain
-   * @param returnUrl the url to return to
-   * @return
-   */
+    * returnUrl is a valid domain and host of returnUrl ends with a whitelisted domain
+    * @param returnUrl the url to return to
+    * @return
+    */
   def isGuToolsDomain(returnUrl: String): Boolean = {
 
     val uri: Uri = returnUrl
@@ -32,6 +32,10 @@ object Application extends Controller {
       Ok("Not a whitelisted gutools.co.uk domain")
     }
 
+  }
+
+  def healthcheck() = {
+    Ok("Ok")
   }
 
 }
