@@ -40,6 +40,7 @@ object Application extends Controller {
 
   }
 
+
   def healthCheck() = Action { implicit request =>
     Ok("Ok")
   }
