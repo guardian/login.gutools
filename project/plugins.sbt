@@ -1,6 +1,8 @@
 // The Play plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.2")
 
+addSbtPlugin("com.gu" % "riffraff-artifact" % "0.5")
+
 // web plugins
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")

@@ -1,10 +1,8 @@
-name := """login"""
+//import com.typesafe.sbt.packager.Keys._
 
-version := "1.0-SNAPSHOT"
+name := "login"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
-scalaVersion := "2.11.6"
+version := "0.0.1"
 
 libraryDependencies ++= Seq(
   jdbc,
@@ -12,8 +10,7 @@ libraryDependencies ++= Seq(
   ws,
   specs2 % Test,
   "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.7",
-  "com.amazonaws" % "aws-java-sdk" % "1.7.5",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
+  "com.amazonaws" % "aws-java-sdk" % "1.7.5"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
@@ -26,3 +23,18 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 sources in (Compile, doc) := Seq.empty
 
 publishArtifact in (Compile, packageDoc) := false
+
+ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
+
+lazy val mainProject = project.in(file("."))
+  .enablePlugins(PlayScala, RiffRaffArtifact)
+  .settings(Defaults.coreDefaultSettings: _*)
+  .settings(
+    // Never interested in the version number in the artifact name
+    name in Universal := normalizedName.value,
+    riffRaffPackageType := (packageZipTarball in config("universal")).value,
+    riffRaffArtifactResources ++= Seq(
+      baseDirectory.value / "cloudformation" / "restorer.json" ->
+        "packages/cloudformation/restorer.json"
+    )
+  )
