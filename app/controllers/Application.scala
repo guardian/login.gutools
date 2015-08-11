@@ -11,6 +11,7 @@ object Application extends Controller {
   lazy val pandaDomainOption = play.api.Play.configuration.getString("pandomain.domain")
 
   /**
+<<<<<<< HEAD
    * returnUrl is a valid domain and host of returnUrl ends with a whitelisted domain
    * @param returnUrl the url to return to
    * @return
@@ -38,6 +39,10 @@ object Application extends Controller {
       Ok("Please redirect to a valid, secure url on the relevant stage")
     }
 
+  }
+
+  def healthcheck() = {
+    Ok("Ok")
   }
 
 }

@@ -1,0 +1,38 @@
+{
+  "defaultStacks": ["flexible"],
+  "packages": {
+    "login" : {
+      "type": "autoscaling",
+      "data": {
+        "bucket": "composer-dist",
+        "publicReadAcl": false
+      }
+    },
+    "login-cloudformation" : {
+      "type": "cloud-formation",
+      "fileName": "cloudformation",
+      "data": {
+        "templatePath": "login-tool.json",
+        "cloudFormationStackName": "LoginTool",
+        "prependStackToCloudFormationStackName": false
+      }
+    }
+  },
+  "recipes": {
+    "default": {
+      "depends": ["login-cloudformation", "artifactUploadOnly", "deployOnly"]
+    },
+
+    "deployOnly": {
+      "actionsBeforeApp": ["login.deploy"]
+    },
+
+    "artifactUploadOnly": {
+      "actionsBeforeApp": ["login.uploadArtifacts"]
+    },
+
+    "login-cloudformation": {
+      "actions": ["login-cloudformation.updateStack"]
+    }
+  }
+}
