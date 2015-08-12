@@ -31,10 +31,10 @@ lazy val mainProject = project.in(file("."))
   .settings(Defaults.coreDefaultSettings: _*)
   .settings(
     // Never interested in the version number in the artifact name
-    name in Universal := normalizedName.value,
+    packageName in Universal := normalizedName.value,
     riffRaffPackageType := (packageZipTarball in config("universal")).value,
     riffRaffArtifactResources ++= Seq(
-      baseDirectory.value / "cloudformation" / "restorer.json" ->
-        "packages/cloudformation/restorer.json"
+      baseDirectory.value / "cloudformation" / "login-tool.json" ->
+        "packages/cloudformation/login-tool.json"
     )
   )
