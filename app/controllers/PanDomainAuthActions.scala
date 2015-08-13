@@ -3,6 +3,7 @@ package controllers
 import com.amazonaws.auth.BasicAWSCredentials
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
+import config.LoginConfig
 
 trait PanDomainAuthActions extends AuthActions {
 
@@ -15,9 +16,9 @@ trait PanDomainAuthActions extends AuthActions {
 
   override def cacheValidation = true
 
-  override def authCallbackUrl: String = config.getString("host").get + "/oauthCallback"
+  override def authCallbackUrl: String = LoginConfig.host + "/oauthCallback"
 
-  override lazy val domain: String = config.getString("pandomain.domain").get
+  override lazy val domain: String = LoginConfig.domain
   
   lazy val awsSecretAccessKey: Option[String] = config.getString("pandomain.aws.secret")
   lazy val awsKeyId: Option[String] = config.getString("pandomain.aws.keyId")
