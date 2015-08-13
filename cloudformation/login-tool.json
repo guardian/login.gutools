@@ -83,6 +83,22 @@
         "Path": "/"
       }
     },
+    "PanDomainPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "PanDomainPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["s3:GetObject"],
+              "Resource": ["arn:aws:s3:::pan-domain-auth-settings/*"]
+            }
+          ]
+        },
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
     "LoginToolDescribeEC2Policy": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
