@@ -13,7 +13,7 @@
       "fileName": "cloudformation",
       "data": {
         "templatePath": "login-tool.json",
-        "cloudFormationStackName": "LoginTool",
+        "cloudFormationStackName": "login-tool",
         "prependStackToCloudFormationStackName": false
       }
     }
