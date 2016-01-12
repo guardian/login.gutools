@@ -1,0 +1,13 @@
+logins:
+  build: .
+  dockerfile: Dockerfile
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ".:/code"
+    - "../dev-nginx:/dev-nginx"
+  environment:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  entrypoint: /code/entrypoint.sh
