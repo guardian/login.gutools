@@ -5,7 +5,9 @@
 cd /dev-nginx
 cp ssl/* /etc/nginx/
 ./setup-app.rb /code/nginx/nginx-mapping.yml
-./restart-nginx.sh
+
+# start nginx
+nginx
 
 # run app
 cd /code
