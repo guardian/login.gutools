@@ -1,1 +1,3 @@
-activator "run -Dconfig.resource=application.local.conf"
+#!/usr/bin/env bash
+
+./activator "~run -Dconfig.resource=application.local.conf"

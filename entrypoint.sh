@@ -9,4 +9,4 @@ cp ssl/* /etc/nginx/
 
 # run app
 cd /code
-./activator "~ run -Dconfig.resource=application.local.conf -Dpandomain.aws.keyId=$AWS_ACCESS_KEY_ID -Dpandomain.aws.secret=$AWS_SECRET_ACCESS_KEY"
+./start-login.sh
