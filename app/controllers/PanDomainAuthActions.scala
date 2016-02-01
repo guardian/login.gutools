@@ -1,6 +1,7 @@
 package controllers
 
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.auth._
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 import config.LoginConfig
@@ -19,10 +20,15 @@ trait PanDomainAuthActions extends AuthActions {
   override def authCallbackUrl: String = LoginConfig.host + "/oauthCallback"
 
   override lazy val domain: String = LoginConfig.domain
-  
-  lazy val awsSecretAccessKey: Option[String] = config.getString("pandomain.aws.secret")
-  lazy val awsKeyId: Option[String] = config.getString("pandomain.aws.keyId")
-  override lazy val awsCredentials = for (key <- awsKeyId; secret <- awsSecretAccessKey) yield new BasicAWSCredentials(key, secret)
+
+  def credentialsProviderChain = new AWSCredentialsProviderChain(
+    new EnvironmentVariableCredentialsProvider(),
+    new SystemPropertiesCredentialsProvider(),
+    new InstanceProfileCredentialsProvider(),
+    new ProfileCredentialsProvider("workflow")
+  )
+
+  override lazy val awsCredentials = Some(credentialsProviderChain.getCredentials)
 
   override lazy val system: String = "login"
 }
