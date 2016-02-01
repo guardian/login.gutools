@@ -21,14 +21,12 @@ trait PanDomainAuthActions extends AuthActions {
 
   override lazy val domain: String = LoginConfig.domain
 
-  def credentialsProviderChain = new AWSCredentialsProviderChain(
+  override lazy val awsCredentialsProvider = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider(),
     new SystemPropertiesCredentialsProvider(),
     new InstanceProfileCredentialsProvider(),
     new ProfileCredentialsProvider("workflow")
   )
-
-  override lazy val awsCredentials = Some(credentialsProviderChain.getCredentials)
 
   override lazy val system: String = "login"
 }

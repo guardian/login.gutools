@@ -9,7 +9,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   specs2 % Test,
-  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.7",
+  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.11",
   "com.amazonaws" % "aws-java-sdk" % "1.10.50"
 )
 
