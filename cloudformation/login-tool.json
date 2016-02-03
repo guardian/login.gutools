@@ -356,7 +356,7 @@
           {"Ref": "SSHSecurityGroup"},
           {"Ref": "PingSecurityGroup"}
         ],
-        "InstanceType": "t2.micro",
+        "InstanceType": "t2.nano",
         "IamInstanceProfile": {"Ref": "LoginToolInstanceProfile"},
         "UserData": {
           "Fn::Base64": {
