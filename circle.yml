@@ -1,0 +1,14 @@
+machine:
+  java:
+    version: oraclejdk8
+general:
+  artifacts:
+    - "target/riffraff/artifacts.zip"
+dependencies:
+  override:
+    - sbt compile
+test:
+  override:
+    - sbt test
+  post:
+    - sbt riffRaffUpload
