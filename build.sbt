@@ -35,9 +35,15 @@ lazy val mainProject = project.in(file("."))
   .settings(
     // Never interested in the version number in the artifact name
     packageName in Universal := normalizedName.value,
+    riffRaffPackageName := s"editorial-tools:${name.value}",
+    riffRaffManifestProjectName := riffRaffPackageName.value,
+    riffRaffBuildIdentifier :=  Option(System.getenv("CIRCLE_BUILD_NUM")).getOrElse("dev"),
+    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
+    riffRaffUploadManifestBucket := Option("riffraff-builds"),
+    riffRaffManifestBranch := Option(System.getenv("CIRCLE_BRANCH")).getOrElse("dev"),
     riffRaffPackageType := (packageZipTarball in config("universal")).value,
     riffRaffArtifactResources ++= Seq(
+      riffRaffPackageType.value -> s"packages/${name.value}/${name.value}.tgz",
       baseDirectory.value / "cloudformation" / "login-tool.json" ->
         "packages/cloudformation/login-tool.json"
-    )
-  )
+    ))
