@@ -1,0 +1,11 @@
+logins:
+  build: .
+  dockerfile: Dockerfile
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ".:/code"
+    - "../dev-nginx:/dev-nginx"
+    - "$HOME/.aws/:/root/.aws:ro"
+  entrypoint: /code/entrypoint.sh
