@@ -10,10 +10,10 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
-  specs2 % Test,
   "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.11",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion
+  "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
+  "org.scalatest" %% "scalatest" % "2.2.6" % Test
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

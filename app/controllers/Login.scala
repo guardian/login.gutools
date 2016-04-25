@@ -1,10 +1,7 @@
 package controllers
 
-import play.api._
 import play.api.mvc._
-import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Future
 
 object Login extends Controller with PanDomainAuthActions {
 
@@ -17,7 +14,7 @@ object Login extends Controller with PanDomainAuthActions {
     Ok(views.html.loginStatus(user.toJson))
   }
 
-  def logout = Action.async { implicit request =>
-    Future(processLogout)
+  def logout = Action { implicit request =>
+    processLogout
   }
 }
