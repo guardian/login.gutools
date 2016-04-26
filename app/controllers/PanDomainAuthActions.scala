@@ -7,7 +7,7 @@ import config.{LoginConfig, AWS}
 
 
 trait PanDomainAuthActions extends AuthActions {
-  val loginConfig = LoginConfig.loginConfig(AWS.eC2Client)
+  def loginConfig = LoginConfig.loginConfig(AWS.eC2Client)
 
   override lazy val awsCredentialsProvider = AWS.awsCredentialsProvider
 
