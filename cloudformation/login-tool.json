@@ -34,6 +34,10 @@
       "Description": "Ip range for the office",
       "Type": "String",
       "Default": "77.91.248.0/21"
+    },
+    "AMI": {
+      "Description": "Ip range for the office",
+      "Type": "String"
     }
   },
   "Mappings": {
@@ -46,13 +50,13 @@
       "EnvironmentMap": {
           "CODE": {
             "lowercase": "code",
-            "desiredCapacity": 1,
-            "maxSize": 2
+            "desiredCapacity": 3,
+            "maxSize": 6
           },
           "PROD": {
             "lowercase": "prod",
-            "desiredCapacity": 1,
-            "maxSize": 2
+            "desiredCapacity": 3,
+            "maxSize": 6
           }
       },
       "DynamoConfigTablesMap" : {
@@ -307,56 +311,15 @@
     },
     "LoginToolLaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
-      "Metadata": {
-        "AWS::CloudFormation::Authentication": {
-          "distributionAuthentication": {
-            "type": "S3",
-            "roleName": {"Ref": "LoginToolRole"},
-            "buckets": ["composer-dist"]
-          }
-        },
-        "AWS::CloudFormation::Init": {
-          "config": {
-            "users": {
-              "login": {
-                "homeDir": "/home/login"
-              }
-            },
-            "files": {
-              "/etc/init/LoginTool.conf": {
-                "source": { "Fn::Join" : ["", [
-                  "https://s3-eu-west-1.amazonaws.com/composer-dist/login/",
-                  { "Ref": "Stage" },
-                  "/login.conf"
-                ]]},
-                "authentication": "distributionAuthentication"
-              },
-              "/home/login/login.tgz": {
-                "source": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "https://s3-eu-west-1.amazonaws.com/composer-dist/login/",
-                      {"Ref": "Stage"},
-                      "/login.tgz"
-                    ]
-                  ]
-                },
-                "authentication": "distributionAuthentication"
-              }
-            }
-          }
-        }
-      },
       "Properties": {
         "KeyName": {"Ref": "KeyName"},
-        "ImageId": "ami-6a9bcb1d",
+        "ImageId": {"Ref": "AMI"},
         "SecurityGroups": [
           {"Ref": "AppServerSecurityGroup"},
           {"Ref": "SSHSecurityGroup"},
           {"Ref": "PingSecurityGroup"}
         ],
-        "InstanceType": "t2.nano",
+        "InstanceType": "t2.micro",
         "IamInstanceProfile": {"Ref": "LoginToolInstanceProfile"},
         "UserData": {
           "Fn::Base64": {
