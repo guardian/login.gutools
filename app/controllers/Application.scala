@@ -1,48 +1,24 @@
 package controllers
 
-import java.net.URL
-
+import config.LoginConfig
 import controllers.Login._
-import play.api.mvc._
 import play.api.Play.current
+import play.api.mvc._
+
 
 object Application extends Controller {
 
   lazy val pandaDomainOption = play.api.Play.configuration.getString("pandomain.domain")
 
-  /**
-   * returnUrl is a valid domain and host of returnUrl ends with a whitelisted domain
-   * @param returnUrl the url to return to
-   * @return
-   */
-  def isValidUrl(returnUrl: String): Boolean = {
-
-    pandaDomainOption match {
-      case Some(pandaDomain) => {
-
-        try {
-          val url = new URL(returnUrl)
-          url.getHost.endsWith(pandaDomain) && url.getProtocol == "https" // valid url, matches panda domain and is secure
-        } catch {
-          case e: Exception => false // invalid url
-        }
-      }
-      case None => false
-    }
-  }
-
-  def login(returnUrl: String) = AuthAction { request =>
-    if (isValidUrl(returnUrl)) {
+  def login(returnUrl: String) = AuthAction { implicit request =>
+    if (LoginConfig.isValidUrl(pandaDomainOption, returnUrl)) {
       Redirect(returnUrl)
     } else {
       Ok("Please redirect to a valid, secure url on the relevant stage")
     }
-
   }
-
 
   def healthCheck() = Action { implicit request =>
     Ok("Ok")
   }
-
 }
