@@ -4,13 +4,13 @@ name := "login"
 
 version := "0.0.1"
 
-val awsSdkVersion = "1.10.50"
+val awsSdkVersion = "1.10.72"
 
 libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.11",
+  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.12",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
   "org.scalatest" %% "scalatest" % "2.2.6" % Test
