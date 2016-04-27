@@ -6,9 +6,9 @@ general:
     - "target/riffraff/artifacts.zip"
 dependencies:
   override:
-    - sbt compile
+    - ./sbt compile
 test:
   override:
-    - sbt test
+    - ./sbt test
   post:
-    - sbt riffRaffUpload
+    - ./sbt riffRaffUpload
