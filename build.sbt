@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.12",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
+  "com.github.nscala-time" %% "nscala-time" % "2.12.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test
 )
 

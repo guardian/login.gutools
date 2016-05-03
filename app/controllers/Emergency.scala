@@ -1,8 +1,7 @@
 package controllers
 
-import java.util.Date
-
 import actions.EmergencySwitchIsOnAction
+import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.PublicSettings
 import com.gu.pandomainauth.model.{CookieParseException, CookieSignatureInvalidException}
 import com.gu.pandomainauth.service.CookieUtils
@@ -10,11 +9,9 @@ import config.LoginPublicSettings
 import play.api.Logger
 import play.api.mvc.{Action, Controller}
 
-
 object Emergency extends Controller with PanDomainAuthActions {
 
-  //TODO - import library?
-  val cookieLifetime: Long = 1000 * 60 * 60 * 24 // 1 day
+  val cookieLifetime = 1.day
 
   def reissueDisabled = Action {
     Ok(views.html.emergency.reissueDisabled())
@@ -28,7 +25,7 @@ object Emergency extends Controller with PanDomainAuthActions {
       try {
         val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
         if (validateUser(authenticatedUser)) {
-          val expires = new Date().getTime + cookieLifetime
+          val expires = (DateTime.now() + cookieLifetime).getMillis
           val newAuthUser = authenticatedUser.copy(expires = expires)
           val authCookies = generateCookies(newAuthUser)
           Ok(views.html.emergency.reissueSuccess())
