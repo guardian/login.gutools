@@ -34,6 +34,7 @@ ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 lazy val mainProject = project.in(file("."))
   .enablePlugins(PlayScala, RiffRaffArtifact)
   .settings(Defaults.coreDefaultSettings: _*)
+  .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     // Never interested in the version number in the artifact name
     packageName in Universal := normalizedName.value,

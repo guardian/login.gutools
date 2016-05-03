@@ -2,6 +2,7 @@ package controllers
 
 import java.util.Date
 
+import actions.EmergencySwitchIsOnAction
 import com.gu.pandomainauth.PublicSettings
 import com.gu.pandomainauth.model.{CookieParseException, CookieSignatureInvalidException}
 import com.gu.pandomainauth.service.CookieUtils
@@ -15,12 +16,11 @@ object Emergency extends Controller with PanDomainAuthActions {
   //TODO - import library?
   val cookieLifetime: Long = 1000 * 60 * 60 * 24 // 1 day
 
-  def reissue = Action { req =>
-    //TODO:
-    /**
-      * Only allow this process to happen if a config switch is on
-      *
-      */
+  def reissueDisabled = Action {
+    Ok(views.html.emergency.reissueDisabled())
+  }
+
+  def reissue = EmergencySwitchIsOnAction { req =>
     (for {
       publicKey <- LoginPublicSettings.publicKey
       assymCookie <- req.cookies.find(_.name == PublicSettings.assymCookieName)
@@ -48,7 +48,7 @@ object Emergency extends Controller with PanDomainAuthActions {
     }
   }
 
-  def unauthorised(message: String) = {
+  private def unauthorised(message: String) = {
     Logger.warn(message)
     Unauthorized(views.html.emergency.reissueFailure(message))
   }
