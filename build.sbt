@@ -10,13 +10,16 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.12",
+  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.13",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
+  "com.github.nscala-time" %% "nscala-time" % "2.12.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % Test
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
+scalaVersion := "2.11.8"
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
@@ -32,6 +35,7 @@ ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 lazy val mainProject = project.in(file("."))
   .enablePlugins(PlayScala, RiffRaffArtifact)
   .settings(Defaults.coreDefaultSettings: _*)
+  .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     // Never interested in the version number in the artifact name
     packageName in Universal := normalizedName.value,
