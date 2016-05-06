@@ -16,6 +16,8 @@ object Switches {
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
   private val bucket = "login-gutools-config"
   private val scheduler = StdSchedulerFactory.getDefaultScheduler
+  val loginConfig = LoginConfig.loginConfig(AWS.eC2Client)
+  val fileName = s"${loginConfig.stage.toUpperCase}/switches.json"
 
   class SwitchJob extends Job() {
     override def execute(context: JobExecutionContext): Unit = refresh()
@@ -31,7 +33,7 @@ object Switches {
     val jsonString = Json.stringify(json)
     val metaData = new ObjectMetadata()
     metaData.setContentLength(jsonString.getBytes("UTF-8").length)
-    val request = new PutObjectRequest(bucket, "DEV/switches.json", new StringInputStream(jsonString), metaData) //TODO fix stage
+    val request = new PutObjectRequest(bucket, fileName, new StringInputStream(jsonString), metaData)
 
     try {
       AWS.s3Client.putObject(request)
@@ -65,7 +67,7 @@ object Switches {
   def refresh() = {
     Logger.debug("Refreshing switches agent")
     try {
-      val request = new GetObjectRequest(bucket, "DEV/switches.json") //TODO fix stage
+      val request = new GetObjectRequest(bucket, fileName)
       val result = AWS.s3Client.getObject(request)
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
