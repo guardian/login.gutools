@@ -1,0 +1,17 @@
+@import config.SwitchState
+@(switches: Map[String, SwitchState])
+<html>
+    <head>
+        <title>
+            Switch states
+        </title>
+    </head>
+    <body>
+        <dl>
+        @for((name, state) <- switches) {
+            <dt> @name </dt>
+            <dl> @{state.name} </dl>
+        }
+        </dl>
+    </body>
+</html>
