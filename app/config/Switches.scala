@@ -38,7 +38,10 @@ object Switches {
     try {
       AWS.s3Client.putObject(request)
     } catch {
-      case e: Exception => Logger.error(s"Unable to update switch $name ${state}", e)
+      case e: Exception => {
+        Logger.error(s"Unable to update switch $name ${state}", e)
+        throw e
+      }
     }
     agent.send(newStates)
   }
@@ -61,6 +64,7 @@ object Switches {
   }
 
   def stop()  {
+    Logger.info("Stopping switches scheduled task")
     scheduler.deleteJob(job.getKey)
   }
 
@@ -76,7 +80,8 @@ object Switches {
       result.close
     }
     catch {
-      case e: Exception => Logger.error("Unable to get an update from config agent ", e) //TODO fix
+      case e: Exception =>
+        Logger.error(s"Unable to get an updated version of switches.json from S3 $bucket $fileName. The switches map is likely to be stale. ", e)
     }
   }
 }

@@ -11,7 +11,11 @@ object Switches {
 
   //TODO whitelist who can do this
   def emergencyOn = AuthAction { req =>
-    config.Switches.set("emergency", On)
-    Ok("We're done") //TODO fix - catch errors
+    try {
+      config.Switches.set("emergency", On)
+      Ok("Emergency switch updated to ON.")
+    } catch {
+      case e: Exception => InternalServerError(s"Update failed with exception ${e.getMessage}")
+    }
   }
 }
