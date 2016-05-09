@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
 object Switches {
-  lazy val allSwitches: Map[String, SwitchState] = agent.get()
+  def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
   private val bucket = "login-gutools-config"
   private val scheduler = StdSchedulerFactory.getDefaultScheduler
@@ -26,7 +26,7 @@ object Switches {
     .withIdentity("refresh-switches-gu-login-tools")
     .build()
 
-  def set(name: String, state: SwitchState) = {
+  def set(name: String, state: SwitchState) {
     val newStates = allSwitches + (name -> state)
 
     val json = Json.toJson(newStates)
@@ -39,10 +39,11 @@ object Switches {
       AWS.s3Client.putObject(request)
     } catch {
       case e: Exception => {
-        Logger.error(s"Unable to update switch $name ${state}", e)
+        Logger.error(s"Unable to update switch $name ${state.name}", e)
         throw e
       }
     }
+    Logger.info(s"$name has been updated to ${state.name}")
     agent.send(newStates)
   }
 
@@ -90,10 +91,10 @@ sealed trait SwitchState {
   val name: String
 }
 object On extends SwitchState {
-  val name = "On"
+  val name = "ON"
 }
 object Off extends SwitchState {
-  val name = "Off"
+  val name = "OFF"
 }
 
 object SwitchState {

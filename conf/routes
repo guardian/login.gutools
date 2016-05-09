@@ -12,6 +12,7 @@ GET     /emergency/reissue          controllers.Emergency.reissue
 GET     /emergency/reissue-disabled controllers.Emergency.reissueDisabled
 
 POST    /switches/emergency/on      controllers.Switches.emergencyOn
+POST    /switches/emergency/off     controllers.Switches.emergencyOff
 GET     /switches                   controllers.Switches.index
 
 GET     /_healthcheck               controllers.Application.healthCheck
