@@ -26,7 +26,8 @@ object Switches {
     .withIdentity("refresh-switches-gu-login-tools")
     .build()
 
-  def set(name: String, state: SwitchState) {
+  def setEmergencySwitch(state: SwitchState) {
+    val name = "emergency"
     val newStates = allSwitches + (name -> state)
 
     val json = Json.toJson(newStates)
