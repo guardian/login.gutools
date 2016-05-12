@@ -1,31 +1,38 @@
 package controllers
 
-import config.{Off, On}
+import actions.EmergencySwitchChangeAccess
+import config.{Off, On, SwitchState}
 import controllers.Login._
+import play.Logger
 
 object Switches {
 
+  private def errorMessage(state: SwitchState)  = s"Failed to update Emergency switch to ${state.name}. Contact digitalcms.dev@theguardian.com for more help."
+  private def success(state: SwitchState)  = s"Emergency switch updated to ${state.name}"
+
   def index = AuthAction { req =>
-    Ok(views.html.switches(config.Switches.allSwitches))
+    Ok(views.html.switches.switchValues(config.Switches.allSwitches))
   }
 
-  //TODO whitelist who can do this & failure cases
-  def emergencyOn = AuthAction { req =>
+  def emergencyOn = EmergencySwitchChangeAccess { req =>
     try {
       config.Switches.setEmergencySwitch(On)
-      Ok("Emergency switch updated to ON.")
+      Ok(views.html.switches.switchChange(success(On)))
     } catch {
-      case e: Exception => InternalServerError(s"Failed to update emergency switch to ON: ${e.getMessage}")
+      case e: Exception =>
+        Logger.error(e.getMessage)
+        InternalServerError(views.html.switches.switchChange(errorMessage(On)))
     }
   }
 
-  //TODO whitelist who can do this & failure cases
-  def emergencyOff = AuthAction { req =>
+  def emergencyOff = EmergencySwitchChangeAccess { req =>
     try {
       config.Switches.setEmergencySwitch(Off)
-      Ok("Emergency switch updated to OFF.")
+      Ok(views.html.switches.switchChange(success(On)))
     } catch {
-      case e: Exception => InternalServerError(s"Failed to update emergency switch to OFF: ${e.getMessage}")
+      case e: Exception =>
+        Logger.error(e.getMessage)
+        InternalServerError(views.html.switches.switchChange(errorMessage(Off)))
     }
   }
 }

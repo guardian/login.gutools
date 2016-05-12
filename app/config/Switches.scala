@@ -79,7 +79,7 @@ object Switches {
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
 
       agent.send(statesInS3)
-      result.close
+      result.close()
     }
     catch {
       case e: Exception =>

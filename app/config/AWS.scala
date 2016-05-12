@@ -3,6 +3,7 @@ package config
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, SystemPropertiesCredentialsProvider}
 import com.amazonaws.regions.{Region, Regions}
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.ec2.AmazonEC2Client
 import com.amazonaws.services.ec2.model.{DescribeTagsRequest, Filter}
 import com.amazonaws.services.s3.AmazonS3Client
@@ -28,6 +29,7 @@ object AWS {
 
   def eC2Client = region.createClient(classOf[AmazonEC2Client], workflowAwsCredentialsProvider, null)
   def s3Client = region.createClient(classOf[AmazonS3Client], composerAwsCredentialsProvider, null)
+  def dynamoDbClient = region.createClient(classOf[AmazonDynamoDBClient], composerAwsCredentialsProvider, null)
 
   def getInstanceId = Option(EC2MetadataUtils.getInstanceId)
 
