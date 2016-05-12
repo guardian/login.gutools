@@ -15,24 +15,14 @@ object Switches {
   }
 
   def emergencyOn = EmergencySwitchChangeAccess { req =>
-    try {
-      config.Switches.setEmergencySwitch(On)
+    config.Switches.setEmergencySwitch(On).map { _ =>
       Ok(views.html.switches.switchChange(success(On)))
-    } catch {
-      case e: Exception =>
-        Logger.error(e.getMessage)
-        InternalServerError(views.html.switches.switchChange(errorMessage(On)))
-    }
+    }.getOrElse(InternalServerError(views.html.switches.switchChange(errorMessage(On))))
   }
 
   def emergencyOff = EmergencySwitchChangeAccess { req =>
-    try {
-      config.Switches.setEmergencySwitch(Off)
-      Ok(views.html.switches.switchChange(success(On)))
-    } catch {
-      case e: Exception =>
-        Logger.error(e.getMessage)
-        InternalServerError(views.html.switches.switchChange(errorMessage(Off)))
-    }
+    config.Switches.setEmergencySwitch(Off).map { _ =>
+      Ok(views.html.switches.switchChange(success(Off)))
+    }.getOrElse(InternalServerError(views.html.switches.switchChange(errorMessage(Off))))
   }
 }

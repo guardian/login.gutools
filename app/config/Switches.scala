@@ -1,7 +1,7 @@
 package config
 
 import akka.agent.Agent
-import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
+import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.StringInputStream
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
@@ -26,7 +26,7 @@ object Switches {
     .withIdentity("refresh-switches-gu-login-tools")
     .build()
 
-  def setEmergencySwitch(state: SwitchState) {
+  def setEmergencySwitch(state: SwitchState): Option[PutObjectResult] = {
     val name = "emergency"
     val newStates = allSwitches + (name -> state)
 
@@ -35,9 +35,17 @@ object Switches {
     val metaData = new ObjectMetadata()
     metaData.setContentLength(jsonString.getBytes("UTF-8").length)
     val request = new PutObjectRequest(bucket, fileName, new StringInputStream(jsonString), metaData)
-    AWS.s3Client.putObject(request)
-    Logger.info(s"$name has been updated to ${state.name}")
-    agent.send(newStates)
+    try {
+      val result = AWS.s3Client.putObject(request)
+      Logger.info(s"$name has been updated to ${state.name}")
+      agent.send(newStates)
+      Some(result)
+    } catch {
+      case e: Exception => {
+        Logger.error(s"Unable to update switch $name ${state.name}", e)
+        None
+      }
+    }
   }
 
   def start() {
