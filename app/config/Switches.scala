@@ -35,15 +35,7 @@ object Switches {
     val metaData = new ObjectMetadata()
     metaData.setContentLength(jsonString.getBytes("UTF-8").length)
     val request = new PutObjectRequest(bucket, fileName, new StringInputStream(jsonString), metaData)
-
-    try {
-      AWS.s3Client.putObject(request)
-    } catch {
-      case e: Exception => {
-        Logger.error(s"Unable to update switch $name ${state.name}", e)
-        throw e
-      }
-    }
+    AWS.s3Client.putObject(request)
     Logger.info(s"$name has been updated to ${state.name}")
     agent.send(newStates)
   }
