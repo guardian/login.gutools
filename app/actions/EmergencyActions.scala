@@ -1,5 +1,6 @@
 package actions
 
+import cats.data.Xor
 import config.{AWS, LoginConfig, Off, On}
 import play.api.Logger
 import play.api.mvc.Results._
@@ -7,6 +8,7 @@ import play.api.mvc.{ActionBuilder, Headers, Request, Result}
 import com.github.t3hnar.bcrypt._
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import Xor.{Left, Right}
 import scala.concurrent.Future
 
 object EmergencySwitchIsOnAction extends ActionBuilder[Request] {
@@ -34,25 +36,26 @@ object EmergencySwitchChangeAccess extends ActionBuilder[Request] {
     }
 
     def refuseSwitchChange(logErrorMsg: String): Future[Result] = {
-      Logger.error(logErrorMsg)
+      Logger.warn(logErrorMsg)
       Future.successful {
-        Unauthorized(views.html.switches.switchChange("Authorisation checks failed, the Emergency switch will not be changed. Contact digitalcms.dev@theguardian.com for more help."))
+        Unauthorized(
+          views.html.switches.switchChange(
+            "Authorisation checks failed, the Emergency switch will not be changed. Contact digitalcms.dev@theguardian.com for more help."
+          ))
       }
     }
 
     try {
       val authHeaderUser = getBasicAuthDetails(request.headers)
       val userId = authHeaderUser.id
-      val userOpt = Scanamo.get[EmergencyUser](AWS.dynamoDbClient)(s"login.gutools-emergency-access-${loginConfig.stage.toUpperCase}")('userId -> s"$userId")
+      val tableName = s"login.gutools-emergency-access-${loginConfig.stage.toUpperCase}"
+      val userOpt = Scanamo.get[EmergencyUser](AWS.dynamoDbClient)(tableName)('userId -> s"$userId")
 
-      userOpt.map { xor =>
-        xor.fold(
-          error => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch."),
-          user => checkPassword(user, userId, authHeaderUser.password)
-        )
-      }.getOrElse {
-        refuseSwitchChange(s"User $userId not found. User will be refused access to change emergency switch.")
-      }
+      userOpt.map {
+        case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch.")
+        case Right(user) => checkPassword(user, userId, authHeaderUser.password)
+      }.getOrElse(refuseSwitchChange(s"User $userId not found. User will be refused access to change emergency switch."))
+
     } catch {
       case e: EmergencyActionsException => {
         refuseSwitchChange(e.getMessage)
