@@ -38,6 +38,14 @@
     "AMI": {
       "Description": "Ip range for the office",
       "Type": "String"
+    },
+    "EmergencyAccessTableARN": {
+      "Description": "DynamoDB table arn which stores authorised users to enable emergency mode.",
+      "Type": "String"
+    },
+    "S3BucketConfig": {
+      "Description": "S3 bucket where configuration lives e.g. switch values",
+      "Type": "String"
     }
   },
   "Mappings": {
@@ -155,6 +163,38 @@
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
+    "LoginToolS3ConfigPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "LoginToolS3ConfigPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:PutObject"],
+              "Resource": [{"Fn::Join": ["", ["arn:aws:s3:::", {"Ref": "S3BucketConfig"}, "/", {"Ref": "Stage"}] ] }]
+            }
+          ]
+        },
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
+    "LoginToolDynamoEmergencyAccessPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "LoginToolDynamoEmergencyAccessPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["dynamodb:GetItem"],
+              "Resource": [{"Ref": "EmergencyAccessTableARN"}]
+            }
+          ]
+        },
         "Roles": [{"Ref": "LoginToolRole"}]
       }
     },
