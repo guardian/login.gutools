@@ -26,7 +26,7 @@ object Switches {
     .withIdentity("refresh-switches-gu-login-tools")
     .build()
 
-  def setEmergencySwitch(state: SwitchState): Option[PutObjectResult] = {
+  def setEmergencySwitch(state: SwitchState): Option[Unit] = {
     val name = "emergency"
     val newStates = allSwitches + (name -> state)
 
@@ -39,7 +39,7 @@ object Switches {
       val result = AWS.s3Client.putObject(request)
       Logger.info(s"$name has been updated to ${state.name}")
       agent.send(newStates)
-      Some(result)
+      Some(Unit)
     } catch {
       case e: Exception => {
         Logger.error(s"Unable to update switch $name ${state.name}", e)
