@@ -9,12 +9,12 @@ class EmergencyActionsTest extends FreeSpec with Matchers {
       "if Authorization header is missing" in {
         val headers = Seq(("some-header", "some-header-value"))
         val thrownException = the[EmergencyActionsException] thrownBy EmergencySwitchChangeAccess.getBasicAuthDetails(FakeHeaders(headers))
-        thrownException.getMessage should equal("Authorization header is missing")
+        thrownException.getMessage should equal("Basic authorization header is missing")
       }
       "if Basic is missing in the Authorization header" in {
         val headers = Seq(("Authorization", "joe.bloggs@guardian.co.uk:some-password"))
         val thrownException = the[EmergencyActionsException] thrownBy EmergencySwitchChangeAccess.getBasicAuthDetails(FakeHeaders(headers))
-        thrownException.getMessage should equal("Authorization header is missing")
+        thrownException.getMessage should equal("Basic authorization header is missing")
       }
       "if email and password are not separate by a colon in the Authorization header" in {
         val headers = Seq(("Authorization", "Basic joe.bloggs@guardian.co.uk some-password"))

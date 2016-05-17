@@ -29,10 +29,10 @@ object EmergencySwitchChangeAccess extends ActionBuilder[Request] {
 
     def checkPassword(user: EmergencyUser, username: String, password: String): Future[Result] = {
       if (password.isBcrypted(user.passwordHash)) {
-        Logger.info(s"${username} is authorised to change the Emergency switch.")
+        Logger.info(s"$username is authorised to change the Emergency switch.")
         block(request)
       } else {
-        refuseSwitchChange(s"The password provided by ${username} is incorrect. User will be refused access to change emergency switch.")
+        refuseSwitchChange(s"The password provided by $username is incorrect. User will be refused access to change emergency switch.")
       }
     }
 
@@ -51,34 +51,32 @@ object EmergencySwitchChangeAccess extends ActionBuilder[Request] {
       val userId = authHeaderUser.id
       val tableName = s"login.gutools-emergency-access-${loginConfig.stage.toUpperCase}"
       val userOpt = Scanamo.get[EmergencyUser](AWS.dynamoDbClient)(tableName)('userId -> s"$userId")
-
       userOpt.map {
         case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch.")
         case Right(user) => checkPassword(user, userId, authHeaderUser.password)
       }.getOrElse(refuseSwitchChange(s"User $userId not found. User will be refused access to change emergency switch."))
-
     } catch {
-      case e: EmergencyActionsException => {
+      case e: EmergencyActionsException =>
         refuseSwitchChange(e.getMessage)
-      }
     }
   }
 
   def getBasicAuthDetails(headers: Headers): AuthorizationHeaderUser = {
-    headers.toMap.get("Authorization").flatMap { authHeaders =>
-
-      authHeaders.find(_.startsWith("Basic")).map { basicAuthHead =>
-        val basicAuthHeaderValue = basicAuthHead.split("Basic")(1).trim
-        if (!basicAuthHeaderValue.contains(":")) {
-          throw new EmergencyActionsException("Authorization header value is not the correct format.")
-        }
-        val usernameAndPassword = basicAuthHeaderValue.split(":")
-        if (usernameAndPassword.length != 2 || !usernameAndPassword(0).endsWith("@guardian.co.uk")) {
-          throw new EmergencyActionsException("Authorization header value is not the correct format.")
-        }
-        AuthorizationHeaderUser(usernameAndPassword(0).split("@guardian.co.uk")(0), usernameAndPassword(1))
+    val authUserOpt = for {
+      authHeaders <- headers.toMap.get("Authorization")
+      basicAuthHead <- authHeaders.find(_.startsWith("Basic"))
+    } yield {
+      val basicAuthHeaderValue = basicAuthHead.split("Basic")(1).trim
+      if (!basicAuthHeaderValue.contains(":")) {
+        throw new EmergencyActionsException("Authorization header value is not the correct format.")
       }
-    }.getOrElse(throw new EmergencyActionsException("Authorization header is missing"))
+      val usernameAndPassword = basicAuthHeaderValue.split(":")
+      if (usernameAndPassword.length != 2 || !usernameAndPassword(0).endsWith("@guardian.co.uk")) {
+        throw new EmergencyActionsException("Authorization header value is not the correct format.")
+      }
+      AuthorizationHeaderUser(usernameAndPassword(0).split("@guardian.co.uk")(0), usernameAndPassword(1))
+    }
+    authUserOpt.getOrElse(throw new EmergencyActionsException("Basic authorization header is missing"))
   }
 }
 
