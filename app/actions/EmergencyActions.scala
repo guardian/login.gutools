@@ -29,6 +29,7 @@ object EmergencySwitchChangeAccess extends ActionBuilder[Request] {
 
     def checkPassword(user: EmergencyUser, username: String, password: String): Future[Result] = {
       if (password.isBcrypted(user.passwordHash)) {
+        Logger.info(s"${username} is authorised to change the Emergency switch.")
         block(request)
       } else {
         refuseSwitchChange(s"The password provided by ${username} is incorrect. User will be refused access to change emergency switch.")
