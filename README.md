@@ -20,7 +20,7 @@ Users that can change the switch will have their userId and a password hash stor
 `userId` is the username of a Guardian email address e.g joe.bloggs if the email address is joe.bloggs@guardian.co.uk
 `passwordHash` is generated using [bCrypt](https://github.com/t3hnar/scala-bcrypt). To generate a hash:
 ```
-./sbt
+./sbt console
 import com.github.t3hnar.bcrypt._
 "[password-value]".bcrypt
 ```
