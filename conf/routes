@@ -7,6 +7,7 @@ GET     /login                      controllers.Application.login(returnUrl: Str
 GET     /showUser                   controllers.Login.status
 GET     /oauthCallback              controllers.Login.oauthCallback
 GET     /logout                     controllers.Login.logout
+GET     /whoami                     controllers.Login.whoami
 
 GET     /emergency/reissue          controllers.Emergency.reissue
 GET     /emergency/reissue-disabled controllers.Emergency.reissueDisabled
