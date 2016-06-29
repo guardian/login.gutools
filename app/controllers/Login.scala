@@ -1,5 +1,6 @@
 package controllers
 
+import model.Cors
 import play.api.mvc._
 
 
@@ -18,8 +19,8 @@ object Login extends Controller with PanDomainAuthActions {
     processLogout
   }
 
-  def whoami = APIAuthAction { request =>
+  def whoami = APIAuthAction { implicit request =>
     val user = request.user
-    Ok(user.toJson)
+    Cors(Ok(user.toJson).as("application/json"), Some("GET"))
   }
 }
