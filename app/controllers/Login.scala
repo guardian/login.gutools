@@ -17,4 +17,9 @@ object Login extends Controller with PanDomainAuthActions {
   def logout = Action { implicit request =>
     processLogout
   }
+
+  def whoami = APIAuthAction { request =>
+    val user = request.user
+    Ok(user.toJson)
+  }
 }
