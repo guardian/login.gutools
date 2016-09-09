@@ -60,3 +60,7 @@ import com.github.t3hnar.bcrypt._
 "[password-value]".bcrypt
 ```
 
+To turn a switch on or off run:
+```
+curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
+```
