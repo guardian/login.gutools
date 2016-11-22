@@ -11,10 +11,10 @@
     "login-cloudformation" : {
       "type": "cloud-formation",
       "fileName": "cloudformation",
+      "apps": ["login"],
       "data": {
-        "templatePath": "login-tool.json",
-        "cloudFormationStackName": "login-tool",
-        "prependStackToCloudFormationStackName": false
+        "cloudFormationStackByTags": true,
+        "templatePath": "login-tool.json"
       }
     }
   },
