@@ -76,7 +76,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
       val cookieIssue = NewCookieIssue(token, emailAddress,
         tokenIssuedAt, false)
 
-      val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(cookieIssue)
+      //val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(cookieIssue)
 
       val email = Email(
         "Gutools cookie link",
