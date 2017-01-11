@@ -43,6 +43,10 @@
       "Description": "DynamoDB table arn which stores authorised users to enable emergency mode.",
       "Type": "String"
     },
+    "ReissueTokensTableARN": {
+      "Description": "DynamoDB table arn which stores authorised users to enable emergency mode.",
+      "Type": "String"
+    },
     "S3BucketConfig": {
       "Description": "S3 bucket where configuration lives e.g. switch values",
       "Type": "String"
@@ -192,6 +196,11 @@
               "Effect": "Allow",
               "Action": ["dynamodb:GetItem"],
               "Resource": [{"Ref": "EmergencyAccessTableARN"}]
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["dynamodb:GetItem"],
+              "Resource": [{"Ref": "ReissueTokensTableARN"}]
             }
           ]
         },

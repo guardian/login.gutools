@@ -1,0 +1,36 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "ReissueTokensCodeTable": {
+            "Description": "Code dynamo table",
+            "Type": "String",
+            "Default": "reissue-tokens-CODE"
+        }
+    },
+    "Resources": {
+        "LoginTokensCode": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": { "Ref": "ReissueTokensCodeTable" },
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "2",
+                    "WriteCapacityUnits": "2"
+                }
+            }
+        }
+    }
+
+}
+
