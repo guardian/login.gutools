@@ -49,8 +49,10 @@ To run in debug mode `./sbt --debug`
 
 If the Google Auth service goes down it is possible to use an emergency feature that will extend the cookie lifetime by 1 day for users already signed in. When the switch is on users will be required to access the `/emergency/reissue` endpoint to extend the cookie lifetime.
 
-There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth 
-is down. 
+If users do not have a cookie issued, they can request an email with a link for obtaining a new cookie through the '/emergency/request-cookie` endpoint.
+
+There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth
+is down.
 
 Users that can change the switch will have their userId and a password hash stored in DynanoDB.
 
