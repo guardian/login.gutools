@@ -49,7 +49,7 @@ object EmergencySwitchChangeAccess extends ActionBuilder[Request] {
     try {
       val authHeaderUser = getBasicAuthDetails(request.headers)
       val userId = authHeaderUser.id
-      val tableName = s"login.gutools-emergency-access-${loginConfig.stage.toUpperCase}"
+      val tableName = AWS.emegergencyAccessDynamo
       val userOpt = Scanamo.get[EmergencyUser](AWS.dynamoDbClient)(tableName)('userId -> s"$userId")
       userOpt.map {
         case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch.")

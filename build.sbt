@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.github.nscala-time" %% "nscala-time" % "2.12.0",
+  "com.typesafe.play" %% "play-mailer" % "4.0.0",
   "io.megl" %% "play-json-extra" % "2.4.3",
   "com.github.t3hnar" % "scala-bcrypt_2.11" % "2.6",
   "com.gu" %% "scanamo" % "0.4.0",

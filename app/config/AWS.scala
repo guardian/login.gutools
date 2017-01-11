@@ -30,6 +30,8 @@ object AWS {
   def eC2Client = region.createClient(classOf[AmazonEC2Client], workflowAwsCredentialsProvider, null)
   def s3Client = region.createClient(classOf[AmazonS3Client], composerAwsCredentialsProvider, null)
   def dynamoDbClient = region.createClient(classOf[AmazonDynamoDBClient], composerAwsCredentialsProvider, null)
+  val tokenDynamoTable = s"reissue-tokens-CODE"
+  val emegergencyAccessDynamo = s"login.gutools-emergency-access-CODE"
 
   def getInstanceId = Option(EC2MetadataUtils.getInstanceId)
 
