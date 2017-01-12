@@ -196,10 +196,21 @@
               "Effect": "Allow",
               "Action": ["dynamodb:GetItem"],
               "Resource": [{"Ref": "EmergencyAccessTableARN"}]
-            },
+            }
+          ]
+        },
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
+    "LoginToolDynamoTokensAccessPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "LoginToolDynamoTokensAccessPolicy",
+        "PolicyDocument": {
+          "Statement": [
             {
               "Effect": "Allow",
-              "Action": ["dynamodb:GetItem"],
+              "Action": ["dynamodb:*"],
               "Resource": [{"Ref": "ReissueTokensTableARN"}]
             }
           ]
