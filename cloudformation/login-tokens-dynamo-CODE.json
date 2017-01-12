@@ -4,7 +4,7 @@
         "ReissueTokensCodeTable": {
             "Description": "Code dynamo table",
             "Type": "String",
-            "Default": "reissue-tokens-CODE"
+            "Default": "login.gutools-tokens-CODE"
         }
     },
     "Resources": {
