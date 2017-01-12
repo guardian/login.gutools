@@ -7,7 +7,8 @@ import com.amazonaws.services.ec2.AmazonEC2Client
 import scala.util.control.NonFatal
 
 
-case class LoginConfig(stage: String, domain: String, host: String)
+case class LoginConfig(stage: String, domain: String, host: String, appName: String, emergencyAccessTableName: String,
+                       tokensTableName: String, emailSettings: Map[String, String])
 
 object LoginConfig {
   private[config] def createLoginConfig(stageOpt: Option[String]): LoginConfig = {
@@ -18,7 +19,12 @@ object LoginConfig {
       case x => x.toLowerCase() + ".dev-gutools.co.uk"
     }
     val host = "https://login." + domain
-    LoginConfig(stage, domain, host)
+    val appName = "login.gutools"
+    val tokensTableName = s"login.gutools-tokens-${stage.toUpperCase}"
+    val emergencyAccessTableName = s"login.gutools-emergency-access-${stage.toUpperCase}"
+    val emailSettings = Email.emailSettings
+
+    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, emailSettings)
   }
 
   def loginConfig(implicit ec2Client: AmazonEC2Client): LoginConfig = {

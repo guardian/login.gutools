@@ -71,7 +71,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
 
       val token = Random.alphanumeric.take(20).mkString
 
-      val tableName = AWS.tokenDynamoTable
+      val tableName = loginConfig.tokensTableName
 
       val cookieIssue = NewCookieIssue(token, emailAddress,
         tokenIssuedAt, false)
@@ -106,7 +106,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
 
     val tenMinutesInMilliSeconds = 600000
 
-    val tableName = AWS.tokenDynamoTable
+    val tableName = loginConfig.tokensTableName
     val tokenOpt: Option[Xor[DynamoReadError, NewCookieIssue]] = Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
     tokenOpt.map {
       case Left(error) => {
@@ -126,7 +126,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
             val firstName = names(0).capitalize
             val lastName = names(1).split("@")(0).capitalize
             val user = User(firstName, lastName, tokenEntry.email, None)
-            val newAuthUser = AuthenticatedUser(user, "emergency-login", Set("emergency-login"), expires, true)
+            val newAuthUser = AuthenticatedUser(user, loginConfig.appName, Set(loginConfig.appName), expires, true)
             val authCookies = generateCookies(newAuthUser)
 
             Ok(views.html.emergency.reissueSuccess())
