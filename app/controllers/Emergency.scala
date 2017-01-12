@@ -76,18 +76,21 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
       val cookieIssue = NewCookieIssue(token, emailAddress,
         tokenIssuedAt, false)
 
-      //val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(cookieIssue)
+      try {
+        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(cookieIssue)
+        val email = Email(
+          "Gutools cookie link",
+          "reetta.vaahtoranta@guardian.co.uk",
+          Seq(emailAddress),
+          bodyText = Some(s"Your link to obtain a new cookie " +
+            s"http://localhost:9000/emergency/new-cookie/$token")
+        )
 
-      val email = Email(
-        "Gutools cookie link",
-        "reetta.vaahtoranta@guardian.co.uk",
-        Seq(emailAddress),
-        bodyText = Some(s"Your link to obtain a new cookie " +
-          s"http://localhost:9000/emergency/new-cookie/$token")
-      )
-
-      Ok(views.html.emergency.emailSent())
-
+        Ok(views.html.emergency.emailSent())
+      }
+      catch {
+        case e: Throwable => Ok(e.toString())
+      }
     }
     else {
       BadRequest("Only guardian email addresses are supported")
@@ -105,11 +108,10 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
 
     val tableName = AWS.tokenDynamoTable
     val tokenOpt: Option[Xor[DynamoReadError, NewCookieIssue]] = Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
-
     tokenOpt.map {
       case Left(error) => {
         Logger.warn(s"Error when reading entry with $userToken from dynamo. A new cookie will not be issued")
-        unauthorised("Checking your access token failed. You will not be issued with a new .", issueNewCookieTopic)
+        unauthorised("Checking your access token failed. You will not be issued with a new ", issueNewCookieTopic)
       }
       case Right(tokenEntry: NewCookieIssue) => {
         if (!tokenEntry.used) {
@@ -118,7 +120,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
-            val updatedTokenEntry: PutItemResult = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
+            //val updatedTokenEntry: PutItemResult = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
             val expires = (DateTime.now() + cookieLifetime).getMillis
             val names = tokenEntry.email.split("\\.")
             val firstName = names(0).capitalize
