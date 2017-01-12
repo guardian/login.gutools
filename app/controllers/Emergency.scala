@@ -120,7 +120,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
-            //val updatedTokenEntry: PutItemResult = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
+            val updatedTokenEntry: PutItemResult = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
             val expires = (DateTime.now() + cookieLifetime).getMillis
             val names = tokenEntry.email.split("\\.")
             val firstName = names(0).capitalize
