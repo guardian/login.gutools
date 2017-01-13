@@ -59,7 +59,7 @@ object Emergency extends Controller with PanDomainAuthActions {
   }
 
   def requestCookieLink = EmergencySwitchIsOnAction { req =>
-    Ok(views.html.emergency.newCookieIssued())
+    Ok(views.html.emergency.requestNewCookie())
   }
 
   def sendCookieLink = EmergencySwitchIsOnAction { req =>
