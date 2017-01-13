@@ -210,7 +210,7 @@
           "Statement": [
             {
               "Effect": "Allow",
-              "Action": ["dynamodb:*"],
+              "Action": ["dynamodb:GetItem", "dynamodb:PutItem"],
               "Resource": [{"Ref": "ReissueTokensTableARN"}]
             }
           ]
