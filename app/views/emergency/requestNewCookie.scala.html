@@ -1,0 +1,27 @@
+@()
+<html>
+<head>
+    <title>
+        New cookie link request
+    </title>
+</head>
+<body>
+<h1>Request a link to obtain a new cookie</h1>
+
+<form action="/emergency/send-cookie-link" method="post">
+    <div>
+        <label for="firstName">Enter your first name:</label>
+        <input type="text" id="firstName" name="firstName"/>
+    </div>
+    <div>
+        <label for="lastName">Enter your last name:</label>
+        <input type="text" id="lastName" name="lastName"/>
+    </div>
+    <div class="button">
+        <button type="submit">Submit</button>
+    </div>
+
+</form>
+
+</body>
+</html>
