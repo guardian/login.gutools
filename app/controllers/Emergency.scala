@@ -65,9 +65,12 @@ object Emergency extends Controller with PanDomainAuthActions {
   def sendCookieLink = EmergencySwitchIsOnAction { req =>
 
     val tokenIssuedAt = DateTime.now().getMillis
-    val emailAddress= req.body.asFormUrlEncoded.get("email")(0)
 
-    if (emailAddress.matches("^[a-z]+\\.[a-z]+@(guardian.co.uk|theguardian.com)$")) {
+    try {
+      val firstName = req.body.asFormUrlEncoded.get("firstName")(0).toLowerCase
+      val lastName = req.body.asFormUrlEncoded.get("lastName")(0).toLowerCase
+
+      val emailAddress = s"$firstName.$lastName@guardian.co.uk"
 
       val token = Random.alphanumeric.take(20).mkString
 
@@ -85,15 +88,15 @@ object Emergency extends Controller with PanDomainAuthActions {
         case NonFatal(e) => InternalServerError(e.toString)
       }
     }
-    else {
-      BadRequest("Only guardian email addresses are supported")
+    catch {
+      case NonFatal(e) => BadRequest("both first and last names must be submitted")
     }
   }
 
   def issueNewCookie(userToken: String) = EmergencySwitchIsOnAction { req =>
 
     def issueNewCookie(tokenEntry: NewCookieIssue, tableName: String) = {
-      val updatedTokenEntry = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
+      val updatedTokenEntry = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used = true))
       val expires = (DateTime.now() + cookieLifetime).getMillis
       val names = tokenEntry.email.split("\\.")
       val firstName = names(0).capitalize
