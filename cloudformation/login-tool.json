@@ -43,10 +43,6 @@
       "Description": "DynamoDB table arn which stores authorised users to enable emergency mode.",
       "Type": "String"
     },
-    "ReissueTokensTableARN": {
-      "Description": "DynamoDB table arn which stores authorised users to enable emergency mode.",
-      "Type": "String"
-    },
     "S3BucketConfig": {
       "Description": "S3 bucket where configuration lives e.g. switch values",
       "Type": "String"
@@ -54,6 +50,11 @@
     "EmailFrom": {
       "Description": "Address to send cookie reissue emails from",
       "Type": "String"
+    },
+    "ReissueTokensTablePrefix": {
+      "Description": "Code dynamo table",
+      "Type": "String",
+      "Default": "login.gutools-tokens"
     }
   },
   "Mappings": {
@@ -215,7 +216,16 @@
             {
               "Effect": "Allow",
               "Action": ["dynamodb:GetItem", "dynamodb:PutItem"],
-              "Resource": [{"Ref": "ReissueTokensTableARN"}]
+              "Resource": [
+                { "Fn::Join" : [ "", [
+                  "arn:aws:dynamodb:",
+                  { "Ref" : "AWS::Region" },
+                  ":",
+                  { "Ref" : "AWS::AccountId" },
+                  ":table/",
+                  { "Fn::Join": ["-", [ {"Ref": "ReissueTokensTablePrefix"}, {"Ref": "Stage"}]]}
+                ] ] }
+              ]
             }
           ]
         },
@@ -416,6 +426,28 @@
               ]
             ]
           }
+        }
+      }
+    },
+    "LoginTokens": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": { "Fn::Join": ["-", [ {"Ref": "ReissueTokensTablePrefix"}, {"Ref": "Stage"}]]},
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
         }
       }
     }
