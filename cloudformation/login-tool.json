@@ -50,6 +50,10 @@
     "S3BucketConfig": {
       "Description": "S3 bucket where configuration lives e.g. switch values",
       "Type": "String"
+    },
+    "EmailFrom": {
+      "Description": "Address to send cookie reissue emails from",
+      "Type": "String"
     }
   },
   "Mappings": {
@@ -212,6 +216,27 @@
               "Effect": "Allow",
               "Action": ["dynamodb:GetItem", "dynamodb:PutItem"],
               "Resource": [{"Ref": "ReissueTokensTableARN"}]
+            }
+          ]
+        },
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
+    "LoginToolSendMailPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "LoginToolSendMailPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["ses:SendEmail"],
+              "Resource": "*",
+              "Condition": {
+                "StringEquals": {
+                  "ses:FromAddress": { "Ref": "EmailFrom" }
+                }
+              }
             }
           ]
         },
