@@ -92,6 +92,20 @@ object Emergency extends Controller with PanDomainAuthActions {
 
   def issueNewCookie(userToken: String) = EmergencySwitchIsOnAction { req =>
 
+    def issueNewCookie(tokenEntry: NewCookieIssue, tableName: String) = {
+      val updatedTokenEntry = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
+      val expires = (DateTime.now() + cookieLifetime).getMillis
+      val names = tokenEntry.email.split("\\.")
+      val firstName = names(0).capitalize
+      val lastName = names(1).split("@")(0).capitalize
+      val user = User(firstName, lastName, tokenEntry.email, None)
+      val newAuthUser = AuthenticatedUser(user, loginConfig.appName, Set(loginConfig.appName), expires, true)
+      val authCookies = generateCookies(newAuthUser)
+
+      Ok(views.html.emergency.reissueSuccess())
+        .withCookies(authCookies: _*)
+    }
+
     val newCookieTopic = "A new cookie has not been created"
     val issueNewCookieTopic = "New cookie has not been created"
     val tenMinutesInMilliSeconds = 600000
@@ -112,17 +126,7 @@ object Emergency extends Controller with PanDomainAuthActions {
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
-            val updatedTokenEntry = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
-            val expires = (DateTime.now() + cookieLifetime).getMillis
-            val names = tokenEntry.email.split("\\.")
-            val firstName = names(0).capitalize
-            val lastName = names(1).split("@")(0).capitalize
-            val user = User(firstName, lastName, tokenEntry.email, None)
-            val newAuthUser = AuthenticatedUser(user, loginConfig.appName, Set(loginConfig.appName), expires, true)
-            val authCookies = generateCookies(newAuthUser)
-
-            Ok(views.html.emergency.reissueSuccess())
-              .withCookies(authCookies: _*)
+            issueNewCookie(tokenEntry, tableName)
           }
         } else {
           Unauthorized(views.html.emergency.newCookieFailure("Your link has already been been used"))
