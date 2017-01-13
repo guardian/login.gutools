@@ -97,7 +97,9 @@ object Emergency extends Controller with PanDomainAuthActions {
     val tenMinutesInMilliSeconds = 600000
 
     val tableName = loginConfig.tokensTableName
-    val tokenOpt: Option[Xor[DynamoReadError, NewCookieIssue]] = Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
+    val tokenOpt: Option[Xor[DynamoReadError, NewCookieIssue]] =
+      Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
+    
     tokenOpt.map {
       case Left(error) => {
         Logger.warn(s"Error when reading entry with $userToken from dynamo. A new cookie will not be issued")
