@@ -51,6 +51,8 @@ If the Google Auth service goes down it is possible to use an emergency feature 
 
 If users do not have a cookie issued, they can request an email with a link for obtaining a new cookie through the '/emergency/request-cookie` endpoint.
 
+If a lot users are requesting new cookies, we might have to increase the read/write capacity of the dynamo table where cookie tokens are stored.
+
 There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth
 is down.
 
@@ -68,3 +70,4 @@ To turn a switch on or off run:
 ```
 curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
 ```
+
