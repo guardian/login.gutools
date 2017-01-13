@@ -1,10 +1,7 @@
 package controllers
 
-import javax.inject.Inject
-
 import actions.EmergencySwitchIsOnAction
 import cats.data.Xor
-import com.amazonaws.services.dynamodbv2.model.PutItemResult
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.PublicSettings
 import com.gu.pandomainauth.model.{User, AuthenticatedUser, CookieParseException, CookieSignatureInvalidException}
@@ -15,11 +12,12 @@ import com.gu.scanamo.syntax._
 import config.{AWS, LoginPublicSettings}
 import play.api.Logger
 import play.api.mvc.{Result, Action, Controller}
-import play.api.libs.mailer._
 import scala.util.Random
 import Xor.{Left, Right}
+import mailer._
 
-class Emergency @Inject() (val mailerClient: MailerClient) extends Controller with PanDomainAuthActions {
+
+object Emergency extends Controller with PanDomainAuthActions {
 
   val cookieLifetime = 1.day
 
@@ -36,7 +34,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
       assymCookie <- req.cookies.find(_.name == PublicSettings.assymCookieName)
     } yield {
       try {
-        val authenticatedUser: AuthenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
+        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
         if (validateUser(authenticatedUser)) {
           val expires = (DateTime.now() + cookieLifetime).getMillis
           val newAuthUser = authenticatedUser.copy(expires = expires)
@@ -71,25 +69,18 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
 
       val token = Random.alphanumeric.take(20).mkString
 
-      val tableName = loginConfig.tokensTableName
-
       val cookieIssue = NewCookieIssue(token, emailAddress,
         tokenIssuedAt, false)
 
       try {
-        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(cookieIssue)
-        val email = Email(
-          "Gutools cookie link",
-          "reetta.vaahtoranta@guardian.co.uk",
-          Seq(emailAddress),
-          bodyText = Some(s"Your link to obtain a new cookie " +
-            s"http://localhost:9000/emergency/new-cookie/$token")
-        )
+        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(loginConfig.tokensTableName)(cookieIssue)
+        val ses = new SES(loginConfig.sesClient, loginConfig)
+        ses.sendCookieEmail(token, emailAddress)
 
         Ok(views.html.emergency.emailSent())
       }
       catch {
-        case e: Throwable => Ok(e.toString())
+        case e: Throwable => InternalServerError(e.toString())
       }
     }
     else {
@@ -100,10 +91,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
   def issueNewCookie(userToken: String) = EmergencySwitchIsOnAction { req =>
 
     val newCookieTopic = "A new cookie has not been created"
-
     val issueNewCookieTopic = "New cookie has not been created"
-
-
     val tenMinutesInMilliSeconds = 600000
 
     val tableName = loginConfig.tokensTableName
@@ -120,7 +108,7 @@ class Emergency @Inject() (val mailerClient: MailerClient) extends Controller wi
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
-            val updatedTokenEntry: PutItemResult = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
+            val updatedTokenEntry = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used=true))
             val expires = (DateTime.now() + cookieLifetime).getMillis
             val names = tokenEntry.email.split("\\.")
             val firstName = names(0).capitalize

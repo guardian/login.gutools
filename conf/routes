@@ -9,11 +9,11 @@ GET     /oauthCallback               controllers.Login.oauthCallback
 GET     /logout                      controllers.Login.logout
 GET     /whoami                      controllers.Login.whoami
 
-GET     /emergency/reissue           @controllers.Emergency.reissue
-GET     /emergency/reissue-disabled  @controllers.Emergency.reissueDisabled
-GET     /emergency/request-cookie    @controllers.Emergency.requestCookieLink
-GET     /emergency/new-cookie/:token @controllers.Emergency.issueNewCookie(token)
-POST    /emergency/send-cookie-link  @controllers.Emergency.sendCookieLink
+GET     /emergency/reissue           controllers.Emergency.reissue
+GET     /emergency/reissue-disabled  controllers.Emergency.reissueDisabled
+GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink
+GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
+POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink
 
 POST    /switches/emergency/on       controllers.Switches.emergencyOn
 POST    /switches/emergency/off      controllers.Switches.emergencyOff

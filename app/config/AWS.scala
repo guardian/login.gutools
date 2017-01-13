@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.ec2.AmazonEC2Client
 import com.amazonaws.services.ec2.model.{DescribeTagsRequest, Filter}
 import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient
 import com.amazonaws.util.EC2MetadataUtils
 
 import scala.collection.JavaConverters._
@@ -29,6 +30,9 @@ object AWS {
 
   def eC2Client = region.createClient(classOf[AmazonEC2Client], workflowAwsCredentialsProvider, null)
   def s3Client = region.createClient(classOf[AmazonS3Client], composerAwsCredentialsProvider, null)
+  lazy val sesClient = region.createClient(classOf[AmazonSimpleEmailServiceClient],
+    composerAwsCredentialsProvider, null)
+
   def dynamoDbClient = region.createClient(classOf[AmazonDynamoDBClient], composerAwsCredentialsProvider, null)
 
   def getInstanceId = Option(EC2MetadataUtils.getInstanceId)
