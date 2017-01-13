@@ -126,12 +126,14 @@ object Emergency extends Controller with PanDomainAuthActions {
         if (!tokenEntry.used) {
           val tokenAgeInMilliseconds = DateTime.now().getMillis - tokenEntry.requested
           if (tokenAgeInMilliseconds > tenMinutesInMilliSeconds) {
+            Logger.warn(s"Attempted to use expired token: ${tokenEntry.id}")
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
             issueNewCookie(tokenEntry, tableName)
           }
         } else {
+          Logger.warn(s"Attempted to use a used token: ${tokenEntry.id}")
           Unauthorized(views.html.emergency.newCookieFailure("Your link has already been been used"))
         }
 
