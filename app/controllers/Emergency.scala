@@ -16,6 +16,8 @@ import scala.util.Random
 import Xor.{Left, Right}
 import mailer._
 
+import scala.util.control.NonFatal
+
 
 object Emergency extends Controller with PanDomainAuthActions {
 
@@ -80,7 +82,7 @@ object Emergency extends Controller with PanDomainAuthActions {
         Ok(views.html.emergency.emailSent())
       }
       catch {
-        case e: Throwable => InternalServerError(e.toString())
+        case NonFatal(e) => InternalServerError(e.toString)
       }
     }
     else {
