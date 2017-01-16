@@ -7,20 +7,11 @@
         "bucket": "composer-dist",
         "publicReadAcl": false
       }
-    },
-    "login-cloudformation" : {
-      "type": "cloud-formation",
-      "fileName": "cloudformation",
-      "data": {
-        "templatePath": "login-tool.json",
-        "cloudFormationStackName": "login-tool",
-        "prependStackToCloudFormationStackName": false
-      }
     }
   },
   "recipes": {
     "default": {
-      "depends": ["login-cloudformation", "artifactUploadOnly", "deployOnly"]
+      "depends": ["artifactUploadOnly", "deployOnly"]
     },
 
     "deployOnly": {
@@ -29,10 +20,6 @@
 
     "artifactUploadOnly": {
       "actionsBeforeApp": ["login.uploadArtifacts"]
-    },
-
-    "login-cloudformation": {
-      "actions": ["login-cloudformation.updateStack"]
     }
   }
 }
