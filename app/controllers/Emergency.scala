@@ -67,10 +67,9 @@ object Emergency extends Controller with PanDomainAuthActions {
     val tokenIssuedAt = DateTime.now().getMillis
 
     try {
-      val firstName = req.body.asFormUrlEncoded.get("firstName")(0).toLowerCase
-      val lastName = req.body.asFormUrlEncoded.get("lastName")(0).toLowerCase
+      val emailPrefix = req.body.asFormUrlEncoded.get("email")(0)
 
-      val emailAddress = s"$firstName.$lastName@guardian.co.uk"
+      val emailAddress = s"$emailPrefix@guardian.co.uk"
 
       val token = Random.alphanumeric.take(20).mkString
 
