@@ -1,0 +1,28 @@
+@()
+<html>
+<head>
+    <title>
+        New cookie link request
+    </title>
+</head>
+<body>
+<h1>Send a link to user to obtain a new cookie</h1>
+
+<div>User email should be the user's canonical guardian email address.
+  This is the email address that appears in the editorial.tools.users list </div>
+
+<div>
+  <form action="/emergency/send-cookie-link" method="post">
+      <div>
+          <label for="email">Enter user email:</label>
+          <input type="text" id="email" name="email"/><span>@@guardian.co.uk</span>
+      </div>
+      <div class="button">
+          <button type="submit">Submit</button>
+      </div>
+
+  </form>
+</div>
+
+</body>
+</html>

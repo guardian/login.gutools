@@ -2,21 +2,24 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /login                      controllers.Application.login(returnUrl: String)
+GET     /login                       controllers.Application.login(returnUrl: String)
 
-GET     /showUser                   controllers.Login.status
-GET     /oauthCallback              controllers.Login.oauthCallback
-GET     /logout                     controllers.Login.logout
-GET     /whoami                     controllers.Login.whoami
+GET     /showUser                    controllers.Login.status
+GET     /oauthCallback               controllers.Login.oauthCallback
+GET     /logout                      controllers.Login.logout
+GET     /whoami                      controllers.Login.whoami
 
-GET     /emergency/reissue          controllers.Emergency.reissue
-GET     /emergency/reissue-disabled controllers.Emergency.reissueDisabled
+GET     /emergency/reissue           controllers.Emergency.reissue
+GET     /emergency/reissue-disabled  controllers.Emergency.reissueDisabled
+GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink
+GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
+POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink
 
-POST    /switches/emergency/on      controllers.Switches.emergencyOn
-POST    /switches/emergency/off     controllers.Switches.emergencyOff
-GET     /switches                   controllers.Switches.index
+POST    /switches/emergency/on       controllers.Switches.emergencyOn
+POST    /switches/emergency/off      controllers.Switches.emergencyOff
+GET     /switches                    controllers.Switches.index
 
-GET     /_healthcheck               controllers.Application.healthCheck
+GET     /_healthcheck                controllers.Application.healthCheck
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)

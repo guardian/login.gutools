@@ -46,6 +46,15 @@
     "S3BucketConfig": {
       "Description": "S3 bucket where configuration lives e.g. switch values",
       "Type": "String"
+    },
+    "EmailFrom": {
+      "Description": "Address to send cookie reissue emails from",
+      "Type": "String"
+    },
+    "ReissueTokensTablePrefix": {
+      "Description": "Code dynamo table",
+      "Type": "String",
+      "Default": "login.gutools-tokens"
     }
   },
   "Mappings": {
@@ -192,6 +201,52 @@
               "Effect": "Allow",
               "Action": ["dynamodb:GetItem"],
               "Resource": [{"Ref": "EmergencyAccessTableARN"}]
+            }
+          ]
+        },
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
+    "LoginToolDynamoTokensAccessPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "LoginToolDynamoTokensAccessPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["dynamodb:GetItem", "dynamodb:PutItem"],
+              "Resource": [
+                { "Fn::Join" : [ "", [
+                  "arn:aws:dynamodb:",
+                  { "Ref" : "AWS::Region" },
+                  ":",
+                  { "Ref" : "AWS::AccountId" },
+                  ":table/",
+                  { "Fn::Join": ["-", [ {"Ref": "ReissueTokensTablePrefix"}, {"Ref": "Stage"}]]}
+                ] ] }
+              ]
+            }
+          ]
+        },
+        "Roles": [{"Ref": "LoginToolRole"}]
+      }
+    },
+    "LoginToolSendMailPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "LoginToolSendMailPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["ses:SendEmail"],
+              "Resource": "*",
+              "Condition": {
+                "StringEquals": {
+                  "ses:FromAddress": { "Ref": "EmailFrom" }
+                }
+              }
             }
           ]
         },
@@ -371,6 +426,28 @@
               ]
             ]
           }
+        }
+      }
+    },
+    "LoginTokens": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": { "Fn::Join": ["-", [ {"Ref": "ReissueTokensTablePrefix"}, {"Ref": "Stage"}]]},
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
         }
       }
     }
