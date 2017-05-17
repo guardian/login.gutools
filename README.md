@@ -24,7 +24,7 @@ this already if you work with identity or similar):
 `include sites-enabled/*;`
   * you may also want to disable the default server on 8080
 
-4. Get the [dev-nginx](https://github.com/guardian/dev-nginx) repo checked out on your machine
+4. Get the dev-nginx repo checked out on your machine
 
 5. Set up certs if you've not already done so (see [dev-nginx readme](https://github.com/guardian/dev-nginx))
 
