@@ -53,7 +53,5 @@ lazy val mainProject = project.in(file("."))
     riffRaffManifestBranch := Option(System.getenv("CIRCLE_BRANCH")).getOrElse("dev"),
     riffRaffPackageType := (packageZipTarball in config("universal")).value,
     riffRaffArtifactResources ++= Seq(
-      riffRaffPackageType.value -> s"packages/${name.value}/${name.value}.tgz",
-      baseDirectory.value / "cloudformation" / "login-tool.json" ->
-        "packages/cloudformation/login-tool.json"
+      riffRaffPackageType.value -> s"packages/${name.value}/${name.value}.tgz"
     ))
