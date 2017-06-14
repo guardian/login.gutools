@@ -2,7 +2,7 @@
 
 name := "login"
 
-version := "0.0.1"
+version := "1.0.0"
 
 val awsSdkVersion = "1.10.72"
 
@@ -39,19 +39,30 @@ publishArtifact in (Compile, packageDoc) := false
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 lazy val mainProject = project.in(file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact)
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
   .settings(Defaults.coreDefaultSettings: _*)
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     // Never interested in the version number in the artifact name
-    packageName in Universal := normalizedName.value,
     riffRaffPackageName := s"editorial-tools:${name.value}",
     riffRaffManifestProjectName := riffRaffPackageName.value,
     riffRaffBuildIdentifier :=  Option(System.getenv("CIRCLE_BUILD_NUM")).getOrElse("dev"),
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
     riffRaffManifestBranch := Option(System.getenv("CIRCLE_BRANCH")).getOrElse("dev"),
-    riffRaffPackageType := (packageZipTarball in config("universal")).value,
-    riffRaffArtifactResources ++= Seq(
-      riffRaffPackageType.value -> s"packages/${name.value}/${name.value}.tgz"
-    ))
+    riffRaffPackageType := (packageBin in Debian).value)
+  .settings(
+    javaOptions in Universal ++= Seq(
+      "-Dpidfile.path=/dev/null"
+    )
+  )
+
+import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
+serverLoading in Debian := Systemd
+debianPackageDependencies := Seq("openjdk-8-jre-headless")
+maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>"
+packageSummary := "login.gutools"
+packageDescription := """Small application to login a user via pan-domain-auth and redirect them."""
+
+
+
