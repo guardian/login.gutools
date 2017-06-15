@@ -44,7 +44,7 @@ lazy val mainProject = project.in(file("."))
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     // Never interested in the version number in the artifact name
-    riffRaffPackageName := s"editorial-tools:${name.value}",
+    riffRaffPackageName := s"${name.value}",
     riffRaffManifestProjectName := riffRaffPackageName.value,
     riffRaffBuildIdentifier :=  Option(System.getenv("CIRCLE_BUILD_NUM")).getOrElse("dev"),
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
