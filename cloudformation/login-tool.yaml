@@ -292,9 +292,12 @@ Resources:
       - !Ref 'PingSecurityGroup'
       InstanceType: t2.micro
       IamInstanceProfile: !Ref 'LoginToolInstanceProfile'
-      UserData: !Base64
-        '#!/bin/bash -ev
-        /opt/features/native-packager/install.sh -b composer-dist -t tgz -a login -s '
+      UserData:
+       Fn::Base64: !Sub |
+          #!/bin/bash -ev
+          aws s3 cp s3://composer-dist/flexible/${Stage}/login/login_1.0.0_all.deb /tmp/login.deb
+          dpkg -i /tmp/login.deb
+
   LoginTokens:
     Type: AWS::DynamoDB::Table
     Properties:
