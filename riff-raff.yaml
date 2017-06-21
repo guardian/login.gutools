@@ -3,7 +3,18 @@ regions:
 stacks:
 - flexible
 deployments:
+  login-ami:
+    type: ami-cloudformation-parameter
+    app: login
+    parameters:
+      amiTags:
+        AmigoStage: PROD
+        Recipe: editorial-tools-xenial-java8
+        BuiltBy: amigo
+      cloudFormationStackByTags: false
+      prependStackToCloudFormationStackName: false
   login:
     type: autoscaling
     parameters:
       bucket: composer-dist
+    dependencies: [login-ami]
