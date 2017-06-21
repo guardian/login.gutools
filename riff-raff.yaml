@@ -13,6 +13,7 @@ deployments:
         BuiltBy: amigo
       cloudFormationStackByTags: false
       prependStackToCloudFormationStackName: false
+      cloudFormationStackName: login-tool
   login:
     type: autoscaling
     parameters:
