@@ -18,17 +18,17 @@ Parameters:
   PublicVpcSubnets:
     Description: Subnets to use in VPC for public internet-facing ELB eg. subnet-abcd1234
     Type: List<AWS::EC2::Subnet::Id>
-    Default: subnet-c3620fa6,subnet-2b37bd5c,subnet-3667c86f
+    Default: subnet-c3620fa6,subnet-2b37bd5c
   PrivateVpcSubnets:
     Description: Subnets to use in VPC for private EC2 instances eg. subnet-abcd1234
     Type: List<AWS::EC2::Subnet::Id>
-    Default: subnet-c2620fa7,subnet-2a37bd5d,subnet-2967c870
+    Default: subnet-c2620fa7,subnet-2a37bd5d
   GuardianIP:
     Description: Ip range for the office
     Type: String
     Default: 77.91.248.0/21
   AMI:
-    Description: Ip range for the office
+    Description: AMI Id
     Type: String
   EmergencyAccessTableARN:
     Description: DynamoDB table arn which stores authorised users to enable emergency
@@ -52,12 +52,12 @@ Mappings:
   EnvironmentMap:
     CODE:
       lowercase: code
-      desiredCapacity: 3
-      maxSize: 6
+      minSize: 1
+      maxSize: 2
     PROD:
       lowercase: prod
-      desiredCapacity: 3
-      maxSize: 6
+      minSize: 2
+      maxSize: 4
   DynamoConfigTablesMap:
     CODE:
       name: LoginToolCODE_
@@ -261,12 +261,17 @@ Resources:
   AutoscalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AvailabilityZones: !GetAZs ''
+      AvailabilityZones:
+        - Fn::Select:
+          - 0
+          - Fn::GetAZs: !Ref "AWS::Region"
+        - Fn::Select:
+          - 1
+          - Fn::GetAZs: !Ref "AWS::Region"
       VPCZoneIdentifier: !Ref 'PrivateVpcSubnets'
       LaunchConfigurationName: !Ref 'LoginToolLaunchConfig'
-      MinSize: !FindInMap [EnvironmentMap, !Ref 'Stage', desiredCapacity]
+      MinSize: !FindInMap [EnvironmentMap, !Ref 'Stage', minSize]
       MaxSize: !FindInMap [EnvironmentMap, !Ref 'Stage', maxSize]
-      DesiredCapacity: !FindInMap [EnvironmentMap, !Ref 'Stage', desiredCapacity]
       HealthCheckType: ELB
       HealthCheckGracePeriod: 900
       LoadBalancerNames:
