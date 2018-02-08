@@ -11,6 +11,7 @@ deployments:
         AmigoStage: PROD
         Recipe: editorial-tools-xenial-java8
         BuiltBy: amigo
+      amiEncrypted: true
       cloudFormationStackByTags: false
       prependStackToCloudFormationStackName: false
       cloudFormationStackName: login-tool
