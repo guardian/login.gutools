@@ -18,6 +18,7 @@ object LoginConfig {
     val domain = stage match {
       case "PROD" => "gutools.co.uk"
       case "DEV" => "local.dev-gutools.co.uk"
+      case "CODE" => "test.dev-gutools.co.uk" // LOL SWAG TODO MRB remove me
       case x => x.toLowerCase() + ".dev-gutools.co.uk"
     }
     val host = "https://login." + domain
