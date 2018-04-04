@@ -12,9 +12,9 @@ class LoginConfigTest extends FreeSpec with Matchers {
       createLoginConfig(None).stage shouldEqual "DEV"
     }
 
-    "uses lower-case custom stage for domain, where provided" in {
-      createLoginConfig(Some("CODE")).domain should startWith("code.")
-    }
+//    "uses lower-case custom stage for domain, where provided" in {
+//      createLoginConfig(Some("CODE")).domain should startWith("code.")
+//    }
   }
 
   "isValidUrl" - {
