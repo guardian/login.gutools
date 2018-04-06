@@ -79,7 +79,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
       }
 
       try {
-        val authHeaderUser = getBasicAuthDetails(request.headers)
+        val authHeaderUser = EmergencyActions.getBasicAuthDetails(request.headers)
         val userId = authHeaderUser.id
         val tableName = config.emergencyAccessTableName
         val userOpt = Scanamo.get[EmergencyUser](AWS.dynamoDbClient)(tableName)('userId -> s"$userId")
@@ -92,24 +92,26 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
           refuseSwitchChange(e.getMessage)
       }
     }
+  }
+}
 
-    def getBasicAuthDetails(headers: Headers): AuthorizationHeaderUser = {
-      val authUserOpt = for {
-        authHeaders <- headers.toMap.get("Authorization")
-        basicAuthHead <- authHeaders.find(_.startsWith("Basic"))
-      } yield {
-        val basicAuthHeaderValue = basicAuthHead.split("Basic")(1).trim
-        if (!basicAuthHeaderValue.contains(":")) {
-          throw new EmergencyActionsException("Authorization header value is not the correct format.")
-        }
-        val usernameAndPassword = basicAuthHeaderValue.split(":")
-        if (usernameAndPassword.length != 2 || !usernameAndPassword(0).endsWith("@guardian.co.uk")) {
-          throw new EmergencyActionsException("Authorization header value is not the correct format.")
-        }
-        AuthorizationHeaderUser(usernameAndPassword(0).split("@guardian.co.uk")(0), usernameAndPassword(1))
+object EmergencyActions {
+  def getBasicAuthDetails(headers: Headers): AuthorizationHeaderUser = {
+    val authUserOpt = for {
+      authHeaders <- headers.toMap.get("Authorization")
+      basicAuthHead <- authHeaders.find(_.startsWith("Basic"))
+    } yield {
+      val basicAuthHeaderValue = basicAuthHead.split("Basic")(1).trim
+      if (!basicAuthHeaderValue.contains(":")) {
+        throw new EmergencyActionsException("Authorization header value is not the correct format.")
       }
-      authUserOpt.getOrElse(throw new EmergencyActionsException("Basic authorization header is missing"))
+      val usernameAndPassword = basicAuthHeaderValue.split(":")
+      if (usernameAndPassword.length != 2 || !usernameAndPassword(0).endsWith("@guardian.co.uk")) {
+        throw new EmergencyActionsException("Authorization header value is not the correct format.")
+      }
+      AuthorizationHeaderUser(usernameAndPassword(0).split("@guardian.co.uk")(0), usernameAndPassword(1))
     }
+    authUserOpt.getOrElse(throw new EmergencyActionsException("Basic authorization header is missing"))
   }
 }
 
