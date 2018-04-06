@@ -74,8 +74,8 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
         tokenIssuedAt, false)
 
       try {
-        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(deps.config.tokensTableName)(cookieIssue)
-        val ses = new SES(AWS.sesClient, deps.config)
+        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(config.tokensTableName)(cookieIssue)
+        val ses = new SES(AWS.sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
 
         Ok(views.html.emergency.emailSent())
@@ -98,7 +98,7 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
       val firstName = names(0).capitalize
       val lastName = names(1).split("@")(0).capitalize
       val user = User(firstName, lastName, tokenEntry.email, None)
-      val newAuthUser = AuthenticatedUser(user, deps.config.appName, Set(deps.config.appName), expires, true)
+      val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, true)
       val authCookies = generateCookies(newAuthUser)
 
       Ok(views.html.emergency.reissueSuccess())
@@ -109,7 +109,7 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
     val issueNewCookieTopic = "New cookie has not been created"
     val tenMinutesInMilliSeconds = 600000
 
-    val tableName = deps.config.tokensTableName
+    val tableName = config.tokensTableName
     val tokenOpt: Option[Either[DynamoReadError, NewCookieIssue]] =
       Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
 

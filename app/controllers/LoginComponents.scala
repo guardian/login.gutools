@@ -33,7 +33,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
   final def config: LoginConfig = deps.config
   final def switches: Switches = deps.switches
 
-  final override lazy val panDomanSettingS: PanDomainAuthSettingsRefresher = deps.panDomainSettings
+  final override lazy val panDomainSettings: PanDomainAuthSettingsRefresher = deps.panDomainSettings
 
   final override lazy val cacheValidation = true
   final override lazy val authCallbackUrl = config.host + "/oauthCallback"
