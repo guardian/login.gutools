@@ -1,16 +1,13 @@
 package config
 
 import com.gu.pandomainauth.PublicSettings
-import dispatch.Http
+import okhttp3.OkHttpClient
 import play.api.Logger
-import scala.concurrent.ExecutionContext.Implicits.global
 
-object LoginPublicSettings {
+import scala.concurrent.ExecutionContext
 
-  private val loginConfig = LoginConfig.loginConfig(AWS.eC2Client)
-  private implicit val dispatchClient = Http
-
-  private val agent = new PublicSettings(loginConfig.domain)
+class LoginPublicSettings(config: LoginConfig)(implicit ec: ExecutionContext) {
+  private val agent = new PublicSettings(config.domain)(new OkHttpClient(), ec)
 
   def start = {
     Logger.info("Starting LoginPublicSettings agent")

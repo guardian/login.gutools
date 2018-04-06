@@ -1,17 +1,11 @@
 package controllers
 
 import config.LoginConfig
-import controllers.Login._
-import play.api.Play.current
-import play.api.mvc._
 
 
-object Application extends Controller {
-
-  lazy val pandaDomainOption = play.api.Play.configuration.getString("pandomain.domain")
-
+class Application(deps: LoginControllerComponents) extends LoginController(deps) {
   def login(returnUrl: String) = AuthAction { implicit request =>
-    if (LoginConfig.isValidUrl(pandaDomainOption, returnUrl)) {
+    if (LoginConfig.isValidUrl(config.domain, returnUrl)) {
       Redirect(returnUrl)
     } else {
       Ok("Please redirect to a valid, secure url on the relevant stage")

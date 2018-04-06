@@ -1,1 +1,0 @@
-activator "run -Dconfig.resource=application.local.conf"

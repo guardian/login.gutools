@@ -1,5 +1,6 @@
 package actions
 
+import controllers.{EmergencyActionsException, EmergencySwitchChangeAccess}
 import org.scalatest.{FreeSpec, Matchers}
 import play.api.test.FakeHeaders
 

@@ -39,12 +39,6 @@ this already if you work with identity or similar):
 
 You will need composer and workflow credentials.
 
-To run as to behave like production (uses `application.conf`) `./sbt run`
-
-To run in developer mode (pulls in `application.local.conf`) `./sbt devrun`
-
-To run in debug mode `./sbt --debug`
-
 ### Emergency access when Google auth is down
 
 If the Google Auth service goes down it is possible to use an emergency feature that will extend the cookie lifetime by 1 day for users already signed in. When the switch is on users will be required to access the `/emergency/reissue` endpoint to extend the cookie lifetime.
@@ -56,12 +50,12 @@ If a lot users are requesting new cookies, we might have to increase the read/wr
 There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth
 is down.
 
-Users that can change the switch will have their userId and a password hash stored in DynanoDB.
+Users that can change the switch will have their userId and a password hash stored in DynamoDB.
 
 `userId` is the username of a Guardian email address e.g joe.bloggs if the email address is joe.bloggs@guardian.co.uk
 `passwordHash` is generated using [bCrypt](https://github.com/t3hnar/scala-bcrypt). To generate a hash:
 ```
-./sbt console
+sbt console
 import com.github.t3hnar.bcrypt._
 "[password-value]".bcrypt
 ```
