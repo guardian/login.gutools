@@ -21,17 +21,19 @@ abstract class LoginControllerComponents(context: Context) extends BuiltInCompon
 
   def config: LoginConfig
   def switches: Switches
+
+  lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
+    new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, AWS.workflowAwsCredentialsProvider)
 }
 
 abstract class LoginController(deps: LoginControllerComponents) extends BaseController with AuthActions {
-  final override val wsClient: WSClient = deps.wsClient
-  final override val controllerComponents: ControllerComponents = deps.controllerComponents
+  final override def wsClient: WSClient = deps.wsClient
+  final override def controllerComponents: ControllerComponents = deps.controllerComponents
 
   final def config: LoginConfig = deps.config
   final def switches: Switches = deps.switches
 
-  final override lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
-    new PanDomainAuthSettingsRefresher(config.domain, "login", deps.actorSystem, AWS.workflowAwsCredentialsProvider)
+  final override lazy val panDomanSettingS: PanDomainAuthSettingsRefresher = deps.panDomainSettings
 
   final override lazy val cacheValidation = true
   final override lazy val authCallbackUrl = config.host + "/oauthCallback"
