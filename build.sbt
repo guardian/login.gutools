@@ -44,6 +44,11 @@ lazy val mainProject = project.in(file("."))
     riffRaffManifestBranch := Option(System.getenv("CIRCLE_BRANCH")).getOrElse("dev"),
     riffRaffPackageType := (packageBin in Debian).value,
 
+    riffRaffArtifactResources := Seq(
+      (packageBin in Debian).value -> s"${name.value}/${name.value}.deb",
+      file("riff-raff.yaml") -> "riff-raff.yaml"
+    ),
+
     debianPackageDependencies := Seq("openjdk-8-jre-headless"),
     maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
     packageSummary := "login.gutools",
