@@ -1,5 +1,7 @@
 package config
 
+import java.util.concurrent.{Executors, TimeUnit}
+
 import akka.agent.Agent
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
@@ -14,12 +16,14 @@ import scala.io.Source
 class Switches(config: LoginConfig) {
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
-  private val scheduler = StdSchedulerFactory.getDefaultScheduler
+  private val scheduler = Executors.newScheduledThreadPool(1)
+
   val fileName = s"${config.stage.toUpperCase}/switches.json"
 
-  class SwitchJob extends Job() {
+  class SwitchJob extends Job {
     override def execute(context: JobExecutionContext): Unit = refresh()
   }
+
   private val job = JobBuilder.newJob(classOf[SwitchJob])
     .withIdentity("refresh-switches-gu-login-tools")
     .build()
@@ -48,24 +52,13 @@ class Switches(config: LoginConfig) {
 
   def start() {
     Logger.info("Starting switches scheduled task")
-    val schedule = SimpleScheduleBuilder.simpleSchedule()
-      .withIntervalInSeconds(60)
-      .repeatForever()
 
-    val trigger = TriggerBuilder.newTrigger()
-      .withSchedule(schedule)
-      .build()
-
-    if(scheduler.checkExists(job.getKey)) {
-      scheduler.deleteJob(job.getKey)
-    }
-    scheduler.scheduleJob(job, trigger)
-    scheduler.start()
+    scheduler.scheduleAtFixedRate(() => refresh(), 60, 60, TimeUnit.SECONDS)
   }
 
   def stop()  {
     Logger.info("Stopping switches scheduled task")
-    scheduler.deleteJob(job.getKey)
+    scheduler.shutdown()
   }
 
   def refresh() {
