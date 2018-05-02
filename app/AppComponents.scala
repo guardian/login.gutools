@@ -6,8 +6,6 @@ import router.Routes
 import scala.concurrent.Future
 
 class AppComponents(context: Context) extends LoginControllerComponents(context) {
-  val instanceTags = AWS.readTags()
-
   override val config = LoginConfig.forStage(instanceTags.map(_.stage))
   override val switches = new Switches(config)
 

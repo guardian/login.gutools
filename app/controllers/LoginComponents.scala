@@ -1,9 +1,14 @@
 package controllers
 
+import java.time.Duration
+import java.util.function.Supplier
+
 import com.github.t3hnar.bcrypt._
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
+import com.gu.play.secretrotation.aws.ParameterStore
+import com.gu.play.secretrotation.{RotatingSecretComponents, SecretState, TransitionTiming}
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
 import config._
@@ -17,13 +22,27 @@ import play.filters.HttpFiltersComponents
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class LoginControllerComponents(context: Context) extends BuiltInComponentsFromContext(context)
-  with AhcWSComponents with AssetsComponents with HttpFiltersComponents {
+  with AhcWSComponents with AssetsComponents with HttpFiltersComponents with RotatingSecretComponents {
 
   def config: LoginConfig
   def switches: Switches
 
+  lazy val instanceTags: Option[InstanceTags] = AWS.readTags()
+
   lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
     new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, AWS.workflowAwsCredentialsProvider)
+
+  override lazy val secretStateSupplier: Supplier[SecretState] = {
+    val stack = instanceTags.map(_.stack).getOrElse("flexible")
+    val app = instanceTags.map(_.app).getOrElse("login")
+    val stage = instanceTags.map(_.stack).getOrElse("DEV")
+
+    new ParameterStore.SecretSupplier(
+      TransitionTiming(usageDelay = Duration.ofMinutes(3), overlapDuration = Duration.ofHours(2)),
+      parameterName = s"/$stack/$app/$stage/play.http.secret.key",
+      AWS.ssmClient
+    )
+  }
 }
 
 abstract class LoginController(deps: LoginControllerComponents) extends BaseController with AuthActions {

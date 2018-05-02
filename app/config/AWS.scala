@@ -8,6 +8,7 @@ import com.amazonaws.services.autoscaling.model.{DescribeAutoScalingGroupsReques
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import com.amazonaws.util.EC2MetadataUtils
 
 import scala.collection.JavaConverters._
@@ -30,6 +31,7 @@ object AWS {
   )
 
   lazy val asgClient = AmazonAutoScalingClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+  lazy val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
 
   lazy val s3Client = AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
   lazy val sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
