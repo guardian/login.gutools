@@ -9,11 +9,10 @@ import scala.util.control.NonFatal
 
 
 case class LoginConfig(stage: String, domain: String, host: String, appName: String, emergencyAccessTableName: String,
-                       tokensTableName: String, sesClient: AmazonSimpleEmailServiceClient, tokenReissueUri: String,
-                        emailSettings: Map[String, String])
+                       tokensTableName: String, tokenReissueUri: String, emailSettings: Map[String, String], switchBucket: String)
 
 object LoginConfig {
-  private[config] def createLoginConfig(stageOpt: Option[String]): LoginConfig = {
+ def forStage(stageOpt: Option[String]): LoginConfig = {
     val stage = stageOpt.getOrElse("DEV")
     val domain = stage match {
       case "PROD" => "gutools.co.uk"
@@ -24,33 +23,26 @@ object LoginConfig {
     val appName = "login.gutools"
     val tokensTableName = s"login.gutools-tokens-${stage.toUpperCase}"
     val emergencyAccessTableName = s"login.gutools-emergency-access-${stage.toUpperCase}"
-    val sesClient = AWS.sesClient
     val tokenReissueUri = host + "/emergency/new-cookie/"
     val emailSettings = Map("from" -> "digitalcms.bugs@guardian.co.uk",
       "replyTo" -> "core.central.production@guardian.co.uk ")
 
-    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, sesClient, tokenReissueUri,
-    emailSettings)
-  }
+   val switchBucket = "login-gutools-config"
 
-  def loginConfig(implicit ec2Client: AmazonEC2Client): LoginConfig = {
-    val instanceId = AWS.getInstanceId
-    createLoginConfig(AWS.readTag("Stage", instanceId))
+    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri, emailSettings, switchBucket)
   }
 
   /**
     * returnUrl is a valid URL and host ends with a whitelisted domain
     */
-  def isValidUrl(configuredDomainOpt: Option[String], returnUrl: String): Boolean = {
-    configuredDomainOpt.exists { configuredDomain =>
-      try {
-        val url = new URL(returnUrl)
-        // valid url, matches panda domain and is secure
-        url.getHost.endsWith(configuredDomain) && url.getProtocol == "https"
-      } catch {
-        // invalid url
-        case NonFatal(e) => false
-      }
+  def isValidUrl(domain: String, returnUrl: String): Boolean = {
+    try {
+      val url = new URL(returnUrl)
+      // valid url, matches panda domain and is secure
+      url.getHost.endsWith(domain) && url.getProtocol == "https"
+    } catch {
+      // invalid url
+      case NonFatal(e) => false
     }
   }
 }

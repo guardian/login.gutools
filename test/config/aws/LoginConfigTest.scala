@@ -9,21 +9,17 @@ class LoginConfigTest extends FreeSpec with Matchers {
 
   "createLoginConfig" - {
     "uses DEV if no stage is present" in {
-      createLoginConfig(None).stage shouldEqual "DEV"
+      LoginConfig.forStage(None).stage shouldEqual "DEV"
     }
 
     "uses lower-case custom stage for domain, where provided" in {
-      createLoginConfig(Some("CODE")).domain should startWith("code.")
+      LoginConfig.forStage(Some("CODE")).domain should startWith("code.")
     }
   }
 
   "isValidUrl" - {
-    "returns false if no domain is configured" in {
-      isValidUrl(None, "https://example.com/returnUrl") shouldEqual false
-    }
-
     "if a domain is configured" - {
-      val domain = Some("example.com")
+      val domain = "example.com"
 
       "returns false if the return URL's host does not match the configured domain" in {
         isValidUrl(domain, "https://different-domain.com/returnUrl") shouldEqual false

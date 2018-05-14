@@ -1,25 +1,22 @@
 package controllers
 
-import actions.EmergencySwitchIsOnAction
-import cats.data.Xor
 import com.github.nscala_time.time.Imports._
-import com.gu.pandomainauth.PublicSettings
-import com.gu.pandomainauth.model.{User, AuthenticatedUser, CookieParseException, CookieSignatureInvalidException}
+import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
+import com.gu.pandomainauth.{PublicKey, PublicSettings}
 import com.gu.scanamo._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.syntax._
 import config.{AWS, LoginPublicSettings}
-import play.api.Logger
-import play.api.mvc.{Result, Action, Controller}
-import scala.util.Random
-import Xor.{Left, Right}
 import mailer._
+import play.api.Logger
+import play.api.mvc._
 
+import scala.util.Random
 import scala.util.control.NonFatal
 
 
-object Emergency extends Controller with PanDomainAuthActions {
+class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerComponents) extends LoginController(deps) {
 
   val cookieLifetime = 1.day
 
@@ -32,11 +29,11 @@ object Emergency extends Controller with PanDomainAuthActions {
     val reissueTopic = "Your login session has not been extended"
 
     (for {
-      publicKey <- LoginPublicSettings.publicKey
+      publicKey <- loginPublicSettings.publicKey
       assymCookie <- req.cookies.find(_.name == PublicSettings.assymCookieName)
     } yield {
       try {
-        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
+        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, PublicKey(publicKey))
         if (validateUser(authenticatedUser)) {
           val expires = (DateTime.now() + cookieLifetime).getMillis
           val newAuthUser = authenticatedUser.copy(expires = expires)
@@ -77,8 +74,8 @@ object Emergency extends Controller with PanDomainAuthActions {
         tokenIssuedAt, false)
 
       try {
-        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(loginConfig.tokensTableName)(cookieIssue)
-        val ses = new SES(loginConfig.sesClient, loginConfig)
+        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(config.tokensTableName)(cookieIssue)
+        val ses = new SES(AWS.sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
 
         Ok(views.html.emergency.emailSent())
@@ -101,7 +98,7 @@ object Emergency extends Controller with PanDomainAuthActions {
       val firstName = names(0).capitalize
       val lastName = names(1).split("@")(0).capitalize
       val user = User(firstName, lastName, tokenEntry.email, None)
-      val newAuthUser = AuthenticatedUser(user, loginConfig.appName, Set(loginConfig.appName), expires, true)
+      val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, true)
       val authCookies = generateCookies(newAuthUser)
 
       Ok(views.html.emergency.reissueSuccess())
@@ -112,8 +109,8 @@ object Emergency extends Controller with PanDomainAuthActions {
     val issueNewCookieTopic = "New cookie has not been created"
     val tenMinutesInMilliSeconds = 600000
 
-    val tableName = loginConfig.tokensTableName
-    val tokenOpt: Option[Xor[DynamoReadError, NewCookieIssue]] =
+    val tableName = config.tokensTableName
+    val tokenOpt: Option[Either[DynamoReadError, NewCookieIssue]] =
       Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
 
     tokenOpt.map {

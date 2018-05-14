@@ -1,45 +1,38 @@
-//import com.typesafe.sbt.packager.Keys._
-
 name := "login"
 
 version := "1.0.0"
 
-val awsSdkVersion = "1.10.72"
+scalaVersion := "2.12.5"
+scalacOptions := Seq(
+  "-unchecked",
+  "-deprecation",
+  "-feature",
+  "-Xfatal-warnings",
+  "-Ypartial-unification"
+)
+
+val awsSdkVersion = "1.11.309"
+
+resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 
 libraryDependencies ++= Seq(
   jdbc,
-  cache,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-4-0" % "0.2.13",
+  "com.gu" %% "pan-domain-auth-play_2-6" % "0.7.0",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore" % "0.7",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk" % awsSdkVersion,
-  "com.github.nscala-time" %% "nscala-time" % "2.12.0",
-  "io.megl" %% "play-json-extra" % "2.4.3",
-  "com.github.t3hnar" % "scala-bcrypt_2.11" % "2.6",
-  "com.gu" %% "scanamo" % "0.4.0",
-  "org.scalatest" %% "scalatest" % "2.2.6" % Test
+  "com.github.nscala-time" %% "nscala-time" % "2.18.0",
+  "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
+  "com.gu" %% "scanamo" % "1.0.0-M6",
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
-
-scalaVersion := "2.11.8"
-
-// Play provides two styles of routers, one expects its actions to be injected, the
-// other, legacy style, accesses its actions statically.
-//routesGenerator := InjectedRoutesGenerator
-
-
-sources in (Compile, doc) := Seq.empty
-
-publishArtifact in (Compile, packageDoc) := false
-
-ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
-
 lazy val mainProject = project.in(file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging)
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, SystemdPlugin)
   .settings(Defaults.coreDefaultSettings: _*)
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
@@ -50,19 +43,22 @@ lazy val mainProject = project.in(file("."))
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
     riffRaffManifestBranch := Option(System.getenv("CIRCLE_BRANCH")).getOrElse("dev"),
-    riffRaffPackageType := (packageBin in Debian).value)
-  .settings(
+    riffRaffPackageType := (packageBin in Debian).value,
+
+    riffRaffArtifactResources := Seq(
+      (packageBin in Debian).value -> s"${name.value}/${name.value}.deb",
+      file("riff-raff.yaml") -> "riff-raff.yaml"
+    ),
+
+    debianPackageDependencies := Seq("openjdk-8-jre-headless"),
+    maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
+    packageSummary := "login.gutools",
+    packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
+
     javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null"
     )
   )
-
-import com.typesafe.sbt.packager.archetypes.ServerLoader.Systemd
-serverLoading in Debian := Systemd
-debianPackageDependencies := Seq("openjdk-8-jre-headless")
-maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>"
-packageSummary := "login.gutools"
-packageDescription := """Small application to login a user via pan-domain-auth and redirect them."""
 
 
 

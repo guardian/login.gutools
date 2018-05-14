@@ -1,10 +1,10 @@
 package mailer
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.amazonaws.services.simpleemail.model._
 import config.LoginConfig
 
-class SES(sesClient: AmazonSimpleEmailServiceClient, loginConfig: LoginConfig) {
+class SES(sesClient: AmazonSimpleEmailService, loginConfig: LoginConfig) {
   def sendCookieEmail(token: String, sendTo: String): Unit = {
 
     val uri = loginConfig.tokenReissueUri
