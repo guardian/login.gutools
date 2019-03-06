@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
 lazy val mainProject = project.in(file("."))
   .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, SystemdPlugin)
   .settings(Defaults.coreDefaultSettings: _*)
-  .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
+  .settings(addCommandAlias("devrun", "run 9345"): _*)
   .settings(
     topLevelDirectory := Some(normalizedName.value),
     riffRaffPackageName := name.value,

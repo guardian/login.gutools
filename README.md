@@ -5,7 +5,7 @@ Small application to login a user via pan-domain-auth and redirect them.
 ## Setting up locally
 
 1. Clone this repo
-2. Get nginx set up locally following the instructions below
+2. Get nginx set up locally following the instructions below (note you may need to re-run this as the port has been moved to 9345).
 
 ### Nginx
 
@@ -38,6 +38,8 @@ this already if you work with identity or similar):
 ## Running locally
 
 You will need composer and workflow credentials.
+
+Run using `sbt devrun` (or using `devrun` in an SBT session).
 
 ### Emergency access when Google auth is down
 
