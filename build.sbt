@@ -40,10 +40,8 @@ lazy val mainProject = project.in(file("."))
     topLevelDirectory := Some(normalizedName.value),
     riffRaffPackageName := name.value,
     riffRaffManifestProjectName := s"editorial-tools:${name.value}",
-    riffRaffBuildIdentifier :=  Option(System.getenv("CIRCLE_BUILD_NUM")).getOrElse("dev"),
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffManifestBranch := Option(System.getenv("CIRCLE_BRANCH")).getOrElse("dev"),
     riffRaffPackageType := (packageBin in Debian).value,
 
     riffRaffArtifactResources := Seq(
