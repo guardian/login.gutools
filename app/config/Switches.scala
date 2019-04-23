@@ -53,7 +53,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   def start() {
     log.info("Starting switches scheduled task")
 
-    scheduler.scheduleAtFixedRate(() => refresh(), 60, 60, TimeUnit.SECONDS)
+    scheduler.scheduleAtFixedRate(() => refresh(), 0, 60, TimeUnit.SECONDS)
   }
 
   def stop()  {
