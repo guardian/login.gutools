@@ -2,42 +2,16 @@
 
 Small application to login a user via pan-domain-auth and redirect them.
 
-## Setting up locally
-
-1. Clone this repo
-2. Get nginx set up locally following the instructions below
-
-### Nginx
-
-To run correctly in standalone mode we run behind nginx, This can be installed as follows (you may have done
-this already if you work with identity or similar):
-
-1. Install nginx:
-  * *Linux:*   ```sudo apt-get install nginx```
-  * *Mac OSX:* ```brew install nginx```
-
-2. Make sure you have a sites-enabled folder under your nginx home. This should be
-  * *Linux:* ```/etc/nginx/sites-enabled```
-  * *Mac OSX:* ```/usr/local/etc/nginx/sites-enabled```
-
-3. Make sure your nginx.conf (found in your nginx home - the same location as the sites-enabled folder above) contains the following line in the http{} block:
-`include sites-enabled/*;`
-  * you may also want to disable the default server on 8080
-
-4. Get the [dev-nginx](https://github.com/guardian/dev-nginx) repo checked out on your machine
-
-5. Set up certs if you've not already done so (see [dev-nginx readme](https://github.com/guardian/dev-nginx))
-
-6. Configure the composer route in nginx
-
-```
-    cd <path_of_dev-nginx>
-    sudo ./setup-app.rb <path_of_login.gutools>/nginx/nginx-mapping.yml
-```
-
 ## Running locally
+1. Setup [dev-nginx](https://github.com/guardian/dev-nginx) using the mappings in the [nginx](./nginx) directory.
+2. Get credentials for `composer` and `workflow` from [Janus](https://janus.gutools.co.uk/multi-credentials?&permissionIds=composer-dev,workflow-dev&tzOffset=1).
+3. Run `./script/start`.
+4. Open `https://login.local.dev-gutools.co.uk`.
 
-You will need composer and workflow credentials.
+### Interactive debugging
+1. Setup your IDE to attach to port 5005. [Here are instructions for IntelliJ](https://www.jetbrains.com/help/idea/run-debug-configuration-remote-debug.html#1).
+2. Run `./script/debug`.
+3. Start debugging in your IDE.
 
 ### Emergency access when Google auth is down
 
