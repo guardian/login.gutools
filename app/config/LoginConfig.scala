@@ -24,8 +24,10 @@ object LoginConfig {
     val tokensTableName = s"login.gutools-tokens-${stage.toUpperCase}"
     val emergencyAccessTableName = s"login.gutools-emergency-access-${stage.toUpperCase}"
     val tokenReissueUri = host + "/emergency/new-cookie/"
-    val emailSettings = Map("from" -> "digitalcms.bugs@guardian.co.uk",
-      "replyTo" -> "core.central.production@guardian.co.uk ")
+    val emailSettings = Map(
+      "from" -> "editorial.tools.dev@theguardian.com",
+      "replyTo" -> "core.central.production@guardian.co.uk "
+    )
 
    val switchBucket = "login-gutools-config"
 

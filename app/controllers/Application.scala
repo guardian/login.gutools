@@ -15,4 +15,6 @@ class Application(deps: LoginControllerComponents) extends LoginController(deps)
   def healthCheck() = Action { implicit request =>
     Ok("Ok")
   }
+
+  def index() = Action { implicit request => Ok("A small application to login a user via pan-domain-auth and redirect them.")}
 }
