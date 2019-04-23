@@ -10,7 +10,7 @@ Small application to login a user via pan-domain-auth and redirect them.
 
 ### Interactive debugging
 1. Setup your IDE to attach to port 5005. [Here are instructions for IntelliJ](https://www.jetbrains.com/help/idea/run-debug-configuration-remote-debug.html#1).
-2. Run `./script/debug`.
+2. Run `./script/start --debug`.
 3. Start debugging in your IDE.
 
 ### Emergency access when Google auth is down
