@@ -9,6 +9,7 @@ import com.amazonaws.util.StringInputStream
 import utils.Loggable
 import org.quartz._
 import play.api.libs.json.{Format, JsString, JsValue, Json}
+import _root_.utils.Notifier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
@@ -17,6 +18,8 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
   private val scheduler = Executors.newScheduledThreadPool(1)
+
+  private val notifier = new Notifier(config)
 
   val fileName = s"${config.stage.toUpperCase}/switches.json"
 
@@ -41,6 +44,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       s3Client.putObject(request)
       log.info(s"$name has been updated to ${state.name}")
       agent.send(newStates)
+      notifier.sendStateChangeNotification(name, state)
       Some(())
     } catch {
       case e: Exception => {
@@ -69,6 +73,8 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val result = s3Client.getObject(request)
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
+
+      statesInS3.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
 
       agent.send(statesInS3)
       result.close()

@@ -34,7 +34,8 @@ libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time" % "2.18.0",
   "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
   "com.gu" %% "scanamo" % "1.0.0-M6",
-  "org.scalatest" %% "scalatest" % "3.0.5" % Test
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+  "com.gu" %% "anghammarad-client" % "1.1.3"
 )
 
 lazy val mainProject = project.in(file("."))

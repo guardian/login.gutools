@@ -5,9 +5,19 @@ import java.net.URL
 import scala.util.control.NonFatal
 
 
-case class LoginConfig(stage: String, domain: String, host: String, appName: String, emergencyAccessTableName: String,
-                       tokensTableName: String, tokenReissueUri: String, emailSettings: Map[String, String],
-                       switchBucket: String, loggingStream: Option[String])
+case class LoginConfig(
+  stage: String,
+  domain: String,
+  host: String,
+  appName: String,
+  emergencyAccessTableName: String,
+  tokensTableName: String,
+  tokenReissueUri: String,
+  emailSettings: Map[String, String],
+  switchBucket: String,
+  loggingStream: Option[String],
+  anghammaradSnsArn: String
+)
 
 object LoginConfig {
  def forStage(stageOpt: Option[String]): LoginConfig = {
@@ -33,8 +43,10 @@ object LoginConfig {
 
    val switchBucket = "login-gutools-config"
 
+   val anghammaradSnsArn = "arn:aws:sns:eu-west-1:095768028460:anghammarad-PROD-NotificationTopic-HDJHBGZT0FFD"
+
     LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri,
-      emailSettings, switchBucket, loggingStream)
+      emailSettings, switchBucket, loggingStream, anghammaradSnsArn)
   }
 
   /**
