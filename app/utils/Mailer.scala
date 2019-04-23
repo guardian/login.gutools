@@ -14,13 +14,13 @@ class SES(sesClient: AmazonSimpleEmailService, loginConfig: LoginConfig) {
          |<div>
          |  Hi,
          |  <p>
-         |    The Guardian's Editorial Tools are currently experiencing issues with Google Authentication and so we cannot authenticate your access to the Tools.
+         |    The Guardian's Editorial Tools are experiencing login issues. This is likely due to a Google issue (please refer to emails from Central Production). You must perform an additional step to login.
          |  </p>
          |  <p>
-         |    Click <a href=$uri$token>here</a> to obtain a new cookie to allow you to use them.
+         |    Click <a href=$uri$token>here</a> to login and continue using the Tools.
          |  </p>
          |  <p>
-         |    <strong>Do NOT share this email.</strong>
+         |    <strong>Do NOT share this email with others. The link is private and for your use only.</strong>
          |  </p>
          |</div>
        """.stripMargin
