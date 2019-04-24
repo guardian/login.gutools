@@ -2,14 +2,15 @@ package config
 
 import java.util.concurrent.{Executors, TimeUnit}
 
+import _root_.utils.Notifier
 import akka.agent.Agent
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
 import utils.Loggable
 import org.quartz._
+import play.api.Logger
 import play.api.libs.json.{Format, JsString, JsValue, Json}
-import _root_.utils.Notifier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
