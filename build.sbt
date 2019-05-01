@@ -1,3 +1,5 @@
+import play.sbt.routes.RoutesKeys
+
 name := "login"
 
 version := "1.0.0"

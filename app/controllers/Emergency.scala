@@ -7,10 +7,11 @@ import com.gu.pandomainauth.{PublicKey, PublicSettings}
 import com.gu.scanamo._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.syntax._
-import config.{AWS, LoginPublicSettings}
+import config.LoginPublicSettings
 import mailer._
 import play.api.Logger
 import play.api.mvc._
+import services.AWS
 
 import scala.util.Random
 import scala.util.control.NonFatal
@@ -55,11 +56,11 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
     }
   }
 
-  def requestCookieLink = EmergencySwitchIsOnAction { req =>
+  def requestCookieLink = EmergencySwitchIsOnAction { implicit req =>
     Ok(views.html.emergency.requestNewCookie())
   }
 
-  def sendCookieLink = EmergencySwitchIsOnAction { req =>
+  def sendCookieLink = EmergencySwitchIsOnAction { implicit req =>
 
     val tokenIssuedAt = DateTime.now().getMillis
 

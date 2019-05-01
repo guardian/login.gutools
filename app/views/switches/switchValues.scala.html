@@ -1,17 +1,74 @@
-@import config.SwitchState
-@(switches: Map[String, SwitchState])
+@import services.switches.SwitchState
+@import helper._
+@(switches: Map[String, SwitchState])(implicit req: Request[AnyContent])
 <html>
     <head>
         <title>
-            Switch states
+            Login Switches
         </title>
     </head>
     <body>
-        <dl>
-        @for((name, state) <- switches) {
-            <dt> @name </dt>
-            <dl> @{state.name} </dl>
-        }
-        </dl>
+        <h1>Login Switches</h1>
+        <div>
+            <table>
+                <colgroup>
+                    <col/>
+                    <col align="right"/>
+                </colgroup>
+                <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Status</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for((name, state) <- switches) {
+                        <tr>
+                            <td>
+                                <strong>@name</strong>
+                            </td>
+                            <td>@{state.name}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <form method="POST" action=@{s"/switches/$name"}>
+                                    @CSRF.formField
+                                    <input
+                                        type="hidden"
+                                        name="status"
+                                        value="@{ if(state.name.toLowerCase() == "on") "off" else "on" }"/>
+
+                                    <label
+                                        for="@{name}_username">
+                                        Username
+                                    </label>
+                                    <input
+                                        id="@{name}_username"
+                                        name="username"
+                                        type="text"
+                                        placeholder="first.last"
+                                        required/>
+
+                                    <label
+                                        for="@{name}_password">
+                                        Password
+                                    </label>
+                                    <input
+                                        id="@{name}_password"
+                                        name="password"
+                                        type="password"
+                                        placeholder="Switch login password"
+                                        required/>
+
+                                    <button type="submit">
+                                        Turn @{ if(state.name.toLowerCase() == "on") "off" else "on" }
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </body>
 </html>

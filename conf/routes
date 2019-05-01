@@ -17,8 +17,7 @@ GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink
 GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
 POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink
 
-POST    /switches/emergency/on       controllers.SwitchesController.emergencyOn
-POST    /switches/emergency/off      controllers.SwitchesController.emergencyOff
+POST    /switches/:name              controllers.SwitchesController.setSwitch(name: String)
 GET     /switches                    controllers.SwitchesController.index
 
 GET     /_healthcheck                controllers.Application.healthCheck
