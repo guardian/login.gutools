@@ -2,7 +2,8 @@ package utils
 
 import com.gu.anghammarad.Anghammarad
 import com.gu.anghammarad.models._
-import config.{LoginConfig, SwitchState}
+import config.LoginConfig
+import services.switches.SwitchState
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}

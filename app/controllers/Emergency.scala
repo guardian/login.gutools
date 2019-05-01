@@ -58,11 +58,11 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
     }
   }
 
-  def requestCookieLink = EmergencySwitchIsOnAction { req =>
+  def requestCookieLink = EmergencySwitchIsOnAction { implicit req =>
     Ok(views.html.emergency.requestNewCookie())
   }
 
-  def sendCookieLink = EmergencySwitchIsOnAction { req =>
+  def sendCookieLink = EmergencySwitchIsOnAction { implicit req =>
 
     val tokenIssuedAt = DateTime.now().getMillis
 

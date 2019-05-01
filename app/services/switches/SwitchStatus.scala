@@ -1,4 +1,4 @@
-package config
+package services.switches
 
 import java.util.concurrent.{Executors, TimeUnit}
 
@@ -7,14 +7,18 @@ import akka.agent.Agent
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
+import config.LoginConfig
+import model.SwitchError
 import utils.Loggable
 import org.quartz._
+import play.api.Logger
 import play.api.libs.json.{Format, JsString, JsValue, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
-class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
+class SwitchStatus(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
+  val switchWhitelist = Set("emergency")
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
   private val scheduler = Executors.newScheduledThreadPool(2)
@@ -31,26 +35,30 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
     .withIdentity("refresh-switches-gu-login-tools")
     .build()
 
-  def setEmergencySwitch(state: SwitchState): Option[Unit] = {
-    val name = "emergency"
-    val newStates = allSwitches + (name -> state)
-    val json = Json.toJson(newStates)
-    val jsonString = Json.stringify(json)
-    val metaData = new ObjectMetadata()
-    metaData.setContentLength(jsonString.getBytes("UTF-8").length)
+  def setSwitch(name: String, state: SwitchState): Either[SwitchError, Unit] = {
+    if (switchWhitelist.contains(name)) {
+      val newStates = allSwitches + (name -> state)
+      val json = Json.toJson(newStates)
+      val jsonString = Json.stringify(json)
+      val metaData = new ObjectMetadata()
+      metaData.setContentLength(jsonString.getBytes("UTF-8").length)
 
-    try {
-      val request = new PutObjectRequest(config.switchBucket, fileName, new StringInputStream(jsonString), metaData)
-      s3Client.putObject(request)
-      log.info(s"$name has been updated to ${state.name}")
-      agent.send(newStates)
-      notifier.sendStateChangeNotification(name, state)
-      Some(())
-    } catch {
-      case e: Exception => {
-        log.error(s"Unable to update switch $name ${state.name}", e)
-        None
+      try {
+        val request = new PutObjectRequest(config.switchBucket, fileName, new StringInputStream(jsonString), metaData)
+        s3Client.putObject(request)
+        log.info(s"$name has been updated to ${state.name}")
+        agent.send(newStates)
+        notifier.sendStateChangeNotification(name, state)
+        Right(())
+      } catch {
+        case e: Exception => {
+          log.error(s"Unable to update switch $name ${state.name}", e)
+          Left(SwitchError.PutSwitchStatusError)
+        }
       }
+    } else {
+      Logger.error(s"Attempted to set non-whitelisted switch: $name")
+      Left(SwitchError.NonWhitelistedSwitchError(name))
     }
   }
 
@@ -114,4 +122,13 @@ object SwitchState {
       case Off => JsString("off")
     }
   )
+
+  def fromString(s: String) = s.toLowerCase() match {
+    case "on" => On
+    case _ => Off
+  }
+}
+
+sealed trait SetSwitchError
+object SetSwitchError {
 }
