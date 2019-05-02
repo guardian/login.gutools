@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObj
 import com.amazonaws.util.StringInputStream
 import config.LoginConfig
 import model.SwitchError
+import utils.Mailer
 import org.quartz._
 import play.api.Logger
 import play.api.libs.json.{Format, JsString, JsValue, Json}
@@ -44,6 +45,7 @@ class SwitchStatus(config: LoginConfig) {
         val request = new PutObjectRequest(config.switchBucket, fileName, new StringInputStream(jsonString), metaData)
         AWS.s3Client.putObject(request)
         Logger.info(s"$name has been updated to ${state.name}")
+
         agent.send(newStates)
         Right(())
       } catch {

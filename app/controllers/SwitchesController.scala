@@ -1,6 +1,8 @@
 package controllers
 
+import services.AWS
 import services.switches._
+import utils.Mailer
 
 
 class SwitchesController(switchAccess: SwitchAccess, deps: LoginControllerComponents) extends LoginController(deps) {
@@ -20,7 +22,12 @@ class SwitchesController(switchAccess: SwitchAccess, deps: LoginControllerCompon
         result = switchAccess.checkAccess(username, password).flatMap { _ =>
           switches.setSwitch(switchName, status)
         } match {
-          case Right(_) => Redirect(routes.SwitchesController.index().url)
+          case Right(_) =>
+            // Notify tools and CP of the change
+            val mailer = new Mailer(AWS.sesClient, config)
+            mailer.sendSwitchChangeEmail(switchName, status, username)
+
+            Redirect(routes.SwitchesController.index().url)
           case Left(switchError) => switchError.toResult(errorMessage(status))
         }
     }  yield result).getOrElse(BadRequest("Bad fields in form body"))

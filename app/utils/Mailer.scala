@@ -1,10 +1,43 @@
-package mailer
+package utils
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.amazonaws.services.simpleemail.model._
 import config.LoginConfig
+import services.switches.SwitchState
 
-class SES(sesClient: AmazonSimpleEmailService, loginConfig: LoginConfig) {
+class Mailer(sesClient: AmazonSimpleEmailService, loginConfig: LoginConfig) {
+  def sendSwitchChangeEmail(switchName: String, status: SwitchState, changedBy: String): Unit = {
+    val emailBody =
+      s"""
+         |<div>
+         |  <p>
+         |    Login switch '$switchName' has been set to '${status.name}' by user $changedBy
+         |  </p>
+         |  <p>
+         |    If this is not expected consider contacting either the developers on: editorial.tools.dev@guardian.co.uk
+         |    or Central Production on: core.central.production@guardian.co.uk
+         |  </p>
+         |  <p>
+         |    Thanks
+         |  </p>
+         |</div>
+       """.stripMargin
+
+    val request = new SendEmailRequest()
+      .withMessage(new Message()
+        .withSubject(new Content(s"Login switch $switchName changed to ${status.name}"))
+        .withBody(new Body().withHtml(new Content(emailBody)))
+      )
+      .withSource(loginConfig.emailSettings("from"))
+      .withReplyToAddresses(loginConfig.emailSettings("replyTo"))
+
+    loginConfig.notifyOnSwitchChange.foreach { address =>
+      request.withDestination(new Destination().withToAddresses(address))
+    }
+
+    sesClient.sendEmail(request)
+  }
+
   def sendCookieEmail(token: String, sendTo: String): Unit = {
 
     val uri = loginConfig.tokenReissueUri

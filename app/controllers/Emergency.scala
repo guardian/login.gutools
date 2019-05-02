@@ -8,7 +8,7 @@ import com.gu.scanamo._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.syntax._
 import config.LoginPublicSettings
-import mailer._
+import utils.Mailer
 import play.api.Logger
 import play.api.mvc._
 import services.AWS
@@ -76,7 +76,7 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
 
       try {
         val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(config.tokensTableName)(cookieIssue)
-        val ses = new SES(AWS.sesClient, config)
+        val ses = new Mailer(AWS.sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
 
         Ok(views.html.emergency.emailSent())

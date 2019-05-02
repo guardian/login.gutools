@@ -9,7 +9,7 @@ import scala.util.control.NonFatal
 
 
 case class LoginConfig(stage: String, domain: String, host: String, appName: String, emergencyAccessTableName: String,
-                       tokensTableName: String, tokenReissueUri: String, emailSettings: Map[String, String], switchBucket: String)
+                       tokensTableName: String, tokenReissueUri: String, emailSettings: Map[String, String], switchBucket: String, notifyOnSwitchChange: List[String])
 
 object LoginConfig {
  def forStage(stageOpt: Option[String]): LoginConfig = {
@@ -26,12 +26,18 @@ object LoginConfig {
     val tokenReissueUri = host + "/emergency/new-cookie/"
     val emailSettings = Map(
       "from" -> "editorial.tools.dev@theguardian.com",
-      "replyTo" -> "core.central.production@guardian.co.uk "
+      "replyTo" -> "core.central.production@guardian.co.uk"
     )
 
    val switchBucket = "login-gutools-config"
 
-    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri, emailSettings, switchBucket)
+   val notifyOnSwitchChange = List(
+     "editorial.tools.dev@theguardian.com",
+     "core.central.production@guardian.co.uk"
+   )
+
+    LoginConfig(stage, domain, host, appName, emergencyAccessTableName,
+      tokensTableName, tokenReissueUri, emailSettings, switchBucket, notifyOnSwitchChange)
   }
 
   /**
