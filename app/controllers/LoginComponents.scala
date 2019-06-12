@@ -27,15 +27,15 @@ abstract class LoginControllerComponents(context: Context) extends BuiltInCompon
   def config: LoginConfig
   def switches: Switches
 
-  lazy val instanceTags: Option[InstanceTags] = AWS.readTags()
+  lazy val asgTags: Option[InstanceTags] = AWS.readTags()
 
   lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
     new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, AWS.workflowAwsCredentialsProvider)
 
-  override lazy val secretStateSupplier: Supplier[SecretState] = {
-    val stack = instanceTags.map(_.stack).getOrElse("flexible")
-    val app = instanceTags.map(_.app).getOrElse("login")
-    val stage = instanceTags.map(_.stack).getOrElse("DEV")
+  override lazy val secretStateSupplier: SnapshotProvider = {
+    val stack = asgTags.map(_.stack).getOrElse("flexible")
+    val app = asgTags.map(_.app).getOrElse("login")
+    val stage = asgTags.map(_.stack).getOrElse("DEV")
 
     new ParameterStore.SecretSupplier(
       TransitionTiming(usageDelay = Duration.ofMinutes(3), overlapDuration = Duration.ofHours(2)),
