@@ -1,7 +1,6 @@
 package controllers
 
 import java.time.Duration
-import java.util.function.Supplier
 
 import com.github.t3hnar.bcrypt._
 import com.gu.pandomainauth.action.AuthActions
@@ -17,12 +16,16 @@ import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc._
 import play.api.{BuiltInComponentsFromContext, Logger}
-import play.filters.HttpFiltersComponents
+import play.filters.csrf.CSRFComponents
+import play.filters.headers.SecurityHeadersComponents
 
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class LoginControllerComponents(context: Context) extends BuiltInComponentsFromContext(context)
-  with AhcWSComponents with AssetsComponents with HttpFiltersComponents with RotatingSecretComponents {
+  with AhcWSComponents with AssetsComponents with CSRFComponents
+  with SecurityHeadersComponents with RotatingSecretComponents {
+
+  def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 
   def config: LoginConfig
   def switches: Switches
