@@ -3,17 +3,17 @@ package config
 import java.util.concurrent.{Executors, TimeUnit}
 
 import akka.agent.Agent
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
+import utils.Loggable
 import org.quartz._
-import org.quartz.impl.StdSchedulerFactory
-import play.api.Logger
 import play.api.libs.json.{Format, JsString, JsValue, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
-class Switches(config: LoginConfig) {
+class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
   private val scheduler = Executors.newScheduledThreadPool(1)
@@ -38,35 +38,35 @@ class Switches(config: LoginConfig) {
 
     try {
       val request = new PutObjectRequest(config.switchBucket, fileName, new StringInputStream(jsonString), metaData)
-      AWS.s3Client.putObject(request)
-      Logger.info(s"$name has been updated to ${state.name}")
+      s3Client.putObject(request)
+      log.info(s"$name has been updated to ${state.name}")
       agent.send(newStates)
       Some(())
     } catch {
       case e: Exception => {
-        Logger.error(s"Unable to update switch $name ${state.name}", e)
+        log.error(s"Unable to update switch $name ${state.name}", e)
         None
       }
     }
   }
 
   def start() {
-    Logger.info("Starting switches scheduled task")
+    log.info("Starting switches scheduled task")
 
     scheduler.scheduleAtFixedRate(() => refresh(), 60, 60, TimeUnit.SECONDS)
   }
 
   def stop()  {
-    Logger.info("Stopping switches scheduled task")
+    log.info("Stopping switches scheduled task")
     scheduler.shutdown()
   }
 
   def refresh() {
-    Logger.debug("Refreshing switches agent")
+    log.debug("Refreshing switches agent")
 
     try {
       val request = new GetObjectRequest(config.switchBucket, fileName)
-      val result = AWS.s3Client.getObject(request)
+      val result = s3Client.getObject(request)
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
 
@@ -75,7 +75,7 @@ class Switches(config: LoginConfig) {
     }
     catch {
       case e: Exception =>
-        Logger.error(s"Unable to get an updated version of switches.json from S3 ${config.switchBucket} $fileName. The switches map is likely to be stale. ", e)
+        log.error(s"Unable to get an updated version of switches.json from S3 ${config.switchBucket} $fileName. The switches map is likely to be stale. ", e)
     }
   }
 }

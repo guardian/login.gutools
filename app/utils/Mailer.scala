@@ -1,4 +1,4 @@
-package mailer
+package utils
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.amazonaws.services.simpleemail.model._

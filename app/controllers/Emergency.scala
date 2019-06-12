@@ -1,5 +1,7 @@
 package controllers
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
@@ -7,16 +9,17 @@ import com.gu.pandomainauth.{PublicKey, PublicSettings}
 import com.gu.scanamo._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.syntax._
-import config.{AWS, LoginPublicSettings}
-import mailer._
-import play.api.Logger
+import config.LoginPublicSettings
 import play.api.mvc._
+import utils._
 
 import scala.util.Random
 import scala.util.control.NonFatal
 
 
-class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerComponents) extends LoginController(deps) {
+class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerComponents,
+                dynamoDbClient: AmazonDynamoDB, sesClient: AmazonSimpleEmailService)
+  extends LoginController(deps, dynamoDbClient) with Loggable {
 
   val cookieLifetime = 1.day
 
@@ -74,8 +77,8 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
         tokenIssuedAt, false)
 
       try {
-        val userOpt = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(config.tokensTableName)(cookieIssue)
-        val ses = new SES(AWS.sesClient, config)
+        val userOpt = Scanamo.put[NewCookieIssue](dynamoDbClient)(config.tokensTableName)(cookieIssue)
+        val ses = new SES(sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
 
         Ok(views.html.emergency.emailSent())
@@ -92,7 +95,7 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
   def issueNewCookie(userToken: String) = EmergencySwitchIsOnAction { req =>
 
     def issueNewCookie(tokenEntry: NewCookieIssue, tableName: String) = {
-      val updatedTokenEntry = Scanamo.put[NewCookieIssue](AWS.dynamoDbClient)(tableName)(tokenEntry.copy(used = true))
+      val updatedTokenEntry = Scanamo.put[NewCookieIssue](dynamoDbClient)(tableName)(tokenEntry.copy(used = true))
       val expires = (DateTime.now() + cookieLifetime).getMillis
       val names = tokenEntry.email.split("\\.")
       val firstName = names(0).capitalize
@@ -111,25 +114,25 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
 
     val tableName = config.tokensTableName
     val tokenOpt: Option[Either[DynamoReadError, NewCookieIssue]] =
-      Scanamo.get[NewCookieIssue](AWS.dynamoDbClient)(tableName)('id -> s"$userToken")
+      Scanamo.get[NewCookieIssue](dynamoDbClient)(tableName)('id -> s"$userToken")
 
     tokenOpt.map {
       case Left(error) => {
-        Logger.warn(s"Error when reading entry with $userToken from dynamo. A new cookie will not be issued: $error")
+        log.warn(s"Error when reading entry with $userToken from dynamo. A new cookie will not be issued: $error")
         unauthorised("Checking your access token failed. You will not be issued with a new ", issueNewCookieTopic)
       }
       case Right(tokenEntry: NewCookieIssue) => {
         if (!tokenEntry.used) {
           val tokenAgeInMilliseconds = DateTime.now().getMillis - tokenEntry.requested
           if (tokenAgeInMilliseconds > tenMinutesInMilliSeconds) {
-            Logger.warn(s"Attempted to use expired token: ${tokenEntry.id}")
+            log.warn(s"Attempted to use expired token: ${tokenEntry.id}")
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
             issueNewCookie(tokenEntry, tableName)
           }
         } else {
-          Logger.warn(s"Attempted to use a used token: ${tokenEntry.id}")
+          log.warn(s"Attempted to use a used token: ${tokenEntry.id}")
           Unauthorized(views.html.emergency.newCookieFailure("Your link has already been been used"))
         }
 
@@ -138,7 +141,7 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
   }
 
   private def unauthorised(message: String, topic: String): Result = {
-    Logger.warn(message)
+    log.warn(message)
     Unauthorized(views.html.emergency.reissueFailure(message, topic))
   }
 
