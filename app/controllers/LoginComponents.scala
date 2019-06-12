@@ -35,7 +35,7 @@ abstract class LoginControllerComponents(context: Context) extends BuiltInCompon
   override lazy val secretStateSupplier: SnapshotProvider = {
     val stack = asgTags.map(_.stack).getOrElse("flexible")
     val app = asgTags.map(_.app).getOrElse("login")
-    val stage = asgTags.map(_.stack).getOrElse("DEV")
+    val stage = asgTags.map(_.stage).getOrElse("DEV")
 
     import aws.parameterstore
 
