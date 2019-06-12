@@ -1,14 +1,13 @@
 package controllers
 
 import java.time.Duration
-import java.util.function.Supplier
 
 import com.github.t3hnar.bcrypt._
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
-import com.gu.play.secretrotation.aws.ParameterStore
-import com.gu.play.secretrotation.{RotatingSecretComponents, SecretState, TransitionTiming}
+import com.gu.play.secretrotation._
+import com.gu.play.secretrotation.aws.parameterstore.AwsSdkV1
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
 import config._
@@ -17,30 +16,36 @@ import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc._
 import play.api.{BuiltInComponentsFromContext, Logger}
-import play.filters.HttpFiltersComponents
+import play.filters.csrf.CSRFComponents
+import play.filters.headers.SecurityHeadersComponents
 
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class LoginControllerComponents(context: Context) extends BuiltInComponentsFromContext(context)
-  with AhcWSComponents with AssetsComponents with HttpFiltersComponents with RotatingSecretComponents {
+  with AhcWSComponents with AssetsComponents with CSRFComponents
+  with SecurityHeadersComponents with RotatingSecretComponents {
+
+  def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 
   def config: LoginConfig
   def switches: Switches
 
-  lazy val instanceTags: Option[InstanceTags] = AWS.readTags()
+  lazy val asgTags: Option[InstanceTags] = AWS.readTags()
 
   lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
     new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, AWS.workflowAwsCredentialsProvider)
 
-  override lazy val secretStateSupplier: Supplier[SecretState] = {
-    val stack = instanceTags.map(_.stack).getOrElse("flexible")
-    val app = instanceTags.map(_.app).getOrElse("login")
-    val stage = instanceTags.map(_.stack).getOrElse("DEV")
+  override lazy val secretStateSupplier: SnapshotProvider = {
+    val stack = asgTags.map(_.stack).getOrElse("flexible")
+    val app = asgTags.map(_.app).getOrElse("login")
+    val stage = asgTags.map(_.stage).getOrElse("DEV")
 
-    new ParameterStore.SecretSupplier(
+    import aws.parameterstore
+
+    new parameterstore.SecretSupplier(
       TransitionTiming(usageDelay = Duration.ofMinutes(3), overlapDuration = Duration.ofHours(2)),
       parameterName = s"/$stack/$app/$stage/play.http.secret.key",
-      AWS.ssmClient
+      AwsSdkV1(AWS.ssmClient)
     )
   }
 }
