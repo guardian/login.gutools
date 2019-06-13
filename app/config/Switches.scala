@@ -7,7 +7,6 @@ import akka.agent.Agent
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
-import org.joda.time.DateTime
 import utils.Loggable
 import org.quartz._
 import play.api.libs.json.{Format, JsString, JsValue, Json}
@@ -18,7 +17,7 @@ import scala.io.Source
 class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
-  private val scheduler = Executors.newScheduledThreadPool(1)
+  private val scheduler = Executors.newScheduledThreadPool(2)
 
   private val notifier = new Notifier(config)
 
@@ -59,6 +58,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
     log.info("Starting switches scheduled task")
 
     scheduler.scheduleAtFixedRate(() => refresh(), 0, 60, TimeUnit.SECONDS)
+    scheduler.scheduleAtFixedRate(() => notifyIfSwitchStillActive(), 0, 60, TimeUnit.MINUTES)
   }
 
   def stop()  {
@@ -75,13 +75,6 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
 
-      // we're refreshing every minute, only sendStillActiveNotification once an hour
-      val isOnTheHour = DateTime.now().getMinuteOfHour == 0
-
-      if (isOnTheHour) {
-        statesInS3.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
-      }
-
       agent.send(statesInS3)
       result.close()
     }
@@ -89,6 +82,10 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       case e: Exception =>
         log.error(s"Unable to get an updated version of switches.json from S3 ${config.switchBucket} $fileName. The switches map is likely to be stale. ", e)
     }
+  }
+
+  def notifyIfSwitchStillActive(): Unit = {
+    agent.get.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
   }
 }
 
