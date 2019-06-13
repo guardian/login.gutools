@@ -2,14 +2,12 @@ package config
 
 import java.net.URL
 
-import com.amazonaws.services.ec2.AmazonEC2Client
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient
-
 import scala.util.control.NonFatal
 
 
 case class LoginConfig(stage: String, domain: String, host: String, appName: String, emergencyAccessTableName: String,
-                       tokensTableName: String, tokenReissueUri: String, emailSettings: Map[String, String], switchBucket: String)
+                       tokensTableName: String, tokenReissueUri: String, emailSettings: Map[String, String],
+                       switchBucket: String, loggingStream: Option[String])
 
 object LoginConfig {
  def forStage(stageOpt: Option[String]): LoginConfig = {
@@ -28,10 +26,15 @@ object LoginConfig {
       "from" -> "editorial.tools.dev@theguardian.com",
       "replyTo" -> "core.central.production@guardian.co.uk "
     )
+    val loggingStream = stage match {
+      case "DEV" => None
+      case _ => Some("elk-PROD-KinesisStream-1PYU4KS1UEQA")
+    }
 
    val switchBucket = "login-gutools-config"
 
-    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri, emailSettings, switchBucket)
+    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri,
+      emailSettings, switchBucket, loggingStream)
   }
 
   /**

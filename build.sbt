@@ -1,3 +1,5 @@
+import com.gu.riffraff.artifact.BuildInfo
+
 name := "login"
 
 version := "1.0.0"
@@ -11,7 +13,7 @@ scalacOptions := Seq(
   "-Ypartial-unification"
 )
 
-val awsSdkVersion = "1.11.309"
+val awsSdkVersion = "1.11.569"
 
 resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 
@@ -26,6 +28,9 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-autoscaling" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
+  "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
+  "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
+  "com.gu" % "kinesis-logback-appender" % "1.4.4",
   "com.github.nscala-time" %% "nscala-time" % "2.18.0",
   "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
   "com.gu" %% "scanamo" % "1.0.0-M6",
@@ -33,7 +38,7 @@ libraryDependencies ++= Seq(
 )
 
 lazy val mainProject = project.in(file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, SystemdPlugin)
+  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, SystemdPlugin, BuildInfoPlugin)
   .settings(Defaults.coreDefaultSettings: _*)
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
@@ -56,7 +61,20 @@ lazy val mainProject = project.in(file("."))
 
     javaOptions in Universal ++= Seq(
       "-Dpidfile.path=/dev/null"
-    )
+    ),
+
+    buildInfoPackage := "login",
+    buildInfoKeys := {
+      lazy val buildInfo = BuildInfo(baseDirectory.value)
+      Seq[BuildInfoKey](
+        BuildInfoKey.constant("buildNumber", buildInfo.buildIdentifier),
+        // so this next one is constant to avoid it always recompiling on dev machines.
+        // we only really care about build time on teamcity, when a constant based on when
+        // it was loaded is just fine
+        BuildInfoKey.constant("buildTime", System.currentTimeMillis),
+        BuildInfoKey.constant("gitCommitId", buildInfo.revision)
+      )
+    }
   )
 
 

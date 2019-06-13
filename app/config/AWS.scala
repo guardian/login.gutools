@@ -3,39 +3,39 @@ package config
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, SystemPropertiesCredentialsProvider}
 import com.amazonaws.regions.{Region, Regions}
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClientBuilder
+import com.amazonaws.services.autoscaling.{AmazonAutoScaling, AmazonAutoScalingClientBuilder}
 import com.amazonaws.services.autoscaling.model.{DescribeAutoScalingGroupsRequest, DescribeAutoScalingInstancesRequest}
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClientBuilder}
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.simpleemail.{AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder}
+import com.amazonaws.services.simplesystemsmanagement.{AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClientBuilder}
 import com.amazonaws.util.EC2MetadataUtils
 
 import scala.collection.JavaConverters._
 
 case class InstanceTags(stack: String, app: String, stage: String)
 
-object AWS {
-  lazy val region = Region.getRegion(Regions.EU_WEST_1).getName
-  lazy val workflowAwsCredentialsProvider = new AWSCredentialsProviderChain(
+class AWS {
+  val region = Region.getRegion(Regions.EU_WEST_1).getName
+  val workflowAwsCredentialsProvider = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider(),
     new SystemPropertiesCredentialsProvider(),
     InstanceProfileCredentialsProvider.getInstance(),
     new ProfileCredentialsProvider("workflow")
   )
-  lazy val composerAwsCredentialsProvider = new AWSCredentialsProviderChain(
+  val composerAwsCredentialsProvider = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider(),
     new SystemPropertiesCredentialsProvider(),
     InstanceProfileCredentialsProvider.getInstance(),
     new ProfileCredentialsProvider("composer")
   )
 
-  lazy val asgClient = AmazonAutoScalingClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
-  lazy val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+  val asgClient: AmazonAutoScaling = AmazonAutoScalingClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+  val ssmClient: AWSSimpleSystemsManagement = AWSSimpleSystemsManagementClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
 
-  lazy val s3Client = AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
-  lazy val sesClient = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
-  lazy val dynamoDbClient = AmazonDynamoDBClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+  val sesClient: AmazonSimpleEmailService = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+  val dynamoDbClient: AmazonDynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
 
   def readTags(): Option[InstanceTags] = {
     // We read tags from the AutoScalingGroup rather than the instance itself to avoid problems where the

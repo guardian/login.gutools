@@ -1,9 +1,9 @@
 package controllers
 
-import config.{Off, On, SwitchState, Switches}
-import play.api.mvc.{BaseController, ControllerComponents}
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import config.{Off, On, SwitchState}
 
-class SwitchesController(deps: LoginControllerComponents) extends LoginController(deps) {
+class SwitchesController(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB) extends LoginController(deps, dynamoDbClient) {
 
   private def errorMessage(state: SwitchState)  = s"Failed to update Emergency switch to ${state.name}. Contact digitalcms.dev@theguardian.com for more help."
   private def success(state: SwitchState)  = s"Emergency switch updated to ${state.name}"

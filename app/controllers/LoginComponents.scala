@@ -2,26 +2,28 @@ package controllers
 
 import java.time.Duration
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.github.t3hnar.bcrypt._
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
-import com.gu.play.secretrotation._
-import com.gu.play.secretrotation.aws.parameterstore.AwsSdkV1
+import com.gu.play.secretrotation.aws.parameterstore.{AwsSdkV1, SecretSupplier}
+import com.gu.play.secretrotation.{RotatingSecretComponents, SnapshotProvider, TransitionTiming}
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
 import config._
 import play.api.ApplicationLoader.Context
+import play.api.BuiltInComponentsFromContext
 import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc._
-import play.api.{BuiltInComponentsFromContext, Logger}
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.SecurityHeadersComponents
+import utils.Loggable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class LoginControllerComponents(context: Context) extends BuiltInComponentsFromContext(context)
+abstract class LoginControllerComponents(context: Context, val aws: AWS) extends BuiltInComponentsFromContext(context)
   with AhcWSComponents with AssetsComponents with CSRFComponents
   with SecurityHeadersComponents with RotatingSecretComponents {
 
@@ -30,27 +32,25 @@ abstract class LoginControllerComponents(context: Context) extends BuiltInCompon
   def config: LoginConfig
   def switches: Switches
 
-  lazy val asgTags: Option[InstanceTags] = AWS.readTags()
+  lazy val asgTags: Option[InstanceTags] = aws.readTags()
 
   lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
-    new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, AWS.workflowAwsCredentialsProvider)
+    new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, aws.workflowAwsCredentialsProvider)
 
   override lazy val secretStateSupplier: SnapshotProvider = {
     val stack = asgTags.map(_.stack).getOrElse("flexible")
     val app = asgTags.map(_.app).getOrElse("login")
     val stage = asgTags.map(_.stage).getOrElse("DEV")
 
-    import aws.parameterstore
-
-    new parameterstore.SecretSupplier(
+    new SecretSupplier(
       TransitionTiming(usageDelay = Duration.ofMinutes(3), overlapDuration = Duration.ofHours(2)),
       parameterName = s"/$stack/$app/$stage/play.http.secret.key",
-      AwsSdkV1(AWS.ssmClient)
+      AwsSdkV1(aws.ssmClient)
     )
   }
 }
 
-abstract class LoginController(deps: LoginControllerComponents) extends BaseController with AuthActions {
+abstract class LoginController(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB) extends BaseController with AuthActions with Loggable {
   final override def wsClient: WSClient = deps.wsClient
   final override def controllerComponents: ControllerComponents = deps.controllerComponents
 
@@ -85,7 +85,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
 
       def checkPassword(user: EmergencyUser, username: String, password: String): Future[Result] = {
         if (password.isBcrypted(user.passwordHash)) {
-          Logger.info(s"$username is authorised to change the Emergency switch.")
+          log.info(s"$username is authorised to change the Emergency switch.")
           block(request)
         } else {
           refuseSwitchChange(s"The password provided by $username is incorrect. User will be refused access to change emergency switch.")
@@ -93,7 +93,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
       }
 
       def refuseSwitchChange(logErrorMsg: String): Future[Result] = {
-        Logger.warn(logErrorMsg)
+        log.warn(logErrorMsg)
         Future.successful {
           Unauthorized(
             views.html.switches.switchChange(
@@ -106,7 +106,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
         val authHeaderUser = EmergencyActions.getBasicAuthDetails(request.headers)
         val userId = authHeaderUser.id
         val tableName = config.emergencyAccessTableName
-        val userOpt = Scanamo.get[EmergencyUser](AWS.dynamoDbClient)(tableName)('userId -> s"$userId")
+        val userOpt = Scanamo.get[EmergencyUser](dynamoDbClient)(tableName)('userId -> s"$userId")
         userOpt.map {
           case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch.")
           case Right(user) => checkPassword(user, userId, authHeaderUser.password)
