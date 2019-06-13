@@ -7,9 +7,9 @@ import akka.agent.Agent
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
+import org.joda.time.DateTime
 import utils.Loggable
 import org.quartz._
-import play.api.Logger
 import play.api.libs.json.{Format, JsString, JsValue, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -75,7 +75,12 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
 
-      statesInS3.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
+      // we're refreshing every minute, only sendStillActiveNotification once an hour
+      val isOnTheHour = DateTime.now().getMinuteOfHour == 0
+
+      if (isOnTheHour) {
+        statesInS3.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
+      }
 
       agent.send(statesInS3)
       result.close()
