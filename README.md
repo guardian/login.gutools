@@ -3,10 +3,10 @@
 Small application to login a user via pan-domain-auth and redirect them.
 
 ## Running locally
-1. Setup [dev-nginx](https://github.com/guardian/dev-nginx) using the mappings in the [nginx](./nginx) directory.
-2. Get credentials for `composer` and `workflow` from [Janus](https://janus.gutools.co.uk/multi-credentials?&permissionIds=composer-dev,workflow-dev&tzOffset=1).
-3. Run `./script/start`.
-4. Open `https://login.local.dev-gutools.co.uk`.
+1. Get credentials for `composer` and `workflow` from [Janus](https://janus.gutools.co.uk/multi-credentials?&permissionIds=composer-dev,workflow-dev&tzOffset=1).
+1. Run `./script/setup`.
+1. Run `./script/start`.
+1. Open `https://login.local.dev-gutools.co.uk`.
 
 ### Interactive debugging
 1. Setup your IDE to attach to port 5005. [Here are instructions for IntelliJ](https://www.jetbrains.com/help/idea/run-debug-configuration-remote-debug.html#1).
