@@ -8,7 +8,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
 
 class Notifier(config: LoginConfig)(implicit ec: ExecutionContext) extends Loggable {
-  def sendStateChangeNotification(switchName: String, state: SwitchState)= sendNotification(s"$switchName switch is now $state", All)
+  def sendStateChangeNotification(switchName: String, state: SwitchState)= sendNotification(s"$switchName switch is now ${state.name} in ${config.stage}", All)
 
   def sendStillActiveNotification(switchName: String) = sendNotification(s"$switchName switch is still ON", HangoutsChat)
 
@@ -16,7 +16,7 @@ class Notifier(config: LoginConfig)(implicit ec: ExecutionContext) extends Logga
     log.info("talking to Anghammarad")
 
     Await.result(Anghammarad.notify(
-      subject = "login.gutools switches monitor",
+      subject = s"${config.appName} switches monitor (${config.stage})",
       message = message,
       actions = List(
         // yeah, this is gross, we need better runbooks!
