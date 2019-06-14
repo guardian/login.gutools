@@ -2,6 +2,7 @@ package config
 
 import java.util.concurrent.{Executors, TimeUnit}
 
+import _root_.utils.Notifier
 import akka.agent.Agent
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
@@ -16,7 +17,9 @@ import scala.io.Source
 class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
-  private val scheduler = Executors.newScheduledThreadPool(1)
+  private val scheduler = Executors.newScheduledThreadPool(2)
+
+  private val notifier = new Notifier(config)
 
   val fileName = s"${config.stage.toUpperCase}/switches.json"
 
@@ -41,6 +44,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       s3Client.putObject(request)
       log.info(s"$name has been updated to ${state.name}")
       agent.send(newStates)
+      notifier.sendStateChangeNotification(name, state)
       Some(())
     } catch {
       case e: Exception => {
@@ -53,7 +57,8 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   def start() {
     log.info("Starting switches scheduled task")
 
-    scheduler.scheduleAtFixedRate(() => refresh(), 60, 60, TimeUnit.SECONDS)
+    scheduler.scheduleAtFixedRate(() => refresh(), 0, 1, TimeUnit.MINUTES)
+    scheduler.scheduleAtFixedRate(() => notifyIfSwitchStillActive(), 0, 1, TimeUnit.HOURS)
   }
 
   def stop()  {
@@ -77,6 +82,10 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       case e: Exception =>
         log.error(s"Unable to get an updated version of switches.json from S3 ${config.switchBucket} $fileName. The switches map is likely to be stale. ", e)
     }
+  }
+
+  def notifyIfSwitchStillActive(): Unit = {
+    agent.get.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
   }
 }
 
