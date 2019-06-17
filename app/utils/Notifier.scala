@@ -10,7 +10,7 @@ import scala.concurrent.{Await, ExecutionContext}
 class Notifier(config: LoginConfig)(implicit ec: ExecutionContext) extends Loggable {
   def sendStateChangeNotification(switchName: String, state: SwitchState)= sendNotification(s"$switchName switch is now ${state.name} in ${config.stage}", All)
 
-  def sendStillActiveNotification(switchName: String) = sendNotification(s"$switchName switch is still ON", HangoutsChat)
+  def sendStillActiveNotification(switchName: String) = sendNotification(s"$switchName switch is still ON in ${config.stage}", HangoutsChat)
 
   private def sendNotification(message: String, channel: RequestedChannel): String = {
     log.info("talking to Anghammarad")
