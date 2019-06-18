@@ -1,5 +1,5 @@
 {
   "checkpoints": {
-    "PROD": { "url": "http://login.gutools.co.uk/_healthcheck", "overdue": "1H" }
+    "PROD": { "url": "https://login.gutools.co.uk/_healthcheck", "overdue": "1H" }
   }
 }
