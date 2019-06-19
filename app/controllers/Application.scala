@@ -2,6 +2,7 @@ package controllers
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import config.LoginConfig
+import login.BuildInfo
 
 
 class Application(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB)
@@ -16,7 +17,7 @@ class Application(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoD
   }
 
   def healthCheck() = Action { implicit request =>
-    Ok("Ok")
+    Ok(BuildInfo.gitCommitId)
   }
 
   def index() = Action { implicit request => Ok("A small application to login a user via pan-domain-auth and redirect them.")}
