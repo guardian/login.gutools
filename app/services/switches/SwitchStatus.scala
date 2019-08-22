@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
 class SwitchStatus(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
-  val switchWhitelist = Set("emergency")
+  val validSwitches = Set("emergency")
   def allSwitches: Map[String, SwitchState] = agent.get()
   private val agent = Agent[Map[String, SwitchState]](Map.empty)
   private val scheduler = Executors.newScheduledThreadPool(2)
@@ -36,7 +36,7 @@ class SwitchStatus(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
     .build()
 
   def setSwitch(name: String, state: SwitchState): Either[SwitchError, Unit] = {
-    if (switchWhitelist.contains(name)) {
+    if (validSwitches.contains(name)) {
       val newStates = allSwitches + (name -> state)
       val json = Json.toJson(newStates)
       val jsonString = Json.stringify(json)
@@ -57,8 +57,8 @@ class SwitchStatus(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
         }
       }
     } else {
-      Logger.error(s"Attempted to set non-whitelisted switch: $name")
-      Left(SwitchError.NonWhitelistedSwitchError(name))
+      Logger.error(s"Attempted to set unrecognised switch: $name")
+      Left(SwitchError.UnrecognisedSwitchError(name))
     }
   }
 

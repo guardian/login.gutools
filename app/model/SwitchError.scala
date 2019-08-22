@@ -9,7 +9,7 @@ sealed trait SwitchError {
     case SwitchError.UserNotFoundError  => Unauthorized(message)
     case SwitchError.AccessBadPasswordError => Unauthorized(message)
     case SwitchError.PutSwitchStatusError => InternalServerError(message)
-    case SwitchError.NonWhitelistedSwitchError(switch) => BadRequest(s"Non-whitelisted switch: $switch")
+    case SwitchError.UnrecognisedSwitchError(switch) => BadRequest(s"Unrecognised switch: $switch")
   }
 }
 
@@ -18,5 +18,5 @@ object SwitchError {
   case object UserNotFoundError extends SwitchError
   case object AccessBadPasswordError extends SwitchError
   case object PutSwitchStatusError extends SwitchError
-  case class NonWhitelistedSwitchError(switch: String) extends SwitchError
+  case class UnrecognisedSwitchError(switch: String) extends SwitchError
 }
