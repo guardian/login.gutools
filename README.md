@@ -14,13 +14,20 @@ Small application to login a user via pan-domain-auth and redirect them.
 3. Start debugging in your IDE.
 
 ### Emergency access when Google auth is down
+#### Turning on the emergency access
+To turn a switch on or off go to the switches page (e.g. https://[your domain]/switches) and enter your username and password.
 
+The username is normally the first part of your email address, before the `@`.
+
+#### Extending cookies
 If the Google Auth service goes down it is possible to use an emergency feature that will extend the cookie lifetime by 1 day for users already signed in. When the switch is on users will be required to access the `/emergency/reissue` endpoint to extend the cookie lifetime.
 
+#### Getting a new cookie
 If users do not have a cookie issued, they can request an email with a link for obtaining a new cookie through the `/emergency/request-cookie` endpoint.
 
 If a lot users are requesting new cookies, we might have to increase the read/write capacity of the dynamo table where cookie tokens are stored.
 
+#### Becoming an emergency login admin
 There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth
 is down.
 
@@ -34,8 +41,5 @@ import com.github.t3hnar.bcrypt._
 "[password-value]".bcrypt
 ```
 
-To turn a switch on or off run:
-```
-curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
-```
+
 

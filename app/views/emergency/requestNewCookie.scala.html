@@ -1,4 +1,5 @@
-@()
+@import helper._
+@()(implicit req: Request[AnyContent])
 <html>
 <head>
     <title>
@@ -13,6 +14,7 @@
 
 <div>
   <form action="/emergency/send-cookie-link" method="post">
+      @CSRF.formField
       <div>
           <label for="email">Enter user email:</label>
           <input type="text" id="email" name="email"/><span>@@guardian.co.uk</span>
