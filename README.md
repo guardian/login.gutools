@@ -3,7 +3,7 @@
 Small application to login a user via pan-domain-auth and redirect them.
 
 ## Running locally
-1. Get credentials for `composer` and `workflow` from [Janus](https://janus.gutools.co.uk/multi-credentials?&permissionIds=composer-dev,workflow-dev&tzOffset=1).
+1. Get credentials for `composer` from [Janus](https://janus.gutools.co.uk/multi-credentials?&permissionIds=composer-dev&tzOffset=1).
 1. Run `./script/setup`.
 1. Run `./script/start`.
 1. Open `https://login.local.dev-gutools.co.uk`.

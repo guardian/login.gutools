@@ -35,7 +35,7 @@ abstract class LoginControllerComponents(context: Context, val aws: AWS) extends
   lazy val asgTags: Option[InstanceTags] = aws.readTags()
 
   lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
-    new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, aws.workflowAwsCredentialsProvider)
+    new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, aws.composerAwsCredentialsProvider)
 
   override lazy val secretStateSupplier: SnapshotProvider = {
     val stack = asgTags.map(_.stack).getOrElse("flexible")
