@@ -17,12 +17,7 @@ case class InstanceTags(stack: String, app: String, stage: String)
 
 class AWS {
   val region = Region.getRegion(Regions.EU_WEST_1).getName
-  val workflowAwsCredentialsProvider = new AWSCredentialsProviderChain(
-    new EnvironmentVariableCredentialsProvider(),
-    new SystemPropertiesCredentialsProvider(),
-    InstanceProfileCredentialsProvider.getInstance(),
-    new ProfileCredentialsProvider("workflow")
-  )
+
   val composerAwsCredentialsProvider = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider(),
     new SystemPropertiesCredentialsProvider(),
