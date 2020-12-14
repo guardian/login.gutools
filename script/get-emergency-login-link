@@ -45,4 +45,5 @@ if [ "${token}" = "null" ]; then
   exit 1
 fi
 
-echo "${issue_cookie_link}/${token}"
+# Wrap the link in quotes to try and stop WhatsApp et al pinging it to make a preview, using up the token
+echo "\"${issue_cookie_link}/${token}\""

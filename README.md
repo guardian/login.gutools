@@ -46,3 +46,5 @@ You will need `composer` Janus credentials to run this script. Once they have vi
 ./script/get-emergency-login-link firstname.lastname@guardian.co.uk
 ```
 
+Be careful when sharing the link using WhatsApp etc. They will ping the link to build a preview unless it is sent in
+quotes which will use up the token and require the user to request another one.
