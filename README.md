@@ -39,3 +39,12 @@ To turn a switch on or off run:
 curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
 ```
 
+In the event that Gmail is also down and users can't receive emails, you can fish out a login token to send to them by other means.
+You will need `composer` Janus credentials to run this script. Once they have visited the `/emergency/request-cookie` endpoint:
+
+```
+./script/get-emergency-login-link firstname.lastname@guardian.co.uk
+```
+
+Be careful when sharing the link using WhatsApp etc. They will ping the link to build a preview unless it is sent in
+quotes which will use up the token and require the user to request another one.

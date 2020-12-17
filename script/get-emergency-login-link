@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -e
+
+STAGE=${STAGE-PROD}
+EMAIL=${1}
+
+common_aws_args="--profile composer --region eu-west-1"
+
+login_gutools_instance="https://login.gutools.co.uk"
+token_table="login.gutools-tokens-PROD"
+
+if [ "${STAGE}" = "CODE" ]; then
+  login_gutools_instance="https://login.code.dev-gutools.co.uk"
+  token_table="login.gutools-tokens-CODE"
+elif [ "${STAGE}" = "DEV" ]; then
+  login_gutools_instance="https://login.local.dev-gutools.co.uk"
+  token_table="login.gutools-tokens-DEV"
+fi
+
+request_cookie_link="${login_gutools_instance}/emergency/request-cookie"
+issue_cookie_link="${login_gutools_instance}/emergency/new-cookie"
+
+if [ -z "${EMAIL}" ]; then
+  echo "Usage: ./get-emergency-login-link <email address>"
+  echo "The user must have requested a cookie first at ${request_cookie_link}"
+  echo "To use in CODE or DEV: STAGE=[CODE|DEV] ./get-emergency-login-link <email address>"
+  exit 1
+fi
+
+scan_response=$(
+  aws dynamodb scan \
+    --table-name "${token_table}" \
+    --filter-expression 'email = :email' \
+    --expression-attribute-values "{ \":email\": { \"S\": \"${EMAIL}\"} }" \
+    ${common_aws_args}
+)
+
+token=$(
+  echo $scan_response | jq -r '.Items | map(select(.used.BOOL == false)) | sort_by(.requested.N) | last | .id.S'
+)
+
+if [ "${token}" = "null" ]; then
+  echo "Can't find token for user. Make sure they have requested a cookie first from ${request_cookie_link}"
+  exit 1
+fi
+
+# Wrap the link in quotes to try and stop WhatsApp et al pinging it to make a preview, using up the token
+echo "\"${issue_cookie_link}/${token}\""
