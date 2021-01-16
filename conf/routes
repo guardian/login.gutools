@@ -18,6 +18,9 @@ GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
 + NOCSRF
 POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink
 
+GET     /decode                      controllers.CookieInfo.decodeForm
+POST    /decode                      controllers.CookieInfo.decodeCookie
+
 + NOCSRF
 POST    /switches/emergency/on       controllers.SwitchesController.emergencyOn
 + NOCSRF
