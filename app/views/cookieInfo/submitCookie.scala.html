@@ -1,0 +1,30 @@
+@import views.html.helper.CSRF
+@(implicit requestHeader: RequestHeader)
+<html>
+    <head>
+        <title>
+        Cookie info request
+        </title>
+    </head>
+    <body>
+        <h1>Paste in a pan domain assym cookie for validation and decoding</h1>
+
+        <div>Cookie should be copied from a browser session.</div>
+
+        <div>
+            <form action="/decode" method="post">
+                @CSRF.formField
+                <div>
+                    <label for="cookie">Enter cookie:</label>
+                </div>
+                <div>
+                    <textarea id="cookie" name="cookie" rows="20" cols="80"></textarea>
+                </div>
+                <div class="button">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,12 @@
+@import com.gu.pandomainauth.model.AuthenticatedUser
+@import org.joda.time.DateTime
+@(user: AuthenticatedUser)
+<div>
+    <p><b>First name:</b> @user.user.firstName</p>
+    <p><b>Last name:</b> @user.user.lastName</p>
+    <p><b>Email:</b> @user.user.email</p>
+    <p><b>Avatar URL:</b> @user.user.avatarUrl.map(_.length).map{l => (@l chars)}: @user.user.avatarUrl.getOrElse("None")</p>
+    <p><b>Authenticating system:</b> @user.authenticatingSystem</p>
+    <p><b>Authenticated in:</b> @user.authenticatedIn.mkString("; ")</p>
+    <p><b>Expires at:</b> @user.expires <i>(@{new DateTime(user.expires).toString})</i></p>
+</div>

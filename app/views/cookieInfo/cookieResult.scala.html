@@ -1,0 +1,45 @@
+@(decodedCookie: DecodedCookie)
+<html>
+    <head>
+        <title>
+        Decoded cookie
+        </title>
+    </head>
+    <body>
+        <h1>Decoded cookie</h1>
+        @decodedCookie match {
+            case BadCookie(reason, data, exception) => {
+                <h2>Invalid cookie</h2>
+                <p>The cookie is not valid, either it is not the right shape or the signature on the cookie is invalid (using a different key pair to this instance of login - which likely means that it is from a different environment i.e. the wrong one of PROD/CODE).</p>
+                <h3>Failure reason: @reason</h3>
+                <div>
+                    @data match {
+                        case Right(user) => {
+                            <h3>Extracted user data from invalid cookie</h3>
+                            @views.html.cookieInfo.userSnippet(user)
+                        }
+                        case Left(rawData) => {
+                            <h3>Raw data (after base 64 decoding if successful)</h3>
+                            <pre>@rawData</pre>
+                        }
+                    }
+
+                    <h3>Panda library exception:</h3>
+                    <pre class="error"><span class="line">-></span><span class="code">@exception.getClass.getName: @exception.getMessage</span></pre>
+
+                    @exception.getStackTrace.map { line =>
+                        <pre><span class="line">&nbsp;</span><span class="code">    @line</span></pre>
+                    }
+                </div>
+            }
+            case NoCookie => {
+                <h2>No cookie found</h2>
+                <p>No cookie data?</p>
+            }
+            case ValidCookie(validity, user) => {
+                <h2>Cookie status: @validity</h2>
+                @views.html.cookieInfo.userSnippet(user)
+            }
+        }
+    </body>
+</html>
