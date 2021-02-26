@@ -9,7 +9,7 @@ deployments:
     parameters:
       amiTags:
         AmigoStage: PROD
-        Recipe: editorial-tools-xenial-java8
+        Recipe: editorial-tools-xenial-java8-ARM
         BuiltBy: amigo
       amiEncrypted: true
   login:
