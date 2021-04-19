@@ -13,7 +13,7 @@ scalacOptions := Seq(
   "-Ypartial-unification"
 )
 
-val awsSdkVersion = "1.11.569"
+val awsSdkVersion = "1.11.678"
 
 resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 
