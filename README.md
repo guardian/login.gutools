@@ -39,6 +39,17 @@ To turn a switch on or off run:
 curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
 ```
 
+Central Production will send comms to all users letting them know what to do:
+
+> We are aware of issues with Google authentication which may affect your access to editorial tools, including Composer, Workflow and The Grid. 
+> The developers are investigating as a matter of urgency.
+> 
+> If you are having authentication issues, please click on this link to extend your session and then navigate to one of the editorial tools:
+>   https://login.gutools.co.uk/emergency/reissue
+>   
+> If the extend link doesn't work please click below to get a link send to your email inbox:
+>   https://login.gutools.co.uk/emergency/request-cookie
+
 In the event that Gmail is also down and users can't receive emails, you can fish out a login token to send to them by other means.
 You will need `composer` Janus credentials to run this script. Once they have visited the `/emergency/request-cookie` endpoint:
 
