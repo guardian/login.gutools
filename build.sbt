@@ -35,7 +35,8 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
   "com.gu" %% "scanamo" % "1.0.0-M6",
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-  "com.gu" %% "anghammarad-client" % "1.1.3"
+  "com.gu" %% "anghammarad-client" % "1.1.3",
+  "org.pac4j" % "pac4j-jwt" % "4.4.0"
 )
 
 lazy val mainProject = project.in(file("."))
