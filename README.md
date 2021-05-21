@@ -33,6 +33,7 @@ sbt console
 import com.github.t3hnar.bcrypt._
 "[password-value]".bcrypt
 ```
+Add a new item to the Composer DynamoDB table `login.gutools-emergency-access-[STAGE]` containing the userId and password hash.
 
 To turn a switch on or off run:
 ```
