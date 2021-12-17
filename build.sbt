@@ -48,10 +48,10 @@ lazy val mainProject = project.in(file("."))
     riffRaffManifestProjectName := s"editorial-tools:${name.value}",
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffPackageType := (packageBin in Debian).value,
+    riffRaffPackageType := (Debian / packageBin).value,
 
     riffRaffArtifactResources := Seq(
-      (packageBin in Debian).value -> s"${name.value}/${name.value}.deb",
+      (Debian / packageBin).value -> s"${name.value}/${name.value}.deb",
       file("riff-raff.yaml") -> "riff-raff.yaml"
     ),
 
@@ -60,7 +60,7 @@ lazy val mainProject = project.in(file("."))
     packageSummary := "login.gutools",
     packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
 
-    javaOptions in Universal ++= Seq(
+    Universal / javaOptions ++= Seq(
       "-Dpidfile.path=/dev/null"
     ),
 
