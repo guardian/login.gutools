@@ -4,24 +4,24 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.13.7"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
   "-feature",
   "-Xfatal-warnings",
-  "-Ypartial-unification"
+  "-Ywarn-unused:imports"
 )
 
-val awsSdkVersion = "1.11.678"
+val awsSdkVersion = "1.12.129"
 
 resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-6" % "0.7.0",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.14",
+  "com.gu" %% "pan-domain-auth-play_2-8" % "1.0.4",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.18",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-dynamodb" % awsSdkVersion,
@@ -31,11 +31,11 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
   "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
   "com.gu" % "kinesis-logback-appender" % "1.4.4",
-  "com.github.nscala-time" %% "nscala-time" % "2.18.0",
-  "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
-  "com.gu" %% "scanamo" % "1.0.0-M6",
-  "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-  "com.gu" %% "anghammarad-client" % "1.1.3"
+  "com.github.nscala-time" %% "nscala-time" % "2.30.0",
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
+  "org.scanamo" %% "scanamo" % "1.0.0-M17",
+  "org.scalatest" %% "scalatest" % "3.2.10" % Test,
+  "com.gu" %% "anghammarad-client" % "1.2.0"
 )
 
 lazy val mainProject = project.in(file("."))
