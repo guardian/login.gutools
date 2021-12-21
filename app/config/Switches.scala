@@ -1,35 +1,29 @@
 package config
 
 import java.util.concurrent.{Executors, TimeUnit}
-
 import _root_.utils.Notifier
-import akka.agent.Agent
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.StringInputStream
 import utils.Loggable
-import org.quartz._
 import play.api.libs.json.{Format, JsString, JsValue, Json}
 
+import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
 class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
-  def allSwitches: Map[String, SwitchState] = agent.get()
-  private val agent = Agent[Map[String, SwitchState]](Map.empty)
+
+  type SwitchMap = Map[String, SwitchState]
+  private val atomicSwitchMap: AtomicReference[SwitchMap] = new AtomicReference[SwitchMap](Map.empty)
+
   private val scheduler = Executors.newScheduledThreadPool(2)
 
   private val notifier = new Notifier(config)
 
   val fileName = s"${config.stage.toUpperCase}/switches.json"
 
-  class SwitchJob extends Job {
-    override def execute(context: JobExecutionContext): Unit = refresh()
-  }
-
-  private val job = JobBuilder.newJob(classOf[SwitchJob])
-    .withIdentity("refresh-switches-gu-login-tools")
-    .build()
+  def allSwitches: Map[String, SwitchState] = atomicSwitchMap.get()
 
   def setEmergencySwitch(state: SwitchState): Option[Unit] = {
     val name = "emergency"
@@ -43,7 +37,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val request = new PutObjectRequest(config.switchBucket, fileName, new StringInputStream(jsonString), metaData)
       s3Client.putObject(request)
       log.info(s"$name has been updated to ${state.name}")
-      agent.send(newStates)
+      atomicSwitchMap.set(newStates)
       notifier.sendStateChangeNotification(name, state)
       Some(())
     } catch {
@@ -54,19 +48,19 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
     }
   }
 
-  def start() {
+  def start(): Unit = {
     log.info("Starting switches scheduled task")
 
     scheduler.scheduleAtFixedRate(() => refresh(), 0, 1, TimeUnit.MINUTES)
     scheduler.scheduleAtFixedRate(() => notifyIfSwitchStillActive(), 0, 1, TimeUnit.HOURS)
   }
 
-  def stop()  {
+  def stop(): Unit = {
     log.info("Stopping switches scheduled task")
     scheduler.shutdown()
   }
 
-  def refresh() {
+  def refresh(): Unit = {
     log.debug("Refreshing switches agent")
 
     try {
@@ -75,7 +69,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
 
-      agent.send(statesInS3)
+      atomicSwitchMap.set(statesInS3)
       result.close()
     }
     catch {
@@ -85,7 +79,7 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
   }
 
   def notifyIfSwitchStillActive(): Unit = {
-    agent.get.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
+    atomicSwitchMap.get.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
   }
 }
 

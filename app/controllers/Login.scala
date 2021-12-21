@@ -1,14 +1,13 @@
 package controllers
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import config.LoginConfig
 import play.api.mvc._
 
-class Login(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB) extends LoginController(deps, dynamoDbClient) {
+class Login(deps: LoginControllerComponents) extends LoginController(deps) {
   private val defaultAllowHeaders = List("X-Requested-With","Origin","Accept","Content-Type")
 
   def oauthCallback = Action.async { implicit request =>
-    processGoogleCallback()
+    processOAuthCallback()
   }
 
   def status = AuthAction { request =>
