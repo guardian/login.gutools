@@ -9,11 +9,13 @@ scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
   "-feature",
-  "-Xfatal-warnings",
-  "-Ywarn-unused:imports"
+  "-Xfatal-warnings"
 )
 
-val awsSdkVersion = "1.12.129"
+val awsSdkVersion = "1.12.130"
+// We must include both V1 and V2 to enable the use of latest Scanamo
+// whilst avoiding overhauling the whole app to V2.
+val awsSdkVersionV2 = "2.17.101"
 
 resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 
@@ -22,13 +24,14 @@ libraryDependencies ++= Seq(
   ws,
   "com.gu" %% "pan-domain-auth-play_2-8" % "1.0.4",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.18",
+  "com.gu.play-secret-rotation" %% "play-v28" % "0.31",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-autoscaling" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
+  "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
   "com.gu" % "kinesis-logback-appender" % "1.4.4",
   "com.github.nscala-time" %% "nscala-time" % "2.30.0",
