@@ -1,10 +1,11 @@
 package actions
 
 import controllers.{EmergencyActions, EmergencyActionsException}
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.test.FakeHeaders
 
-class EmergencyActionsTest extends FreeSpec with Matchers {
+class EmergencyActionsTest extends AnyFreeSpec with Matchers {
   "EmergencySwitchChangeAccess" - {
     "Should throw an exception" - {
       "if Authorization header is missing" in {

@@ -1,10 +1,11 @@
 package config.aws
 
 import config.LoginConfig
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers
 
 
-class LoginConfigTest extends FreeSpec with Matchers {
+class LoginConfigTest extends AnyFreeSpec with Matchers {
   import LoginConfig._
 
   "createLoginConfig" - {
