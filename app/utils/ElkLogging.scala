@@ -80,7 +80,7 @@ class ElkLogging(stage: String,
 
   private def getRootLogger = LoggerFactory.getLogger(SLFLogger.ROOT_LOGGER_NAME).asInstanceOf[Logger]
 
-  def init() {
+  def init(): Unit = {
     val maybeStreamName = loggingStreamName
 
     if (maybeStreamName.isEmpty) log.info("Not configuring log shipping as stream not configured")
