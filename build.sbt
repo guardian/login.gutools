@@ -42,6 +42,10 @@ libraryDependencies ++= Seq(
   "com.gu" %% "anghammarad-client" % "1.2.0"
 )
 
+dependencyOverrides ++= Seq(
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4",
+)
+
 lazy val mainProject = project.in(file("."))
   .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, SystemdPlugin, BuildInfoPlugin)
   .settings(Defaults.coreDefaultSettings: _*)

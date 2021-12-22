@@ -29,8 +29,8 @@ abstract class LoginControllerComponents(
 
   def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 
-  val emergencyUserDBService = new EmergencyUserDBService(aws.dynamoDbClient, config.emergencyAccessTableName)
-  val tokenDBService = new TokenDBService(aws.dynamoDbClient, config.tokensTableName)
+  lazy val emergencyUserDBService = new EmergencyUserDBService(aws.dynamoDbClient, config.emergencyAccessTableName)
+  lazy val tokenDBService = new TokenDBService(aws.dynamoDbClient, config.tokensTableName)
 
   def config: LoginConfig
   def switches: Switches

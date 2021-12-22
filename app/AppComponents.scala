@@ -2,13 +2,13 @@ import com.gu.pandomainauth.PublicSettings
 import config.{AWS, LoginConfig, Switches}
 import controllers._
 import play.api.ApplicationLoader.Context
-import router.Routes
 import utils.ElkLogging
+import router.Routes
 
 import scala.concurrent.Future
 
 class AppComponents(context: Context) extends LoginControllerComponents(context, new AWS()) {
-  override val config = LoginConfig.forStage(asgTags.map(_.stage))
+  override def config = LoginConfig.forStage(asgTags.map(_.stage))
 
   val elkLogging = new ElkLogging(config.stage, aws.region, config.loggingStream, aws.composerAwsCredentialsProvider, applicationLifecycle)
 
