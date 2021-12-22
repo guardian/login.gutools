@@ -15,7 +15,7 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
   override val switches = new Switches(config, aws.s3Client)
 
   val loginPublicSettings = new PublicSettings(
-    settingsFileKey = s"${config.domain}.public.settings",
+    settingsFileKey = s"${config.domain}.settings.public",
     bucketName = "pan-domain-auth-settings",
     s3Client = aws.s3Client
   )
