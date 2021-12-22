@@ -31,7 +31,7 @@ class Emergency(
 
     (for {
       publicKey <- loginPublicSettings.publicKey
-      assymCookie <- req.cookies.find(_.name == loginPublicSettings)
+      assymCookie <- req.cookies.find(_.name == panDomainSettings.settings.cookieSettings.cookieName)
     } yield {
       try {
         val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
