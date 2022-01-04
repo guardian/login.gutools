@@ -115,7 +115,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
         val userId = authHeaderUser.id
         val userOpt = deps.emergencyUserDBService.getUser(userId)
         userOpt.map {
-          case Left(_) => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch.")
+          case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo: ${error.toString}. User will be refused access to change emergency switch.")
           case Right(user) => checkPassword(user, userId, authHeaderUser.password)
         }.getOrElse(refuseSwitchChange(s"User $userId not found. User will be refused access to change emergency switch."))
       } catch {

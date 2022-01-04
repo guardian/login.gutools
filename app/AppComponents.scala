@@ -31,7 +31,7 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
   })
 
   val app = new Application(this)
-  val emergency = new Emergency(loginPublicSettings, this, this.tokenDBService, aws.sesClient)
+  val emergency = new Emergency(loginPublicSettings, this, aws.sesClient)
   val login = new Login(this)
   val switchesController = new SwitchesController(this)
 
