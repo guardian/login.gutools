@@ -108,10 +108,9 @@ abstract class LoginController(deps: LoginControllerComponents, dynamoDbClient: 
       try {
         val authHeaderUser = EmergencyActions.getBasicAuthDetails(request.headers)
         val userId = authHeaderUser.id
-        val tableName = config.emergencyAccessTableName
-        val userOpt = Scanamo.get[EmergencyUser](dynamoDbClient)(tableName)('userId -> s"$userId")
+        val userOpt = deps.emergencyUserDBService.getUser(userId)
         userOpt.map {
-          case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo. User will be refused access to change emergency switch.")
+          case Left(error) => refuseSwitchChange(s"Error with reading $userId from Dynamo: ${error.toString}. User will be refused access to change emergency switch.")
           case Right(user) => checkPassword(user, userId, authHeaderUser.password)
         }.getOrElse(refuseSwitchChange(s"User $userId not found. User will be refused access to change emergency switch."))
       } catch {

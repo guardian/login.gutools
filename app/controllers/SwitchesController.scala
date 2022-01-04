@@ -1,9 +1,8 @@
 package controllers
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import config.{Off, On, SwitchState}
 
-class SwitchesController(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB) extends LoginController(deps, dynamoDbClient) {
+class SwitchesController(deps: LoginControllerComponents) extends LoginController(deps) {
 
   private def errorMessage(state: SwitchState)  = s"Failed to update Emergency switch to ${state.name}. Contact digitalcms.dev@theguardian.com for more help."
   private def success(state: SwitchState)  = s"Emergency switch updated to ${state.name}"
