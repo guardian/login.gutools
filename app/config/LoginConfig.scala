@@ -15,6 +15,7 @@ case class LoginConfig(
   tokenReissueUri: String,
   emailSettings: Map[String, String],
   switchBucket: String,
+  pandaAuthBucket: String,
   loggingStream: Option[String],
   anghammaradSnsArn: String
 )
@@ -42,11 +43,12 @@ object LoginConfig {
     }
 
    val switchBucket = "login-gutools-config"
+   val pandaAuthBucket = "pan-domain-auth-settings"
 
    val anghammaradSnsArn = "arn:aws:sns:eu-west-1:095768028460:anghammarad-PROD-NotificationTopic-HDJHBGZT0FFD"
 
     LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri,
-      emailSettings, switchBucket, loggingStream, anghammaradSnsArn)
+      emailSettings, switchBucket, pandaAuthBucket, anghammaradSnsArn)
   }
 
   /**

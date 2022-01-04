@@ -41,7 +41,7 @@ abstract class LoginControllerComponents(
     new PanDomainAuthSettingsRefresher(
       domain = config.domain,
       system = "login",
-      bucketName = "pan-domain-auth-settings",
+      bucketName = config.pandaAuthBucket,
       settingsFileKey = s"${config.domain}.settings",
       s3Client = aws.s3Client
     )

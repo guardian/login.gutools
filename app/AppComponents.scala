@@ -16,7 +16,7 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
 
   val loginPublicSettings = new PublicSettings(
     settingsFileKey = s"${config.domain}.settings.public",
-    bucketName = "pan-domain-auth-settings",
+    bucketName = config.pandaAuthBucket,
     s3Client = aws.s3Client
   )
 
