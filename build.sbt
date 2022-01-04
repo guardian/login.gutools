@@ -43,8 +43,7 @@ libraryDependencies ++= Seq(
 )
 
 dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4",
-  "com.github.blemale" %% "scaffeine" % "4.1.0"
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4"
 )
 
 lazy val mainProject = project.in(file("."))
