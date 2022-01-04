@@ -64,7 +64,7 @@ lazy val mainProject = project.in(file("."))
       file("riff-raff.yaml") -> "riff-raff.yaml"
     ),
 
-    debianPackageDependencies := Seq("openjdk-8-jre-headless"),
+    debianPackageDependencies := Seq("openjdk-11-jdk"),
     maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
     packageSummary := "login.gutools",
     packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
