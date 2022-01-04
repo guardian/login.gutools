@@ -1,27 +1,25 @@
 package controllers
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
 import com.gu.pandomainauth.{PublicKey, PublicSettings}
-import com.gu.scanamo._
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.syntax._
 import config.LoginPublicSettings
 import play.api.mvc._
+import services.NewCookieIssue
 import utils._
 
 import scala.util.Random
 import scala.util.control.NonFatal
 
+class Emergency(
+   loginPublicSettings: LoginPublicSettings,
+   deps: LoginControllerComponents,
+   sesClient: AmazonSimpleEmailService
+) extends LoginController(deps) with Loggable {
 
-class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerComponents,
-                dynamoDbClient: AmazonDynamoDB, sesClient: AmazonSimpleEmailService)
-  extends LoginController(deps, dynamoDbClient) with Loggable {
-
-  val cookieLifetime = 1.day
+  private val cookieLifetime = 1.day
 
   def reissueDisabled = Action {
     Ok(views.html.emergency.reissueDisabled())
@@ -77,7 +75,8 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
         tokenIssuedAt, false)
 
       try {
-        val userOpt = Scanamo.put[NewCookieIssue](dynamoDbClient)(config.tokensTableName)(cookieIssue)
+        deps.tokenDBService.createCookieIssue(cookieIssue)
+
         val ses = new SES(sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
 
@@ -92,29 +91,27 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
     }
   }
 
-  def issueNewCookie(userToken: String) = EmergencySwitchIsOnAction { req =>
+  def issueNewCookie(userToken: String): Action[AnyContent] = EmergencySwitchIsOnAction {
 
-    def issueNewCookie(tokenEntry: NewCookieIssue, tableName: String) = {
-      val updatedTokenEntry = Scanamo.put[NewCookieIssue](dynamoDbClient)(tableName)(tokenEntry.copy(used = true))
+    def issueNewCookie(newCookieIssue: NewCookieIssue): Result = {
+      deps.tokenDBService.expireCookieIssue(newCookieIssue)
+
       val expires = (DateTime.now() + cookieLifetime).getMillis
-      val names = tokenEntry.email.split("\\.")
+      val names = newCookieIssue.email.split("\\.")
       val firstName = names(0).capitalize
       val lastName = names(1).split("@")(0).capitalize
-      val user = User(firstName, lastName, tokenEntry.email, None)
-      val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, true)
+      val user = User(firstName, lastName, newCookieIssue.email, None)
+      val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, multiFactor = true)
       val authCookies = generateCookies(newAuthUser)
 
       Ok(views.html.emergency.reissueSuccess())
         .withCookies(authCookies: _*)
     }
 
-    val newCookieTopic = "A new cookie has not been created"
     val issueNewCookieTopic = "New cookie has not been created"
     val tenMinutesInMilliSeconds = 600000
 
-    val tableName = config.tokensTableName
-    val tokenOpt: Option[Either[DynamoReadError, NewCookieIssue]] =
-      Scanamo.get[NewCookieIssue](dynamoDbClient)(tableName)('id -> s"$userToken")
+    val tokenOpt = deps.tokenDBService.getCookieIssueForUserToken(userToken)
 
     tokenOpt.map {
       case Left(error) => {
@@ -129,7 +126,7 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
-            issueNewCookie(tokenEntry, tableName)
+            issueNewCookie(tokenEntry)
           }
         } else {
           log.warn(s"Attempted to use a used token: ${tokenEntry.id}")
@@ -144,8 +141,5 @@ class Emergency(loginPublicSettings: LoginPublicSettings, deps: LoginControllerC
     log.warn(message)
     Unauthorized(views.html.emergency.reissueFailure(message, topic))
   }
-
 }
-
-case class NewCookieIssue(id: String, email: String, requested: Long, used: Boolean)
 

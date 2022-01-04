@@ -25,10 +25,10 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
     Future.successful(())
   })
 
-  val app = new Application(this, aws.dynamoDbClient)
-  val emergency = new Emergency(loginPublicSettings, this, aws.dynamoDbClient, aws.sesClient)
-  val login = new Login(this, aws.dynamoDbClient)
-  val switchesController = new SwitchesController(this, aws.dynamoDbClient)
+  val app = new Application(this)
+  val emergency = new Emergency(loginPublicSettings, this, aws.sesClient)
+  val login = new Login(this)
+  val switchesController = new SwitchesController(this)
 
   override lazy val router = new Routes(httpErrorHandler, app, login, emergency, switchesController, assets)
 }

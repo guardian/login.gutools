@@ -1,12 +1,9 @@
 package controllers
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import config.LoginConfig
 import login.BuildInfo
+import config.LoginConfig
 
-
-class Application(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB)
-  extends LoginController(deps, dynamoDbClient) {
+class Application(deps: LoginControllerComponents) extends LoginController(deps) {
 
   def login(returnUrl: String) = AuthAction { implicit request =>
     if (LoginConfig.isValidUrl(config.domain, returnUrl)) {

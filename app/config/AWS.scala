@@ -5,11 +5,18 @@ import com.amazonaws.auth.{AWSCredentialsProviderChain, EnvironmentVariableCrede
 import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.autoscaling.{AmazonAutoScaling, AmazonAutoScalingClientBuilder}
 import com.amazonaws.services.autoscaling.model.{DescribeAutoScalingGroupsRequest, DescribeAutoScalingInstancesRequest}
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClientBuilder}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import com.amazonaws.services.simpleemail.{AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder}
 import com.amazonaws.services.simplesystemsmanagement.{AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClientBuilder}
 import com.amazonaws.util.EC2MetadataUtils
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.regions.{Region => RegionV2}
+import software.amazon.awssdk.auth.credentials.{
+  AwsCredentialsProviderChain,
+  EnvironmentVariableCredentialsProvider => EnvironmentVariableCredentialsProviderV2,
+  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2,
+  ProfileCredentialsProvider => ProfileCredentialsProviderV2
+}
 
 import scala.collection.JavaConverters._
 
@@ -17,12 +24,13 @@ case class InstanceTags(stack: String, app: String, stage: String)
 
 class AWS {
   val region = Region.getRegion(Regions.EU_WEST_1).getName
+  val profile = "composer"
 
   val composerAwsCredentialsProvider = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider(),
     new SystemPropertiesCredentialsProvider(),
     InstanceProfileCredentialsProvider.getInstance(),
-    new ProfileCredentialsProvider("composer")
+    new ProfileCredentialsProvider(profile)
   )
 
   val asgClient: AmazonAutoScaling = AmazonAutoScalingClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
@@ -30,7 +38,17 @@ class AWS {
 
   val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
   val sesClient: AmazonSimpleEmailService = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
-  val dynamoDbClient: AmazonDynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
+
+  private val v2CredentialsProvider = AwsCredentialsProviderChain.builder.credentialsProviders(
+    ProfileCredentialsProviderV2.builder.profileName(profile).build,
+    InstanceProfileCredentialsProviderV2.builder.asyncCredentialUpdateEnabled(false).build,
+    EnvironmentVariableCredentialsProviderV2.create()
+  ).build
+
+  val dynamoDbClient: DynamoDbClient = DynamoDbClient.builder
+    .credentialsProvider(v2CredentialsProvider)
+    .region(RegionV2.EU_WEST_1)
+    .build()
 
   def readTags(): Option[InstanceTags] = {
     // We read tags from the AutoScalingGroup rather than the instance itself to avoid problems where the
