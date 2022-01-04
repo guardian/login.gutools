@@ -5,8 +5,9 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 import scala.util.Either
+import scala.language.higherKinds
 
 case class EmergencyUser(userId: String, passwordHash: String)
 
