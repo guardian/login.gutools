@@ -13,7 +13,11 @@ scalacOptions := Seq(
   "-Ypartial-unification"
 )
 
-val awsSdkVersion = "1.11.678"
+
+// We must include both AWS SDK V1 and V2 to enable the use of latest
+// Scanamo whilst avoiding overhauling the whole app to V2.
+val awsSdkVersion = "1.12.130"
+val awsSdkVersionV2 = "2.17.101"
 
 resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
 
@@ -24,16 +28,16 @@ libraryDependencies ++= Seq(
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.14",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-autoscaling" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
+  "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
   "com.gu" % "kinesis-logback-appender" % "1.4.4",
   "com.github.nscala-time" %% "nscala-time" % "2.18.0",
   "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
-  "com.gu" %% "scanamo" % "1.0.0-M6",
+  "org.scanamo" %% "scanamo" % "1.0.0-M17",
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
   "com.gu" %% "anghammarad-client" % "1.1.3"
 )
