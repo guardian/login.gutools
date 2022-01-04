@@ -1,16 +1,12 @@
 package controllers
 
 import java.time.Duration
-
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.github.t3hnar.bcrypt._
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
 import com.gu.play.secretrotation.aws.parameterstore.{AwsSdkV1, SecretSupplier}
 import com.gu.play.secretrotation.{RotatingSecretComponents, SnapshotProvider, TransitionTiming}
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
 import config._
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
@@ -19,15 +15,22 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc._
 import play.filters.csrf.CSRFComponents
 import play.filters.headers.SecurityHeadersComponents
+import services.{EmergencyUser, EmergencyUserDBService, TokenDBService}
 import utils.Loggable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class LoginControllerComponents(context: Context, val aws: AWS) extends BuiltInComponentsFromContext(context)
+abstract class LoginControllerComponents(
+  context: Context,
+  val aws: AWS
+) extends BuiltInComponentsFromContext(context)
   with AhcWSComponents with AssetsComponents with CSRFComponents
   with SecurityHeadersComponents with RotatingSecretComponents {
 
   def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
+
+  lazy val emergencyUserDBService = new EmergencyUserDBService(aws.dynamoDbClient, config.emergencyAccessTableName)
+  lazy val tokenDBService = new TokenDBService(aws.dynamoDbClient, config.tokensTableName)
 
   def config: LoginConfig
   def switches: Switches
@@ -138,8 +141,6 @@ object EmergencyActions {
     authUserOpt.getOrElse(throw new EmergencyActionsException("Basic authorization header is missing"))
   }
 }
-
-case class EmergencyUser(userId: String, passwordHash: String)
 
 case class AuthorizationHeaderUser(id: String, password: String)
 
