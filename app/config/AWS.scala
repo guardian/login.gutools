@@ -24,12 +24,13 @@ case class InstanceTags(stack: String, app: String, stage: String)
 
 class AWS {
   val region = Region.getRegion(Regions.EU_WEST_1).getName
+  val profile = "composer"
 
   val composerAwsCredentialsProvider = new AWSCredentialsProviderChain(
     new EnvironmentVariableCredentialsProvider(),
     new SystemPropertiesCredentialsProvider(),
     InstanceProfileCredentialsProvider.getInstance(),
-    new ProfileCredentialsProvider("composer")
+    new ProfileCredentialsProvider(profile)
   )
 
   val asgClient: AmazonAutoScaling = AmazonAutoScalingClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
