@@ -4,13 +4,12 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.12.5"
+scalaVersion := "2.13.7"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
   "-feature",
-  "-Xfatal-warnings",
-  "-Ypartial-unification"
+  "-Xfatal-warnings"
 )
 
 
@@ -24,8 +23,9 @@ resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositori
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-6" % "0.7.0",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.14",
+  "com.gu" %% "pan-domain-auth-play_2-8" % "1.0.4",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.18",
+  "com.gu.play-secret-rotation" %% "play-v28" % "0.31",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
@@ -35,11 +35,16 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
   "com.gu" % "kinesis-logback-appender" % "1.4.4",
-  "com.github.nscala-time" %% "nscala-time" % "2.18.0",
-  "com.github.t3hnar" %% "scala-bcrypt" % "3.1",
+  "com.github.nscala-time" %% "nscala-time" % "2.30.0",
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
-  "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-  "com.gu" %% "anghammarad-client" % "1.1.3"
+  "org.scalatest" %% "scalatest" % "3.2.10" % Test,
+  "com.gu" %% "anghammarad-client" % "1.2.0"
+)
+
+dependencyOverrides ++= Seq(
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4",
+  "com.github.blemale" %% "scaffeine" % "4.1.0"
 )
 
 lazy val mainProject = project.in(file("."))
@@ -52,10 +57,10 @@ lazy val mainProject = project.in(file("."))
     riffRaffManifestProjectName := s"editorial-tools:${name.value}",
     riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
     riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffPackageType := (packageBin in Debian).value,
+    riffRaffPackageType := (Debian / packageBin).value,
 
     riffRaffArtifactResources := Seq(
-      (packageBin in Debian).value -> s"${name.value}/${name.value}.deb",
+      (Debian / packageBin).value -> s"${name.value}/${name.value}.deb",
       file("riff-raff.yaml") -> "riff-raff.yaml"
     ),
 
@@ -64,7 +69,7 @@ lazy val mainProject = project.in(file("."))
     packageSummary := "login.gutools",
     packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
 
-    javaOptions in Universal ++= Seq(
+    Universal / javaOptions ++= Seq(
       "-Dpidfile.path=/dev/null"
     ),
 

@@ -2,29 +2,29 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /                           controllers.Application.index
+GET     /                           controllers.Application.index()
 
 GET     /login                       controllers.Application.login(returnUrl: String)
 
-GET     /showUser                    controllers.Login.status
-GET     /oauthCallback               controllers.Login.oauthCallback
-GET     /logout                      controllers.Login.logout
-GET     /whoami                      controllers.Login.whoami
+GET     /showUser                    controllers.Login.status()
+GET     /oauthCallback               controllers.Login.oauthCallback()
+GET     /logout                      controllers.Login.logout()
+GET     /whoami                      controllers.Login.whoami()
 
-GET     /emergency/reissue           controllers.Emergency.reissue
-GET     /emergency/reissue-disabled  controllers.Emergency.reissueDisabled
-GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink
+GET     /emergency/reissue           controllers.Emergency.reissue()
+GET     /emergency/reissue-disabled  controllers.Emergency.reissueDisabled()
+GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink()
 GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
 + NOCSRF
-POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink
+POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink()
 
 + NOCSRF
-POST    /switches/emergency/on       controllers.SwitchesController.emergencyOn
+POST    /switches/emergency/on       controllers.SwitchesController.emergencyOn()
 + NOCSRF
-POST    /switches/emergency/off      controllers.SwitchesController.emergencyOff
-GET     /switches                    controllers.SwitchesController.index
+POST    /switches/emergency/off      controllers.SwitchesController.emergencyOff()
+GET     /switches                    controllers.SwitchesController.index()
 
-GET     /_healthcheck                controllers.Application.healthCheck
+GET     /_healthcheck                controllers.Application.healthCheck()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)

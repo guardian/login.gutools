@@ -4,8 +4,7 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
-import com.gu.pandomainauth.{PublicKey, PublicSettings}
-import config.LoginPublicSettings
+import com.gu.pandomainauth.PublicSettings
 import play.api.mvc._
 import services.NewCookieIssue
 import utils._
@@ -14,41 +13,40 @@ import scala.util.Random
 import scala.util.control.NonFatal
 
 class Emergency(
-   loginPublicSettings: LoginPublicSettings,
+   loginPublicSettings: PublicSettings,
    deps: LoginControllerComponents,
    sesClient: AmazonSimpleEmailService
 ) extends LoginController(deps) with Loggable {
 
   private val cookieLifetime = 1.day
 
-  def reissueDisabled = Action {
+  def reissueDisabled: Action[AnyContent] = Action {
     Ok(views.html.emergency.reissueDisabled())
   }
 
-  def reissue = EmergencySwitchIsOnAction { req =>
+  def reissue: Action[AnyContent] = EmergencySwitchIsOnAction { req =>
 
     val reissueTopic = "Your login session has not been extended"
 
     (for {
       publicKey <- loginPublicSettings.publicKey
-      assymCookie <- req.cookies.find(_.name == PublicSettings.assymCookieName)
+      assymCookie <- req.cookies.find(_.name == panDomainSettings.settings.cookieSettings.cookieName)
     } yield {
       try {
-        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, PublicKey(publicKey))
+        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
         if (validateUser(authenticatedUser)) {
           val expires = (DateTime.now() + cookieLifetime).getMillis
           val newAuthUser = authenticatedUser.copy(expires = expires)
-          val authCookies = generateCookies(newAuthUser)
-          Ok(views.html.emergency.reissueSuccess())
-            .withCookies(authCookies: _*)
+          val authCookie = generateCookie(newAuthUser)
+          Ok(views.html.emergency.reissueSuccess()).withCookies(authCookie)
         } else {
           unauthorised("Only Guardian email addresses with two-factor auth are supported.", reissueTopic)
         }
       }
       catch {
-        case e: CookieSignatureInvalidException =>
+        case _: CookieSignatureInvalidException =>
           unauthorised("Invalid existing session, could not log you in.", reissueTopic)
-        case e: CookieParseException =>
+        case _: CookieParseException =>
           unauthorised("Could not refresh existing session due to a corrupted cookie.", reissueTopic)
       }
     }).getOrElse {
@@ -56,16 +54,16 @@ class Emergency(
     }
   }
 
-  def requestCookieLink = EmergencySwitchIsOnAction { req =>
+  def requestCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction {
     Ok(views.html.emergency.requestNewCookie())
   }
 
-  def sendCookieLink = EmergencySwitchIsOnAction { req =>
+  def sendCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction { req =>
 
     val tokenIssuedAt = DateTime.now().getMillis
 
     try {
-      val emailPrefix = req.body.asFormUrlEncoded.get("email")(0)
+      val emailPrefix = req.body.asFormUrlEncoded.get("email").head
 
       val emailAddress = s"$emailPrefix@guardian.co.uk"
 
@@ -87,13 +85,14 @@ class Emergency(
       }
     }
     catch {
-      case NonFatal(e) => BadRequest("both first and last names must be submitted")
+      case NonFatal(_) => BadRequest("both first and last names must be submitted")
     }
   }
 
   def issueNewCookie(userToken: String): Action[AnyContent] = EmergencySwitchIsOnAction {
 
     def issueNewCookie(newCookieIssue: NewCookieIssue): Result = {
+
       deps.tokenDBService.expireCookieIssue(newCookieIssue)
 
       val expires = (DateTime.now() + cookieLifetime).getMillis
@@ -102,10 +101,10 @@ class Emergency(
       val lastName = names(1).split("@")(0).capitalize
       val user = User(firstName, lastName, newCookieIssue.email, None)
       val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, multiFactor = true)
-      val authCookies = generateCookies(newAuthUser)
+      val authCookie = generateCookie(newAuthUser)
 
-      Ok(views.html.emergency.reissueSuccess())
-        .withCookies(authCookies: _*)
+
+      Ok(views.html.emergency.reissueSuccess()).withCookies(authCookie)
     }
 
     val issueNewCookieTopic = "New cookie has not been created"

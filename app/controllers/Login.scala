@@ -7,7 +7,7 @@ class Login(deps: LoginControllerComponents) extends LoginController(deps) {
   private val defaultAllowHeaders = List("X-Requested-With","Origin","Accept","Content-Type")
 
   def oauthCallback = Action.async { implicit request =>
-    processGoogleCallback()
+    processOAuthCallback()
   }
 
   def status = AuthAction { request =>

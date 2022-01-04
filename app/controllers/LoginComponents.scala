@@ -38,9 +38,15 @@ abstract class LoginControllerComponents(
   lazy val asgTags: Option[InstanceTags] = aws.readTags()
 
   lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
-    new PanDomainAuthSettingsRefresher(config.domain, "login", actorSystem, aws.composerAwsCredentialsProvider)
+    new PanDomainAuthSettingsRefresher(
+      domain = config.domain,
+      system = "login",
+      bucketName = config.pandaAuthBucket,
+      settingsFileKey = s"${config.domain}.settings",
+      s3Client = aws.s3Client
+    )
 
-  override lazy val secretStateSupplier: SnapshotProvider = {
+  val secretStateSupplier: SnapshotProvider = {
     val stack = asgTags.map(_.stack).getOrElse("flexible")
     val app = asgTags.map(_.app).getOrElse("login")
     val stage = asgTags.map(_.stage).getOrElse("DEV")
@@ -60,8 +66,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
   final def config: LoginConfig = deps.config
   final def switches: Switches = deps.switches
 
-  final override lazy val panDomainSettings: PanDomainAuthSettingsRefresher = deps.panDomainSettings
-
+  final override lazy val panDomainSettings = deps.panDomainSettings
   final override lazy val cacheValidation = true
   final override lazy val authCallbackUrl = config.host + "/oauthCallback"
 
@@ -87,7 +92,7 @@ abstract class LoginController(deps: LoginControllerComponents) extends BaseCont
     override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
 
       def checkPassword(user: EmergencyUser, username: String, password: String): Future[Result] = {
-        if (password.isBcrypted(user.passwordHash)) {
+        if (password.isBcryptedBounded(user.passwordHash)) {
           log.info(s"$username is authorised to change the Emergency switch.")
           block(request)
         } else {

@@ -1,25 +1,30 @@
-import config.{AWS, LoginConfig, LoginPublicSettings, Switches}
+import com.gu.pandomainauth.PublicSettings
+import config.{AWS, LoginConfig, Switches}
 import controllers._
 import play.api.ApplicationLoader.Context
-import router.Routes
 import utils.ElkLogging
+import router.Routes
 
 import scala.concurrent.Future
 
 class AppComponents(context: Context) extends LoginControllerComponents(context, new AWS()) {
-  override val config = LoginConfig.forStage(asgTags.map(_.stage))
+  override def config = LoginConfig.forStage(asgTags.map(_.stage))
 
   val elkLogging = new ElkLogging(config.stage, aws.region, config.loggingStream, aws.composerAwsCredentialsProvider, applicationLifecycle)
 
   override val switches = new Switches(config, aws.s3Client)
 
-  val loginPublicSettings = new LoginPublicSettings(config)
+  val loginPublicSettings = new PublicSettings(
+    settingsFileKey = s"${config.domain}.settings.public",
+    bucketName = config.pandaAuthBucket,
+    s3Client = aws.s3Client
+  )
 
-  loginPublicSettings.start
+  loginPublicSettings.start()
+
   switches.start()
 
   applicationLifecycle.addStopHook(() => {
-    loginPublicSettings.stop
     switches.stop()
 
     Future.successful(())

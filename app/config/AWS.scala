@@ -18,7 +18,7 @@ import software.amazon.awssdk.auth.credentials.{
   ProfileCredentialsProvider => ProfileCredentialsProviderV2
 }
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class InstanceTags(stack: String, app: String, stage: String)
 
@@ -78,7 +78,12 @@ class AWS {
     val request = new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(autoscalingGroupName)
     val response = asgClient.describeAutoScalingGroups(request)
 
-    val group = response.getAutoScalingGroups.asScala.headOption
-    group.map(_.getTags.asScala.map { t => t.getKey -> t.getValue }(scala.collection.breakOut))
+    val maybeGroup = response.getAutoScalingGroups.asScala.headOption
+    maybeGroup.map {
+      _.getTags
+        .asScala
+        .map { t => t.getKey -> t.getValue }
+        .toMap
+    }
   }
 }
