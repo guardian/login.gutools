@@ -83,8 +83,7 @@ class AWS {
       _.getTags
         .asScala
         .map { t => t.getKey -> t.getValue }
-        .view
-        .to(Map)
+        .toMap
     }
   }
 }
