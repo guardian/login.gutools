@@ -48,7 +48,7 @@ object LoginConfig {
    val anghammaradSnsArn = "arn:aws:sns:eu-west-1:095768028460:anghammarad-PROD-NotificationTopic-HDJHBGZT0FFD"
 
     LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri,
-      emailSettings, switchBucket, pandaAuthBucket, anghammaradSnsArn)
+      emailSettings, switchBucket, pandaAuthBucket, loggingStream, anghammaradSnsArn)
   }
 
   /**
