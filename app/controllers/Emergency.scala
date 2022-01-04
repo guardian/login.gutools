@@ -4,24 +4,22 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
-import com.gu.pandomainauth.PublicSettings
+import com.gu.pandomainauth.{PublicKey, PublicSettings}
+import config.LoginPublicSettings
 import play.api.mvc._
-import services.{NewCookieIssue, TokenDBService}
+import services.NewCookieIssue
 import utils._
 
 import scala.util.Random
 import scala.util.control.NonFatal
 
 class Emergency(
-   loginPublicSettings: PublicSettings,
+   loginPublicSettings: LoginPublicSettings,
    deps: LoginControllerComponents,
-   tokenDB: TokenDBService,
    sesClient: AmazonSimpleEmailService
 ) extends LoginController(deps) with Loggable {
 
   private val cookieLifetime = 1.day
-
-  val cookieLifetime = 1.day
 
   def reissueDisabled = Action {
     Ok(views.html.emergency.reissueDisabled())
@@ -77,7 +75,7 @@ class Emergency(
         tokenIssuedAt, false)
 
       try {
-        tokenDB.createCookieIssue(cookieIssue)
+        deps.tokenDBService.createCookieIssue(cookieIssue)
 
         val ses = new SES(sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
@@ -96,7 +94,7 @@ class Emergency(
   def issueNewCookie(userToken: String): Action[AnyContent] = EmergencySwitchIsOnAction {
 
     def issueNewCookie(newCookieIssue: NewCookieIssue): Result = {
-      tokenDB.expireCookieIssue(newCookieIssue)
+      deps.tokenDBService.expireCookieIssue(newCookieIssue)
 
       val expires = (DateTime.now() + cookieLifetime).getMillis
       val names = newCookieIssue.email.split("\\.")
@@ -104,7 +102,7 @@ class Emergency(
       val lastName = names(1).split("@")(0).capitalize
       val user = User(firstName, lastName, newCookieIssue.email, None)
       val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, multiFactor = true)
-      val authCookie = generateCookie(newAuthUser)
+      val authCookies = generateCookies(newAuthUser)
 
       Ok(views.html.emergency.reissueSuccess())
         .withCookies(authCookies: _*)
@@ -113,7 +111,7 @@ class Emergency(
     val issueNewCookieTopic = "New cookie has not been created"
     val tenMinutesInMilliSeconds = 600000
 
-    val tokenOpt = tokenDB.getCookieIssueForUserToken(userToken)
+    val tokenOpt = deps.tokenDBService.getCookieIssueForUserToken(userToken)
 
     tokenOpt.map {
       case Left(error) => {

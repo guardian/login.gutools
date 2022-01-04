@@ -53,7 +53,7 @@ abstract class LoginControllerComponents(
   }
 }
 
-abstract class LoginController(deps: LoginControllerComponents, dynamoDbClient: AmazonDynamoDB) extends BaseController with AuthActions with Loggable {
+abstract class LoginController(deps: LoginControllerComponents) extends BaseController with AuthActions with Loggable {
   final override def wsClient: WSClient = deps.wsClient
   final override def controllerComponents: ControllerComponents = deps.controllerComponents
 
