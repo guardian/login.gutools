@@ -23,7 +23,7 @@ resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositori
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-8" % "1.0.4",
+  "com.gu" %% "pan-domain-auth-play_2-8" % "1.0.6",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.18",
   "com.gu.play-secret-rotation" %% "play-v28" % "0.31",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
