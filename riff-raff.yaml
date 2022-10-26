@@ -15,5 +15,5 @@ deployments:
   login:
     type: autoscaling
     parameters:
-      bucketSsmLookup: true
+      bucket: composer-dist
     dependencies: [login-ami]
