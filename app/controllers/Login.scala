@@ -7,7 +7,15 @@ class Login(deps: LoginControllerComponents) extends LoginController(deps) {
   private val defaultAllowHeaders = List("X-Requested-With","Origin","Accept","Content-Type")
 
   def oauthCallback = Action.async { implicit request =>
-    processOAuthCallback()
+    val resultFuture = processOAuthCallback()
+    if (config.domain == "code.dev-gutools.co.uk") {
+      resultFuture.map(result => result.copy(
+        newCookies = result.newCookies.map(_.copy(domain = Some("dev-gutools.co.uk")))
+      ))(controllerComponents.executionContext)
+    }
+    else {
+      resultFuture
+    }
   }
 
   def status = AuthAction { request =>
