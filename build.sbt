@@ -43,8 +43,7 @@ libraryDependencies ++= Seq(
 )
 
 dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4",
-  "com.github.blemale" %% "scaffeine" % "4.1.0"
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4"
 )
 
 lazy val mainProject = project.in(file("."))
@@ -64,7 +63,7 @@ lazy val mainProject = project.in(file("."))
       file("riff-raff.yaml") -> "riff-raff.yaml"
     ),
 
-    debianPackageDependencies := Seq("openjdk-8-jre-headless"),
+    debianPackageDependencies := Seq("openjdk-11-jdk"),
     maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
     packageSummary := "login.gutools",
     packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
