@@ -2,6 +2,7 @@ package controllers
 
 import login.BuildInfo
 import config.LoginConfig
+import play.api.libs.json.Json
 
 class Application(deps: LoginControllerComponents) extends LoginController(deps) {
 
@@ -14,7 +15,7 @@ class Application(deps: LoginControllerComponents) extends LoginController(deps)
   }
 
   def healthCheck() = Action { implicit request =>
-    Ok(BuildInfo.gitCommitId)
+    Ok(Json.parse(BuildInfo.toJson))
   }
 
   def index() = Action { implicit request => Ok("A small application to login a user via pan-domain-auth and redirect them.")}

@@ -26,7 +26,7 @@ class ElkLogging(stage: String,
       "stage" -> stage,
       "stack" -> "flexible",
       "region" -> region,
-      "buildNumber" -> BuildInfo.buildNumber
+      "buildNumber" -> BuildInfo.buildNumber.getOrElse("DEV")
     )
     log.info(s"Logging with context map: $effective")
     effective
