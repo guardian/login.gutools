@@ -1,5 +1,3 @@
-import com.gu.riffraff.artifact.BuildInfo
-
 name := "login"
 
 version := "1.0.0"
@@ -47,23 +45,14 @@ dependencyOverrides ++= Seq(
   "com.github.blemale" %% "scaffeine" % "4.1.0"
 )
 
+def env(propName: String): Option[String] = sys.env.get(propName).filter(_.trim.nonEmpty)
+
 lazy val mainProject = project.in(file("."))
-  .enablePlugins(PlayScala, RiffRaffArtifact, JDebPackaging, SystemdPlugin, BuildInfoPlugin)
+  .enablePlugins(PlayScala, JDebPackaging, SystemdPlugin, BuildInfoPlugin)
   .settings(Defaults.coreDefaultSettings: _*)
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     topLevelDirectory := Some(normalizedName.value),
-    riffRaffPackageName := name.value,
-    riffRaffManifestProjectName := s"editorial-tools:${name.value}",
-    riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
-    riffRaffUploadManifestBucket := Option("riffraff-builds"),
-    riffRaffPackageType := (Debian / packageBin).value,
-
-    riffRaffArtifactResources := Seq(
-      (Debian / packageBin).value -> s"${name.value}/${name.value}.deb",
-      file("riff-raff.yaml") -> "riff-raff.yaml"
-    ),
-
     debianPackageDependencies := Seq("openjdk-8-jre-headless"),
     maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
     packageSummary := "login.gutools",
@@ -74,18 +63,20 @@ lazy val mainProject = project.in(file("."))
     ),
 
     buildInfoPackage := "login",
-    buildInfoKeys := {
-      lazy val buildInfo = BuildInfo(baseDirectory.value)
-      Seq[BuildInfoKey](
-        BuildInfoKey.constant("buildNumber", buildInfo.buildIdentifier),
-        // so this next one is constant to avoid it always recompiling on dev machines.
-        // we only really care about build time on teamcity, when a constant based on when
-        // it was loaded is just fine
-        BuildInfoKey.constant("buildTime", System.currentTimeMillis),
-        BuildInfoKey.constant("gitCommitId", buildInfo.revision)
-      )
-    }
+    buildInfoKeys ++= Seq[BuildInfoKey](
+      name,
+      scalaVersion,
+      sbtVersion,
+
+      BuildInfoKey.sbtbuildinfoConstantEntry("buildNumber", env("BUILD_NUMBER")),
+      // so this next one is constant to avoid it always recompiling on dev machines.
+      // we only really care about build time on teamcity, when a constant based on when
+      // it was loaded is just fine
+      BuildInfoKey.sbtbuildinfoConstantEntry("buildTime", System.currentTimeMillis),
+      BuildInfoKey.sbtbuildinfoConstantEntry("gitCommitId", env("GITHUB_SHA")),
+    ),
+    buildInfoOptions := Seq(
+      BuildInfoOption.Traits("management.BuildInfo"),
+      BuildInfoOption.ToJson
+    )
   )
-
-
-
