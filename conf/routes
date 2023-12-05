@@ -6,6 +6,9 @@ GET     /                           controllers.Application.index()
 
 GET     /login                       controllers.Application.login(returnUrl: String)
 
+GET     /desktop-login               controllers.DesktopLogin.desktopLogin()
+GET     /desktopOauthCallback        controllers.DesktopLogin.desktopOauthCallback()
+
 GET     /showUser                    controllers.Login.status()
 GET     /oauthCallback               controllers.Login.oauthCallback()
 GET     /logout                      controllers.Login.logout()
