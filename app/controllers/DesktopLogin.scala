@@ -49,7 +49,7 @@ class DesktopLogin(
       if (validateUser(authedUserData)) {
         // TODO updates to get value separately from cookie
         val updatedCookie = generateCookie(authedUserData)
-        Redirect(s"gnm://auth/token/${URLEncoder.encode(updatedCookie.value, "UTF-8")}/")
+        Redirect(s"gnm://auth/token/${URLEncoder.encode(updatedCookie.value, "UTF-8")}")
           .withSession(session = request.session - ANTI_FORGERY_KEY - LOGIN_ORIGIN_KEY)
       } else {
         showUnauthedMessage(invalidUserMessage(claimedAuth))
