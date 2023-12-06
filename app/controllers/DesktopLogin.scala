@@ -28,23 +28,10 @@ class DesktopLogin(
     val token =
       request.session.get(ANTI_FORGERY_KEY).getOrElse(throw new OAuthException("missing anti forgery token"))
 
-    val existingCookie = readCookie(request) // will be populated if this was a re-auth for expired login
-
     OAuth.validatedUserIdentity(token)(request, deps.executionContext, wsClient).map { claimedAuth =>
-      val authedUserData = existingCookie match {
-        case Some(c) =>
-          val existingAuth = CookieUtils.parseCookieData(c.value, panDomainSettings.settings.publicKey)
-          logger.debug("user re-authed, merging auth data")
+      logger.debug("fresh user login")
+      val authedUserData = claimedAuth.copy(authenticatingSystem = "login-desktop", multiFactor = checkMultifactor(claimedAuth))
 
-          claimedAuth.copy(
-            authenticatingSystem = panDomainSettings.system,
-            authenticatedIn = existingAuth.authenticatedIn ++ Set(panDomainSettings.system),
-            multiFactor = checkMultifactor(claimedAuth)
-          )
-        case None =>
-          logger.debug("fresh user login")
-          claimedAuth.copy(multiFactor = checkMultifactor(claimedAuth))
-      }
 
       if (validateUser(authedUserData)) {
         // TODO updates to get value separately from cookie
