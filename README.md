@@ -31,7 +31,7 @@ Users that can change the switch will have their userId and a password hash stor
 ```
 sbt console
 import com.github.t3hnar.bcrypt._
-"[password-value]".bcrypt
+"[password-value]".boundedBcrypt
 ```
 Add a new item to the Composer DynamoDB table `login.gutools-emergency-access-[STAGE]` containing the userId and password hash.
 
