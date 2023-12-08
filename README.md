@@ -52,7 +52,8 @@ Central Production will send comms to all users letting them know what to do:
 >   https://login.gutools.co.uk/emergency/request-cookie
 
 In the event that Gmail is also down and users can't receive emails, you can fish out a login token to send to them by other means.
-You will need `composer` Janus credentials to run this script. Once they have visited the `/emergency/request-cookie` endpoint:
+You will need `composer` Janus credentials, or potentially regular IAM crediations (aka break-glass credentials) if you cannot log in
+to Janus. Once they have visited the `/emergency/request-cookie` endpoint:
 
 ```
 ./script/get-emergency-login-link firstname.lastname@guardian.co.uk
