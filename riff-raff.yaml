@@ -9,11 +9,9 @@ deployments:
     parameters:
       amiTags:
         AmigoStage: PROD
-        Recipe: editorial-tools-bionic-java8-ARM
+        Recipe: editorial-tools-focal-java8-ARM
         BuiltBy: amigo
       amiEncrypted: true
   login:
     type: autoscaling
-    parameters:
-      bucket: composer-dist
     dependencies: [login-ami]
