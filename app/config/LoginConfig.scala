@@ -16,7 +16,6 @@ case class LoginConfig(
   emailSettings: Map[String, String],
   switchBucket: String,
   pandaAuthBucket: String,
-  loggingStream: Option[String],
   anghammaradSnsArn: String
 )
 
@@ -37,10 +36,6 @@ object LoginConfig {
       "from" -> "editorial.tools.dev@theguardian.com",
       "replyTo" -> "core.central.production@guardian.co.uk "
     )
-    val loggingStream = stage match {
-      case "DEV" => None
-      case _ => Some("elk-PROD-KinesisStream-1PYU4KS1UEQA")
-    }
 
    val switchBucket = "login-gutools-config"
    val pandaAuthBucket = "pan-domain-auth-settings"
@@ -48,7 +43,7 @@ object LoginConfig {
    val anghammaradSnsArn = "arn:aws:sns:eu-west-1:095768028460:anghammarad-PROD-NotificationTopic-HDJHBGZT0FFD"
 
     LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri,
-      emailSettings, switchBucket, pandaAuthBucket, loggingStream, anghammaradSnsArn)
+      emailSettings, switchBucket, pandaAuthBucket, anghammaradSnsArn)
   }
 
   /**
