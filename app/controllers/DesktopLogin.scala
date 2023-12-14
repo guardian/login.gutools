@@ -1,7 +1,7 @@
 package controllers
 
 import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
-import com.gu.pandomainauth.service.{CookieUtils, OAuthException}
+import com.gu.pandomainauth.service.OAuthException
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent}
 
