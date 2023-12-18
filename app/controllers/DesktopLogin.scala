@@ -1,7 +1,7 @@
 package controllers
 
 import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
-import com.gu.pandomainauth.service.OAuthException
+import com.gu.pandomainauth.service.{CookieUtils, OAuthException}
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent}
 
@@ -29,14 +29,13 @@ class DesktopLogin(
       request.session.get(ANTI_FORGERY_KEY).getOrElse(throw new OAuthException("missing anti forgery token"))
 
     OAuth.validatedUserIdentity(token)(request, deps.executionContext, wsClient).map { claimedAuth =>
-      logger.debug("fresh user login")
+      logger.debug("fresh user desktop login")
       val authedUserData = claimedAuth.copy(authenticatingSystem = "login-desktop", multiFactor = checkMultifactor(claimedAuth))
 
 
       if (validateUser(authedUserData)) {
-        // TODO updates to get value separately from cookie
-        val updatedCookie = generateCookie(authedUserData)
-        Redirect(s"gnm://auth/token/${URLEncoder.encode(updatedCookie.value, "UTF-8")}")
+        val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.privateKey)
+        Redirect(s"gnm://auth/token/${URLEncoder.encode(token, "UTF-8")}")
           .withSession(session = request.session - ANTI_FORGERY_KEY - LOGIN_ORIGIN_KEY)
       } else {
         showUnauthedMessage(invalidUserMessage(claimedAuth))
