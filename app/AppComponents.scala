@@ -21,7 +21,7 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
     )
 
   private lazy val desktopPanDomainSettings: PanDomainAuthSettingsRefresher = {
-    val domain = "code.integration.flexible.gnl"
+    val domain = config.desktopDomain
     new PanDomainAuthSettingsRefresher(
       domain = domain,
       system = "login-desktop",
