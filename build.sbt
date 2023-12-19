@@ -32,7 +32,6 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
-  "com.gu" % "kinesis-logback-appender" % "1.4.4",
   "com.github.nscala-time" %% "nscala-time" % "2.30.0",
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
