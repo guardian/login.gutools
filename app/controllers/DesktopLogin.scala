@@ -1,7 +1,8 @@
 package controllers
 
-import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
+import com.gu.pandomainauth.model._
 import com.gu.pandomainauth.service.{CookieUtils, OAuthException}
+import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent}
 
@@ -13,7 +14,7 @@ class DesktopLogin(
   panDomainSettings: PanDomainAuthSettingsRefresher
 ) extends LoginController(deps, panDomainSettings) with Logging {
 
-  override lazy val authCallbackUrl: String = deps.config.host + "/desktopOauthCallback"
+  override lazy val authCallbackUrl: String = deps.config.host + "/desktop/oauthCallback"
 
   implicit private val ec: ExecutionContext = deps.executionContext
 
@@ -22,6 +23,27 @@ class DesktopLogin(
     OAuth.redirectToOAuthProvider(antiForgeryToken, None)(ec, request, wsClient) map { _.withSession {
       request.session + (ANTI_FORGERY_KEY -> antiForgeryToken)
     }}
+  }
+
+  def authStatus: Action[AnyContent] = Action { request =>
+    request.headers.get(AUTHORIZATION) match {
+      case Some(s"GU-Desktop-Panda $token") =>
+        PanDomain.authStatus(token,
+          publicKey = panDomainSettings.settings.publicKey,
+          validateUser = PanDomain.guardianValidation,
+          apiGracePeriod = 0L,
+          system = panDomainSettings.system,
+          cacheValidation = false
+        ) match {
+          case Expired(_) => new Status(419)
+          case GracePeriod(authedUser) => Ok(s"hello ${authedUser.user.email} - you're in a grace period")
+          case Authenticated(authedUser) => Ok(s"hello ${authedUser.user.email}")
+          case NotAuthorized(_) => Forbidden
+          case InvalidCookie(_) => BadRequest
+          case NotAuthenticated => Unauthorized
+        }
+      case _ => Unauthorized
+    }
   }
 
   def desktopOauthCallback(): Action[AnyContent] = Action.async { implicit request =>

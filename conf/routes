@@ -6,8 +6,9 @@ GET     /                           controllers.Application.index()
 
 GET     /login                       controllers.Application.login(returnUrl: String)
 
-GET     /desktop-login               controllers.DesktopLogin.desktopLogin()
-GET     /desktopOauthCallback        controllers.DesktopLogin.desktopOauthCallback()
+GET     /desktop/login               controllers.DesktopLogin.desktopLogin()
+GET     /desktop/showUser            controllers.DesktopLogin.authStatus()
+GET     /desktop/oauthCallback        controllers.DesktopLogin.desktopOauthCallback()
 
 GET     /showUser                    controllers.Login.status()
 GET     /oauthCallback               controllers.Login.oauthCallback()
@@ -18,12 +19,12 @@ GET     /emergency/reissue           controllers.Emergency.reissue()
 GET     /emergency/reissue-disabled  controllers.Emergency.reissueDisabled()
 GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink()
 GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
-+ NOCSRF
++NOCSRF
 POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink()
 
-+ NOCSRF
++NOCSRF
 POST    /switches/emergency/on       controllers.SwitchesController.emergencyOn()
-+ NOCSRF
++NOCSRF
 POST    /switches/emergency/off      controllers.SwitchesController.emergencyOff()
 GET     /switches                    controllers.SwitchesController.index()
 
