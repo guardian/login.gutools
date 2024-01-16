@@ -24,9 +24,9 @@ object LoginConfig {
   def forStage(stageOpt: Option[String]): LoginConfig = {
     val stage = stageOpt.getOrElse("DEV")
     val domain = stage match {
-      case "PROD" => "gutools.co.uk"
       case "DEV" => "local.dev-gutools.co.uk"
-      case x => s"${x.toLowerCase }.dev-gutools.co.uk"
+      case "CODE" => "code.dev-gutools.co.uk"
+      case "PROD" => "gutools.co.uk"
     }
     val desktopDomain = stage match {
       case "DEV" => "local.integration.flexible.gnm"
