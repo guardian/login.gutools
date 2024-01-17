@@ -21,12 +21,11 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
     )
 
   private lazy val desktopPanDomainSettings: PanDomainAuthSettingsRefresher = {
-    val domain = config.desktopDomain
     new PanDomainAuthSettingsRefresher(
-      domain = domain,
+      domain = config.desktopDomain,
       system = "login-desktop",
       bucketName = config.pandaAuthBucket,
-      settingsFileKey = s"$domain.settings",
+      settingsFileKey = s"${config.desktopDomain}.settings",
       s3Client = aws.s3Client
     )
   }
