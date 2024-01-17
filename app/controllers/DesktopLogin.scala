@@ -57,7 +57,7 @@ class DesktopLogin(
 
       if (validateUser(authedUserData)) {
         val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.privateKey)
-        Redirect(s"gnm://auth/token/${URLEncoder.encode(token, "UTF-8")}")
+        Redirect(s"gnm://auth/token/${URLEncoder.encode(token, "UTF-8")}/stage/${deps.config.stage.toLowerCase}")
           .withSession(session = request.session - ANTI_FORGERY_KEY - LOGIN_ORIGIN_KEY)
       } else {
         showUnauthedMessage(invalidUserMessage(claimedAuth))

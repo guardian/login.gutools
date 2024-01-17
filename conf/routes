@@ -8,7 +8,7 @@ GET     /login                       controllers.Application.login(returnUrl: St
 
 GET     /desktop/login               controllers.DesktopLogin.desktopLogin()
 GET     /desktop/showUser            controllers.DesktopLogin.authStatus()
-GET     /desktop/oauthCallback        controllers.DesktopLogin.desktopOauthCallback()
+GET     /desktop/oauthCallback       controllers.DesktopLogin.desktopOauthCallback()
 
 GET     /showUser                    controllers.Login.status()
 GET     /oauthCallback               controllers.Login.oauthCallback()
