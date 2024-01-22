@@ -24,8 +24,11 @@ abstract class LoginControllerComponents(
   context: Context,
   val aws: AWS
 ) extends BuiltInComponentsFromContext(context)
-  with AhcWSComponents with AssetsComponents with CSRFComponents
-  with SecurityHeadersComponents with RotatingSecretComponents {
+    with AhcWSComponents
+    with AssetsComponents
+    with CSRFComponents
+    with SecurityHeadersComponents
+    with RotatingSecretComponents {
 
   def httpFilters: Seq[EssentialFilter] = Seq(csrfFilter, securityHeadersFilter)
 
@@ -36,15 +39,6 @@ abstract class LoginControllerComponents(
   def switches: Switches
 
   lazy val asgTags: Option[InstanceTags] = aws.readTags()
-
-  lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
-    new PanDomainAuthSettingsRefresher(
-      domain = config.domain,
-      system = "login",
-      bucketName = config.pandaAuthBucket,
-      settingsFileKey = s"${config.domain}.settings",
-      s3Client = aws.s3Client
-    )
 
   val secretStateSupplier: SnapshotProvider = {
     val stack = asgTags.map(_.stack).getOrElse("flexible")
@@ -59,18 +53,21 @@ abstract class LoginControllerComponents(
   }
 }
 
-abstract class LoginController(deps: LoginControllerComponents) extends BaseController with AuthActions with Loggable {
+abstract class LoginController(
+  deps: LoginControllerComponents,
+  final override val panDomainSettings: PanDomainAuthSettingsRefresher
+) extends BaseController with AuthActions with Loggable {
+
   final override def wsClient: WSClient = deps.wsClient
   final override def controllerComponents: ControllerComponents = deps.controllerComponents
 
   final def config: LoginConfig = deps.config
   final def switches: Switches = deps.switches
 
-  final override lazy val panDomainSettings = deps.panDomainSettings
   final override lazy val cacheValidation = true
-  final override lazy val authCallbackUrl = config.host + "/oauthCallback"
+  override lazy val authCallbackUrl: String = config.host + "/oauthCallback"
 
-  final override def validateUser(authedUser: AuthenticatedUser) = PanDomain.guardianValidation(authedUser)
+  final override def validateUser(authedUser: AuthenticatedUser): Boolean = PanDomain.guardianValidation(authedUser)
 
   object EmergencySwitchIsOnAction extends ActionBuilder[Request, AnyContent] {
     final override def parser: BodyParser[AnyContent] = deps.controllerComponents.parsers.default

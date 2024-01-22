@@ -8,6 +8,7 @@ import scala.util.control.NonFatal
 case class LoginConfig(
   stage: String,
   domain: String,
+  desktopDomain: String,
   host: String,
   appName: String,
   emergencyAccessTableName: String,
@@ -20,12 +21,17 @@ case class LoginConfig(
 )
 
 object LoginConfig {
- def forStage(stageOpt: Option[String]): LoginConfig = {
+  def forStage(stageOpt: Option[String]): LoginConfig = {
     val stage = stageOpt.getOrElse("DEV")
     val domain = stage match {
-      case "PROD" => "gutools.co.uk"
       case "DEV" => "local.dev-gutools.co.uk"
-      case x => x.toLowerCase() + ".dev-gutools.co.uk"
+      case "CODE" => "code.dev-gutools.co.uk"
+      case "PROD" => "gutools.co.uk"
+    }
+    val desktopDomain = stage match {
+      case "DEV" => "local.integration.flexible.gnm"
+      case "CODE" => "code.integration.flexible.gnm"
+      case "PROD" => "prod.integration.flexible.gnm"
     }
     val host = "https://login." + domain
     val appName = "login.gutools"
@@ -37,13 +43,25 @@ object LoginConfig {
       "replyTo" -> "core.central.production@guardian.co.uk "
     )
 
-   val switchBucket = "login-gutools-config"
-   val pandaAuthBucket = "pan-domain-auth-settings"
+    val switchBucket = "login-gutools-config"
+    val pandaAuthBucket = "pan-domain-auth-settings"
 
-   val anghammaradSnsArn = "arn:aws:sns:eu-west-1:095768028460:anghammarad-PROD-NotificationTopic-HDJHBGZT0FFD"
+    val anghammaradSnsArn = "arn:aws:sns:eu-west-1:095768028460:anghammarad-PROD-NotificationTopic-HDJHBGZT0FFD"
 
-    LoginConfig(stage, domain, host, appName, emergencyAccessTableName, tokensTableName, tokenReissueUri,
-      emailSettings, switchBucket, pandaAuthBucket, anghammaradSnsArn)
+    LoginConfig(
+      stage = stage,
+      domain = domain,
+      desktopDomain = desktopDomain,
+      host = host,
+      appName = appName,
+      emergencyAccessTableName = emergencyAccessTableName,
+      tokensTableName = tokensTableName,
+      tokenReissueUri = tokenReissueUri,
+      emailSettings = emailSettings,
+      switchBucket = switchBucket,
+      pandaAuthBucket = pandaAuthBucket,
+      anghammaradSnsArn = anghammaradSnsArn
+    )
   }
 
   /**

@@ -1,10 +1,19 @@
 package controllers
 
-import login.BuildInfo
+import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
 import config.LoginConfig
+import login.BuildInfo
+import play.api.Logging
 import play.api.libs.json.Json
 
-class Application(deps: LoginControllerComponents) extends LoginController(deps) {
+import scala.concurrent.ExecutionContext
+
+class Application(
+  deps: LoginControllerComponents,
+  panDomainSettings: PanDomainAuthSettingsRefresher
+) extends LoginController(deps, panDomainSettings) with Logging {
+
+  implicit val ec: ExecutionContext = deps.executionContext
 
   def login(returnUrl: String) = AuthAction { implicit request =>
     if (LoginConfig.isValidUrl(config.domain, returnUrl)) {

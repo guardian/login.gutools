@@ -1,4 +1,4 @@
-import com.gu.pandomainauth.PublicSettings
+import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings}
 import config.{AWS, LoginConfig, Switches}
 import controllers._
 import play.api.ApplicationLoader.Context
@@ -10,6 +10,25 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
   override def config = LoginConfig.forStage(asgTags.map(_.stage))
 
   override val switches = new Switches(config, aws.s3Client)
+
+  private lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
+    new PanDomainAuthSettingsRefresher(
+      domain = config.domain,
+      system = "login",
+      bucketName = config.pandaAuthBucket,
+      settingsFileKey = s"${config.domain}.settings",
+      s3Client = aws.s3Client
+    )
+
+  private lazy val desktopPanDomainSettings: PanDomainAuthSettingsRefresher = {
+    new PanDomainAuthSettingsRefresher(
+      domain = config.desktopDomain,
+      system = "login-desktop",
+      bucketName = config.pandaAuthBucket,
+      settingsFileKey = s"${config.desktopDomain}.settings",
+      s3Client = aws.s3Client
+    )
+  }
 
   val loginPublicSettings = new PublicSettings(
     settingsFileKey = s"${config.domain}.settings.public",
@@ -27,10 +46,11 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
     Future.successful(())
   })
 
-  val app = new Application(this)
-  val emergency = new Emergency(loginPublicSettings, this, aws.sesClient)
-  val login = new Login(this)
-  val switchesController = new SwitchesController(this)
+  private val app = new Application(this, panDomainSettings)
+  private val emergency = new Emergency(loginPublicSettings, this, aws.sesClient, panDomainSettings)
+  private val login = new Login(this, panDomainSettings)
+  private val desktopLogin = new DesktopLogin(this, desktopPanDomainSettings)
+  private val switchesController = new SwitchesController(this, panDomainSettings)
 
-  override lazy val router = new Routes(httpErrorHandler, app, login, emergency, switchesController, assets)
+  override lazy val router = new Routes(httpErrorHandler, app, desktopLogin, login, emergency, switchesController, assets)
 }

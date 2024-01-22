@@ -1,8 +1,11 @@
 package controllers
 
+import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
 import config.{Off, On, SwitchState}
 
-class SwitchesController(deps: LoginControllerComponents) extends LoginController(deps) {
+class SwitchesController(
+  deps: LoginControllerComponents, panDomainSettings: PanDomainAuthSettingsRefresher
+) extends LoginController(deps, panDomainSettings) {
 
   private def errorMessage(state: SwitchState)  = s"Failed to update Emergency switch to ${state.name}. Contact digitalcms.dev@theguardian.com for more help."
   private def success(state: SwitchState)  = s"Emergency switch updated to ${state.name}"

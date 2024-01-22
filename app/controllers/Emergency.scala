@@ -4,7 +4,7 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
-import com.gu.pandomainauth.PublicSettings
+import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings}
 import play.api.mvc._
 import services.NewCookieIssue
 import utils._
@@ -15,8 +15,9 @@ import scala.util.control.NonFatal
 class Emergency(
    loginPublicSettings: PublicSettings,
    deps: LoginControllerComponents,
-   sesClient: AmazonSimpleEmailService
-) extends LoginController(deps) with Loggable {
+   sesClient: AmazonSimpleEmailService,
+   panDomainSettings: PanDomainAuthSettingsRefresher
+) extends LoginController(deps, panDomainSettings) with Loggable {
 
   private val cookieLifetime = 1.day
 
@@ -141,4 +142,3 @@ class Emergency(
     Unauthorized(views.html.emergency.reissueFailure(message, topic))
   }
 }
-
