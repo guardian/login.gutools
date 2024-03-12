@@ -33,7 +33,8 @@ class DesktopLogin(
           validateUser = PanDomain.guardianValidation,
           apiGracePeriod = 0L,
           system = panDomainSettings.system,
-          cacheValidation = false
+          cacheValidation = false,
+          forceExpiry = false
         ) match {
           case Expired(_) => new Status(419)
           case GracePeriod(authedUser) => Ok(s"hello ${authedUser.user.email} - you're in a grace period")

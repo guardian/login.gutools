@@ -2,7 +2,7 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.12"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
@@ -21,9 +21,9 @@ resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositori
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_2-8" % "1.0.6",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "0.18",
-  "com.gu.play-secret-rotation" %% "play-v28" % "0.31",
+  "com.gu" %% "pan-domain-auth-play_3-0" % "3.0.1",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
+  "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
@@ -31,17 +31,12 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
-  "net.logstash.logback" % "logstash-logback-encoder" % "6.0",
-  "com.github.nscala-time" %% "nscala-time" % "2.30.0",
+  "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
+  "com.github.nscala-time" %% "nscala-time" % "2.32.0",
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
-  "org.scalatest" %% "scalatest" % "3.2.10" % Test,
-  "com.gu" %% "anghammarad-client" % "1.2.0"
-)
-
-dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.11.4",
-  "com.github.blemale" %% "scaffeine" % "4.1.0"
+  "org.scalatest" %% "scalatest" % "3.2.17" % Test,
+  "com.gu" %% "anghammarad-client" % "1.8.1"
 )
 
 def env(propName: String): Option[String] = sys.env.get(propName).filter(_.trim.nonEmpty)
@@ -52,7 +47,7 @@ lazy val mainProject = project.in(file("."))
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     topLevelDirectory := Some(normalizedName.value),
-    debianPackageDependencies := Seq("openjdk-8-jre-headless"),
+    debianPackageDependencies := Seq("openjdk-11-jre-headless"),
     maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
     packageSummary := "login.gutools",
     packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
