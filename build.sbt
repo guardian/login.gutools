@@ -47,7 +47,7 @@ lazy val mainProject = project.in(file("."))
   .settings(addCommandAlias("devrun", "run -Dconfig.resource=application.local.conf 9000"): _*)
   .settings(
     topLevelDirectory := Some(normalizedName.value),
-    debianPackageDependencies := Seq("openjdk-11-jre-headless"),
+    debianPackageDependencies := Seq("java11-runtime-headless"),
     maintainer := "Digital CMS <digitalcms.dev@guardian.co.uk>",
     packageSummary := "login.gutools",
     packageDescription := """Small application to login a user via pan-domain-auth and redirect them.""",
