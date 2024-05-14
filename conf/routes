@@ -6,6 +6,7 @@ GET     /                           controllers.Application.index()
 
 GET     /login                       controllers.Application.login(returnUrl: String)
 
+GET     /desktop/loginRedirect       controllers.DesktopLogin.clientSideRedirectToDesktopLogin()
 GET     /desktop/login               controllers.DesktopLogin.desktopLogin()
 GET     /desktop/showUser            controllers.DesktopLogin.authStatus()
 GET     /desktop/oauthCallback       controllers.DesktopLogin.desktopOauthCallback()
