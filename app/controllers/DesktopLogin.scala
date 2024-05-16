@@ -19,6 +19,12 @@ class DesktopLogin(
 
   implicit private val ec: ExecutionContext = deps.executionContext
 
+
+  def clientSideRedirectToDesktopLogin = Action {
+    val desktopLoginUrl = controllers.routes.DesktopLogin.desktopLogin().url
+    Ok(views.html.clientSideRedirectToLogin(desktopLoginUrl))
+  }
+
   def desktopLogin: Action[AnyContent] = Action.async { implicit request =>
     val antiForgeryToken = OAuth.generateAntiForgeryToken()
     OAuth.redirectToOAuthProvider(antiForgeryToken, None)(ec, request, wsClient) map { _.withSession {

@@ -1,0 +1,16 @@
+@(loginUrl: String)
+<html>
+    <head>
+        <title>
+            Redirecting to login...
+        </title>
+        <script>
+            setTimeout(function() {
+                window.location.href = "@loginUrl";
+            }, 250);
+        </script>
+    </head>
+    <body>
+        <h1>Redirecting to login...</h1>
+    </body>
+</html>
