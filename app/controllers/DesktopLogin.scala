@@ -27,7 +27,7 @@ class DesktopLogin(
 
   def desktopLogin: Action[AnyContent] = Action.async { implicit request =>
     val antiForgeryToken = OAuth.generateAntiForgeryToken()
-    OAuth.redirectToOAuthProvider(antiForgeryToken, None)(ec, request, wsClient) map { _.withSession {
+    OAuth.redirectToOAuthProvider(antiForgeryToken, None)(ec) map { _.withSession {
       request.session + (ANTI_FORGERY_KEY -> antiForgeryToken)
     }}
   }
