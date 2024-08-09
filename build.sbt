@@ -2,7 +2,7 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.14"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
@@ -16,12 +16,12 @@ scalacOptions := Seq(
 val awsSdkVersion = "1.12.130"
 val awsSdkVersionV2 = "2.17.101"
 
-resolvers += "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
+resolvers ++= Resolver.sonatypeOssRepos("releases")
 
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_3-0" % "4.0.0",
+  "com.gu" %% "pan-domain-auth-play_3-0" % "5.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
