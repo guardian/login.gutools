@@ -1,4 +1,5 @@
-import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings}
+import com.gu.pandomainauth.S3BucketLoader.forAwsSdkV1
+import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings, S3BucketLoader, Settings}
 import config.{AWS, LoginConfig, Switches}
 import controllers._
 import play.api.ApplicationLoader.Context
@@ -11,29 +12,22 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
 
   override val switches = new Switches(config, aws.s3Client)
 
-  private lazy val panDomainSettings: PanDomainAuthSettingsRefresher =
-    new PanDomainAuthSettingsRefresher(
-      domain = config.domain,
-      system = "login",
-      bucketName = config.pandaAuthBucket,
-      settingsFileKey = s"${config.domain}.settings",
-      s3Client = aws.s3Client
-    )
+  private val s3BucketLoader: S3BucketLoader = forAwsSdkV1(aws.s3Client, "pan-domain-auth-settings")
 
-  private lazy val desktopPanDomainSettings: PanDomainAuthSettingsRefresher = {
-    new PanDomainAuthSettingsRefresher(
-      domain = config.desktopDomain,
-      system = "login-desktop",
-      bucketName = config.pandaAuthBucket,
-      settingsFileKey = s"${config.desktopDomain}.settings",
-      s3Client = aws.s3Client
-    )
-  }
+  private lazy val panDomainSettings: PanDomainAuthSettingsRefresher = PanDomainAuthSettingsRefresher(
+    domain = config.domain,
+    system = "login",
+    s3BucketLoader
+  )
 
-  val loginPublicSettings = new PublicSettings(
-    settingsFileKey = s"${config.domain}.settings.public",
-    bucketName = config.pandaAuthBucket,
-    s3Client = aws.s3Client
+  private lazy val desktopPanDomainSettings: PanDomainAuthSettingsRefresher = PanDomainAuthSettingsRefresher(
+    domain = config.desktopDomain,
+    system = "login-desktop",
+    s3BucketLoader
+  )
+
+  val loginPublicSettings: PublicSettings = PublicSettings(
+    new Settings.Loader(s3BucketLoader, s"${config.domain}.settings.public")
   )
 
   loginPublicSettings.start()

@@ -21,7 +21,7 @@ resolvers ++= Resolver.sonatypeOssRepos("releases")
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_3-0" % "5.0.0",
+  "com.gu" %% "pan-domain-auth-play_3-0" % "7.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
