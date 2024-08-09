@@ -30,11 +30,10 @@ class Emergency(
     val reissueTopic = "Your login session has not been extended"
 
     (for {
-      publicKey <- loginPublicSettings.publicKey
       assymCookie <- req.cookies.find(_.name == panDomainSettings.settings.cookieSettings.cookieName)
     } yield {
       try {
-        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
+        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, loginPublicSettings.publicKey)
         if (validateUser(authenticatedUser)) {
           val expires = (DateTime.now() + cookieLifetime).getMillis
           val newAuthUser = authenticatedUser.copy(expires = expires)
