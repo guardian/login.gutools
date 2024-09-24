@@ -36,7 +36,7 @@ class DesktopLogin(
     request.headers.get(AUTHORIZATION) match {
       case Some(s"GU-Desktop-Panda $token") =>
         PanDomain.authStatus(token,
-          publicKey = panDomainSettings.settings.signingKeyPair.getPublic,
+          verification = panDomainSettings.settings.signingAndVerification,
           validateUser = PanDomain.guardianValidation,
           apiGracePeriod = 9.hours.toMillis,
           system = panDomainSettings.system,
@@ -64,7 +64,7 @@ class DesktopLogin(
 
 
       if (validateUser(authedUserData)) {
-        val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.signingKeyPair.getPrivate)
+        val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.signingAndVerification)
         Redirect(s"gu-panda://desktop?token=${URLEncoder.encode(token, "UTF-8")}&stage=${deps.config.stage.toLowerCase}")
           .withSession(session = request.session - ANTI_FORGERY_KEY - LOGIN_ORIGIN_KEY)
       } else {

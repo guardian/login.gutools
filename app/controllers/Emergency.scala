@@ -30,27 +30,16 @@ class Emergency(
     val reissueTopic = "Your login session has not been extended"
 
     (for {
-      publicKey <- loginPublicSettings.publicKey
       assymCookie <- req.cookies.find(_.name == panDomainSettings.settings.cookieSettings.cookieName)
-    } yield {
-      try {
-        val authenticatedUser = CookieUtils.parseCookieData(assymCookie.value, publicKey)
+    } yield CookieUtils.parseCookieData(assymCookie.value, loginPublicSettings.verification).fold(
+      tokenIntegrityFailure =>
+        unauthorised(s"Invalid existing session, could not log you in: $tokenIntegrityFailure", reissueTopic)
+      , authenticatedUser =>
         if (validateUser(authenticatedUser)) {
-          val expires = (DateTime.now() + cookieLifetime).getMillis
-          val newAuthUser = authenticatedUser.copy(expires = expires)
-          val authCookie = generateCookie(newAuthUser)
+          val authCookie = generateCookie(authenticatedUser.copy(expires = (DateTime.now() + cookieLifetime).getMillis))
           Ok(views.html.emergency.reissueSuccess()).withCookies(authCookie)
-        } else {
-          unauthorised("Only Guardian email addresses with two-factor auth are supported.", reissueTopic)
-        }
-      }
-      catch {
-        case _: CookieSignatureInvalidException =>
-          unauthorised("Invalid existing session, could not log you in.", reissueTopic)
-        case _: CookieParseException =>
-          unauthorised("Could not refresh existing session due to a corrupted cookie.", reissueTopic)
-      }
-    }).getOrElse {
+        } else unauthorised("Only Guardian email addresses with two-factor auth are supported.", reissueTopic)
+    )).getOrElse {
       unauthorised("No existing login session found, unable to log you in.", reissueTopic)
     }
   }
