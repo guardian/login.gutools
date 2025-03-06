@@ -13,9 +13,10 @@ jobs:
       # Allow GitHub to request an OIDC JWT ID token, for exchange with `aws-actions/configure-aws-credentials`
       # See https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#updating-your-github-actions-workflow
       id-token: write
-
       # Required for `actions/checkout`
       contents: read
+      # required for actions-riff-raff to comment on PRs with build number
+      pull-requests: write
 
     steps:
       # Checkout the branch
@@ -23,7 +24,7 @@ jobs:
 
       - uses: guardian/setup-scala@v1
         with:
-          majaor-java-version: 11
+          major-java-version: 11
 
       # Seed the build number with last number from TeamCity.
       # This env var is used by the SBT builds and guardian/actions-riff-raff.
@@ -40,15 +41,11 @@ jobs:
       - name: Rename files for easy finding by guardian/actions-riff-raff
         run: mv target/login_1.0.0_all.deb login.deb
 
-      # Fetch AWS credentials, allowing us to upload to Riff-Raff (well, S3)
-      - uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          aws-region: eu-west-1
-
       # Upload our build artifacts to Riff-Raff (well, S3)
-      - uses: guardian/actions-riff-raff@v2
+      - uses: guardian/actions-riff-raff@v4
         with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           buildNumber: ${{ env.BUILD_NUMBER }}
           projectName: editorial-tools:login
           configPath: riff-raff.yaml
