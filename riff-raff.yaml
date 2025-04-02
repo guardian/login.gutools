@@ -9,7 +9,7 @@ deployments:
     parameters:
       amiTags:
         AmigoStage: PROD
-        Recipe: editorial-tools-focal-java11-ARM-WITH-cdk-base
+        Recipe: editorial-tools-focal-java21
         BuiltBy: amigo
       amiEncrypted: true
   login:

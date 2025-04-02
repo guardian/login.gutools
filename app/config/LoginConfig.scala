@@ -1,7 +1,6 @@
 package config
 
-import java.net.URL
-
+import java.net.URI
 import scala.util.control.NonFatal
 
 
@@ -69,12 +68,12 @@ object LoginConfig {
     */
   def isValidUrl(domain: String, returnUrl: String): Boolean = {
     try {
-      val url = new URL(returnUrl)
+      val uri = URI.create(returnUrl)
       // valid url, matches panda domain and is secure
-      url.getHost.endsWith(domain) && url.getProtocol == "https"
+      uri.getHost.endsWith(domain) && uri.getScheme == "https"
     } catch {
       // invalid url
-      case NonFatal(e) => false
+      case NonFatal(_) => false
     }
   }
 }
