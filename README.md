@@ -27,7 +27,7 @@ is down.
 Users that can change the switch will have their userId and a password hash stored in DynamoDB.
 
 `userId` is the username of a Guardian email address e.g joe.bloggs if the email address is joe.bloggs@guardian.co.uk
-`passwordHash` is generated using [bCrypt](https://github.com/t3hnar/scala-bcrypt). To generate a hash:
+`passwordHash` is generated using [bCrypt](https://github.com/t3hnar/scala-bcrypt). To generate a hash, checkout this repository and run:
 ```
 sbt console
 import com.github.t3hnar.bcrypt._
