@@ -23,8 +23,6 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: guardian/setup-scala@v1
-        with:
-          major-java-version: 11
 
       # Seed the build number with last number from TeamCity.
       # This env var is used by the SBT builds and guardian/actions-riff-raff.
