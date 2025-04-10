@@ -14,7 +14,7 @@ scalacOptions := Seq(
 // We must include both AWS SDK V1 and V2 to enable the use of latest
 // Scanamo whilst avoiding overhauling the whole app to V2.
 val awsSdkVersion = "1.12.130"
-val awsSdkVersionV2 = "2.17.101"
+val awsSdkVersionV2 = "2.31.19"
 
 resolvers ++= Resolver.sonatypeOssRepos("releases")
 
