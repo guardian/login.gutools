@@ -7,8 +7,11 @@ set -e
 function usage {
   echo "Usage: $0 [options]"
   echo "Options:"
-  echo "  enable [stage]               - Enable emergency access for a stage"
-  echo "  disable [stage]              - Disable emergency access for a stage"
+  echo "  enable [stage] [--profile PROFILE]   - Enable emergency access for a stage"
+  echo "  disable [stage] [--profile PROFILE]  - Disable emergency access for a stage"
+  echo ""
+  echo "Parameters:"
+  echo "  --profile PROFILE                    - AWS profile to use for S3 operations"
   echo ""
   echo "Examples:"
   echo "  $0 enable PROD"
@@ -24,6 +27,7 @@ function get_config_key {
 function upload_config {
   local stage=$1
   local state=$2
+  local profile=$3
   local bucket="login-gutools-config"
   local key=$(get_config_key $stage)
   local temp_file=$(mktemp)
@@ -32,34 +36,14 @@ function upload_config {
   echo "{\"emergency\":\"$state\"}" > "$temp_file"
   
   echo "Uploading switches configuration to s3://$bucket/$key"
-  aws s3 cp "$temp_file" "s3://$bucket/$key"
-  rm "$temp_file"
-}
-
-function set_emergency_state {
-  if [ $# -lt 2 ]; then
-    echo "Error: Stage and state required"
-    usage
-  fi
   
-  local stage=$1
-  local state=$2
-  local stage_upper=$(echo $stage | tr '[:lower:]' '[:upper:]')
-  
-  # Validate state
-  if [[ "$state" != "on" && "$state" != "off" ]]; then
-    echo "Error: State must be 'on' or 'off'"
-    exit 1
-  fi
-  
-  # Directly upload the new configuration
-  upload_config $stage_upper $state
-  
-  if [ "$state" == "on" ]; then
-    echo "Emergency access ENABLED for $stage_upper"
+  if [ -n "$profile" ]; then
+    aws s3 cp "$temp_file" "s3://$bucket/$key" --profile "$profile"
   else
-    echo "Emergency access DISABLED for $stage_upper"
+    aws s3 cp "$temp_file" "s3://$bucket/$key"
   fi
+  
+  rm "$temp_file"
 }
 
 # Main script logic
@@ -70,15 +54,62 @@ fi
 command=$1
 shift
 
-case "$command" in
-  enable)
-    set_emergency_state "$1" "on"
-    ;;
-  disable)
-    set_emergency_state "$1" "off"
-    ;;
-  *)
-    echo "Unknown command: $command"
-    usage
-    ;;
-esac
+# Parse stage and optional profile
+stage=""
+profile=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --profile)
+      if [ -z "$2" ] || [[ "$2" == --* ]]; then
+        echo "Error: --profile requires a value"
+        usage
+      fi
+      profile="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Error: Unknown option $1"
+      usage
+      ;;
+    *)
+      if [ -z "$stage" ]; then
+        stage="$1"
+        shift
+      else
+        echo "Error: Unexpected argument $1"
+        usage
+      fi
+      ;;
+  esac
+done
+
+# Validate stage
+if [ -z "$stage" ]; then
+  echo "Error: Stage is required"
+  usage
+fi
+
+# Set state based on command
+if [ "$command" == "enable" ]; then
+  state="on"
+elif [ "$command" == "disable" ]; then
+  state="off"
+else
+  echo "Unknown command: $command"
+  usage
+fi
+
+
+# Convert stage to uppercase
+stage_upper=$(echo $stage | tr '[:lower:]' '[:upper:]')
+
+# Upload the configuration
+upload_config "$stage_upper" "$state" "$profile"
+
+# Confirmation message
+if [ "$state" == "on" ]; then
+  echo "Emergency access ENABLED for $stage_upper"
+else
+  echo "Emergency access DISABLED for $stage_upper"
+fi
