@@ -1,0 +1,84 @@
+#!/bin/bash
+
+set -e
+
+# Script to manage emergency access configuration in S3 for login.gutools
+
+function usage {
+  echo "Usage: $0 [options]"
+  echo "Options:"
+  echo "  enable [stage]               - Enable emergency access for a stage"
+  echo "  disable [stage]              - Disable emergency access for a stage"
+  echo ""
+  echo "Examples:"
+  echo "  $0 enable PROD"
+  echo "  $0 disable PROD"
+  exit 1
+}
+
+function get_config_key {
+  local stage=$1
+  echo "${stage}/switches.json"
+}
+
+function upload_config {
+  local stage=$1
+  local state=$2
+  local bucket="login-gutools-config"
+  local key=$(get_config_key $stage)
+  local temp_file=$(mktemp)
+  
+  # Create simple JSON with just the emergency state
+  echo "{\"emergency\":\"$state\"}" > "$temp_file"
+  
+  echo "Uploading switches configuration to s3://$bucket/$key"
+  aws s3 cp "$temp_file" "s3://$bucket/$key"
+  rm "$temp_file"
+}
+
+function set_emergency_state {
+  if [ $# -lt 2 ]; then
+    echo "Error: Stage and state required"
+    usage
+  fi
+  
+  local stage=$1
+  local state=$2
+  local stage_upper=$(echo $stage | tr '[:lower:]' '[:upper:]')
+  
+  # Validate state
+  if [[ "$state" != "on" && "$state" != "off" ]]; then
+    echo "Error: State must be 'on' or 'off'"
+    exit 1
+  fi
+  
+  # Directly upload the new configuration
+  upload_config $stage_upper $state
+  
+  if [ "$state" == "on" ]; then
+    echo "Emergency access ENABLED for $stage_upper"
+  else
+    echo "Emergency access DISABLED for $stage_upper"
+  fi
+}
+
+# Main script logic
+if [ $# -lt 1 ]; then
+  usage
+fi
+
+command=$1
+shift
+
+case "$command" in
+  enable)
+    set_emergency_state "$1" "on"
+    ;;
+  disable)
+    set_emergency_state "$1" "off"
+    ;;
+  *)
+    echo "Unknown command: $command"
+    usage
+    ;;
+esac

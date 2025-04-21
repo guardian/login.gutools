@@ -21,24 +21,21 @@ If users do not have a cookie issued, they can request an email with a link for 
 
 If a lot users are requesting new cookies, we might have to increase the read/write capacity of the dynamo table where cookie tokens are stored.
 
-There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth
-is down.
+#### Managing emergency access
 
-Users that can change the switch will have their userId and a password hash stored in DynamoDB.
+Emergency access is now configured using an S3-based configuration file, which is updated via the `emergency-script.sh` script. This replaces the previous DynamoDB-based approach for user authentication and provides a simple command-line interface to enable or disable emergency access.
 
-`userId` is the username of a Guardian email address e.g joe.bloggs if the email address is joe.bloggs@guardian.co.uk
-`passwordHash` is generated using [bCrypt](https://github.com/t3hnar/scala-bcrypt). To generate a hash, checkout this repository and run:
-```
-sbt console
-import com.github.t3hnar.bcrypt._
-"[password-value]".boundedBcrypt
-```
-Add a new item to the Composer DynamoDB table `login.gutools-emergency-access-[STAGE]` containing the userId and password hash.
+To manage emergency access:
 
-To turn a switch on or off run:
+```bash
+# Enable emergency access for a stage
+./script/emergency-access enable PROD
+
+# Disable emergency access for a stage
+./script/emergency-access disable PROD
 ```
-curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
-```
+
+You will need appropriate AWS credentials to use this script. The script modifies the same S3 configuration file that the application reads for switch states.
 
 Central Production will send comms to all users letting them know what to do:
 
