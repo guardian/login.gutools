@@ -23,7 +23,7 @@ If a lot users are requesting new cookies, we might have to increase the read/wr
 
 #### Managing emergency access
 
-Emergency access is now configured using an S3-based configuration file, which is updated via the `emergency-script.sh` script. This replaces the previous DynamoDB-based approach for user authentication and provides a simple command-line interface to enable or disable emergency access.
+Emergency access is now configured using an S3-based configuration file, which is updated via the `emergency-access` script. This replaces the previous approach for emergency access management and provides a simple command-line interface to enable or disable emergency access.
 
 To manage emergency access:
 
