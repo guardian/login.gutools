@@ -23,7 +23,7 @@ If a lot users are requesting new cookies, we might have to increase the read/wr
 
 #### Managing emergency access
 
-Emergency access is now configured using an S3-based configuration file, which is updated via the `emergency-access` script. This replaces the previous approach for emergency access management and provides a simple command-line interface to enable or disable emergency access.
+Emergency access is configured using an S3-based configuration file, which is updated via the `emergency-access` script. This replaces the previous approach for emergency access management and provides a simple command-line interface to enable or disable emergency access.
 
 To manage emergency access:
 
@@ -35,7 +35,7 @@ To manage emergency access:
 ./script/emergency-access disable PROD
 ```
 
-You will need appropriate AWS credentials to use this script. The script modifies the same S3 configuration file that the application reads for switch states.
+You will need appropriate AWS credentials to use this script. If access to AWS via Janus is an issue, break-glass credentials may need to be used. 
 
 Central Production will send comms to all users letting them know what to do:
 
