@@ -46,19 +46,20 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
       
+      val currentSwitches = atomicSwitchMap.get()
+
+      atomicSwitchMap.set(statesInS3)
+      result.close()
+
       // Check for any state changes and notify
       statesInS3.foreach { case (switchName, newState) =>
-        atomicSwitchMap.get().get(switchName) match {
-          case None =>
+        currentSwitches.get(switchName) match {
           case Some(oldState) if oldState != newState =>
             notifier.sendStateChangeNotification(switchName, newState)
             log.info(s"$switchName has been changed to ${newState.name}")
           case _ => 
         }
       }
-
-      atomicSwitchMap.set(statesInS3)
-      result.close()
     }
     catch {
       case e: Exception =>

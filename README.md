@@ -28,14 +28,14 @@ Emergency access is configured using an S3-based configuration file, which is up
 To manage emergency access:
 
 ```bash
-# Enable emergency access for a stage
-./script/emergency-access enable PROD
+# Enable emergency access for a stage (with composer aws credentials)
+./script/emergency-access enable PROD --profile composer
 
-# Disable emergency access for a stage
-./script/emergency-access disable PROD
+# Disable emergency access for a stage (with composer aws credentials)
+./script/emergency-access disable PROD --profile composer
 ```
 
-You will need appropriate AWS credentials to use this script. If access to AWS via Janus is an issue, break-glass credentials may need to be used. 
+You will need composer AWS credentials to use this script. If access to AWS via Janus is an issue, break-glass credentials may need to be used. 
 
 Central Production will send comms to all users letting them know what to do:
 
