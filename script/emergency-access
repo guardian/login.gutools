@@ -5,10 +5,10 @@ set -e
 # Script to manage emergency access configuration in S3 for login.gutools
 
 function usage {
-  echo "Usage: $0 [options]"
+  echo "Usage: $0 <options>"
   echo "Options:"
-  echo "  enable [stage] [--profile PROFILE]   - Enable emergency access for a stage"
-  echo "  disable [stage] [--profile PROFILE]  - Disable emergency access for a stage"
+  echo "  enable <stage> [--profile PROFILE]   - Enable emergency access for a stage"
+  echo "  disable <stage> [--profile PROFILE]  - Disable emergency access for a stage"
   echo ""
   echo "Parameters:"
   echo "  --profile PROFILE                    - AWS profile to use for S3 operations"
