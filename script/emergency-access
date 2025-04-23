@@ -29,9 +29,11 @@ function upload_config {
   local state=$2
   local profile=$3
   local bucket="login-gutools-config"
-  local key=$(get_config_key $stage)
-  local temp_file=$(mktemp)
-  
+  local key
+  key=$(get_config_key "$stage")
+  local temp_file
+  temp_file=$(mktemp)
+
   # Create simple JSON with just the emergency state
   echo "{\"emergency\":\"$state\"}" > "$temp_file"
   
@@ -102,7 +104,7 @@ fi
 
 
 # Convert stage to uppercase
-stage_upper=$(echo $stage | tr '[:lower:]' '[:upper:]')
+stage_upper=$(echo "$stage" | tr '[:lower:]' '[:upper:]')
 
 # Upload the configuration
 upload_config "$stage_upper" "$state" "$profile"
