@@ -92,6 +92,13 @@ if [ -z "$stage" ]; then
   usage
 fi
 
+# Validate that stage is one of the allowed values (case insensitive)
+stage_lower=$(echo $stage | tr '[:upper:]' '[:lower:]')
+if [[ "$stage_lower" != "dev" && "$stage_lower" != "code" && "$stage_lower" != "prod" ]]; then
+  echo "Error: Stage must be one of: dev, code, prod"
+  usage
+fi
+
 # Set state based on command
 if [ "$command" == "enable" ]; then
   state="on"
