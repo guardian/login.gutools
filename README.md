@@ -35,7 +35,7 @@ To manage emergency access:
 ./script/emergency-access disable PROD --profile composer
 ```
 
-You will need composer AWS credentials to use this script. If access to AWS via Janus is an issue, break-glass credentials may need to be used. 
+You will need composer AWS credentials to use this script. If access to AWS via Janus is an issue, break-glass credentials may need to be used. In this case it might be easier to set environment variables with the credentials and omit the `--profile` option when running the script.
 
 Central Production will send comms to all users letting them know what to do:
 
