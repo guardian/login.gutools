@@ -57,7 +57,9 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
           case Some(oldState) if oldState != newState =>
             notifier.sendStateChangeNotification(switchName, newState)
             log.info(s"$switchName has been changed to ${newState.name}")
-          case _ => 
+          case None if newState == On => 
+            notifier.sendStillActiveNotification(switchName)
+          case _  => 
         }
       }
     }
