@@ -122,3 +122,7 @@ if [ "$state" == "on" ]; then
 else
   echo "Emergency access DISABLED for $stage_upper"
 fi
+
+echo ""
+echo "Note: Switch updates can take up to 60 seconds to take effect."
+echo "You can check the current switch state at: https://login.gutools.co.uk/switches"
