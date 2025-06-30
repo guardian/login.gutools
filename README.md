@@ -35,7 +35,29 @@ To manage emergency access:
 ./script/emergency-access disable PROD --profile composer
 ```
 
-You will need composer AWS credentials to use this script. If access to AWS via Janus is an issue, break-glass credentials may need to be used. In this case it might be easier to set environment variables with the credentials and omit the `--profile` option when running the script.
+>[!NOTE]
+> You will need composer AWS credentials with write permissions to use this script. Readonly credentials are not sufficient to update the emergency switch.**
+
+The switch takes time to update after changes are made - **up to 60 seconds** for the application to pick up the new state. You can check the current switch state at: https://login.code.dev-gutools.co.uk/switches
+
+#### Using break-glass credentials
+If access to AWS via Janus is an issue, break-glass credentials may need to be used. To get an access key:
+
+1. Access the [AWS console](https://console.aws.amazon.com/) using break glass credentials
+2. Go to your AWS IAM user page
+3. Navigate to "Security credentials"
+4. Go to "Access keys"
+5. Create a new access key
+6. Remove the key once access is no longer needed
+
+Set the following environment variables with your break-glass credentials and omit the `--profile` option when running the script:
+
+```bash
+export AWS_ACCESS_KEY_ID=your_access_key_id
+export AWS_SECRET_ACCESS_KEY=your_secret_access_key
+```
+
+#### Emergency comms
 
 Central Production will send comms to all users letting them know what to do:
 
