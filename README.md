@@ -36,9 +36,21 @@ To manage emergency access:
 ```
 
 >[!NOTE]
-> You will need composer AWS credentials with write permissions to use this script. Readonly credentials are not sufficient to update the emergency switch.**
+> You will need composer AWS credentials with login config bucket write permissions to use this script. Readonly credentials are not sufficient to update the emergency switch.**
 
 The switch takes time to update after changes are made - **up to 60 seconds** for the application to pick up the new state. You can check the current switch state at: https://login.code.dev-gutools.co.uk/switches
+
+#### Emergency login switch access key
+
+If you have been issued an emergency login access key you can run the script using those credentials.
+
+```bash
+# Enable emergency access for a stage (with composer aws credentials)
+./script/emergency-access enable PROD --profile emergency-login
+
+# Disable emergency access for a stage (with composer aws credentials)
+./script/emergency-access disable PROD --profile emergency-login
+```
 
 #### Using break-glass credentials
 If access to AWS via Janus is an issue, break-glass credentials may need to be used. To get an access key:
@@ -71,7 +83,7 @@ Central Production will send comms to all users letting them know what to do:
 >   https://login.gutools.co.uk/emergency/request-cookie
 
 In the event that Gmail is also down and users can't receive emails, you can fish out a login token to send to them by other means.
-You will need `composer` Janus credentials, or potentially regular IAM crediations (aka break-glass credentials) if you cannot log in
+You will need `composer` Janus credentials, or potentially regular IAM credentials (aka break-glass credentials) if you cannot log in
 to Janus. Once they have visited the `/emergency/request-cookie` endpoint:
 
 ```
@@ -80,3 +92,18 @@ to Janus. Once they have visited the `/emergency/request-cookie` endpoint:
 
 Be careful when sharing the link using WhatsApp etc. They will ping the link to build a preview unless it is sent in
 quotes which will use up the token and require the user to request another one.
+
+### Provisioning emergency access keys
+
+An Engineering Manager of the Journalism Stream can provide an emergency access key to users as required.
+
+The manager can create a new user in AWS IAM as part of the `emergency-login-switch-users-PROD` group. It is recommended 
+to affix `emergency-login` to the end of the name. The `GoogleUsername` tag should be used on any created account for 
+ease of identifying usage. An access key can then be created and shared with the user. 
+
+It is recommend to store the credentials using the AWS CLI for ease of access in an emergency:
+
+```bash 
+aws configure set aws_access_key_id [access_key] --profile emergency-login   
+aws configure set aws_secret_access_key [secret_access_key] --profile login
+```
