@@ -42,7 +42,7 @@ The switch takes time to update after changes are made - **up to 60 seconds** fo
 
 #### Emergency login switch access key
 
-If you have been issued an emergency login access key you can run the script using those credentials.
+If you have been [issued an emergency login access key](#provisioning-emergency-access-keys) you can run the script using those credentials.
 
 ```bash
 # Enable emergency access for a stage (with composer aws credentials)
