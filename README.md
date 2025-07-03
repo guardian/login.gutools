@@ -25,7 +25,16 @@ If a lot users are requesting new cookies, we might have to increase the read/wr
 
 Emergency access is configured using an S3-based configuration file, which is updated via the `emergency-access` script. This replaces the previous approach for emergency access management and provides a simple command-line interface to enable or disable emergency access.
 
-To manage emergency access:
+There are three ways to authorise enabling the switch:
+- [Composer janus credentials](#composer-janus-credentials)
+- [Emergency login switch access key](#emergency-login-switch-access-key)
+- [Using break-glass credentials](#using-break-glass-credentials)
+
+The switch takes time to update after changes are made - **up to 60 seconds** for the application to pick up the new state. You can check the current switch state at: https://login.gutools.co.uk/switches.
+
+#### Composer janus credentials
+
+If you can access Janus or already have access to Composer credentials with login config bucket write permissions, you can run the script using those credentials.
 
 ```bash
 # Enable emergency access for a stage (with composer aws credentials)
@@ -35,25 +44,21 @@ To manage emergency access:
 ./script/emergency-access disable PROD --profile composer
 ```
 
->[!NOTE]
-> You will need composer AWS credentials with login config bucket write permissions to use this script. Readonly credentials are not sufficient to update the emergency switch.
-
-The switch takes time to update after changes are made - **up to 60 seconds** for the application to pick up the new state. You can check the current switch state at: https://login.code.dev-gutools.co.uk/switches
-
 #### Emergency login switch access key
 
 If you have been [issued an emergency login access key](#provisioning-emergency-access-keys) you can run the script using those credentials.
 
 ```bash
-# Enable emergency access for a stage (with composer aws credentials)
+# Enable emergency access for a stage (with emergency-login aws credentials)
 ./script/emergency-access enable PROD --profile emergency-login
 
-# Disable emergency access for a stage (with composer aws credentials)
+# Disable emergency access for a stage (with emergency-login aws credentials)
 ./script/emergency-access disable PROD --profile emergency-login
 ```
 
 #### Using break-glass credentials
-If access to AWS via Janus is an issue, break-glass credentials may need to be used. To get an access key:
+
+If access to AWS via Janus is an issue and no access keys are available, break-glass credentials may need to be used. To get an access key:
 
 1. Access the [AWS console](https://console.aws.amazon.com/) using break glass credentials
 2. Go to your AWS IAM user page
@@ -67,6 +72,8 @@ Set the following environment variables with your break-glass credentials and om
 ```bash
 export AWS_ACCESS_KEY_ID=your_access_key_id
 export AWS_SECRET_ACCESS_KEY=your_secret_access_key
+
+./script/emergency-access enable PROD
 ```
 
 #### Emergency comms
@@ -99,9 +106,9 @@ An Engineering Manager of the Journalism Stream can provide an emergency access 
 
 The manager can create a new user in AWS IAM as part of the `emergency-login-switch-users-PROD` group. It is recommended 
 to affix `emergency-login` to the end of the name. The `GoogleUsername` tag should be used on any created account for 
-ease of identifying usage. An access key can then be created and shared with the user. 
+ease of identifying ownership. An access key can then be created and shared with the user. 
 
-It is recommend to store the credentials using the AWS CLI for ease of access in an emergency:
+It is recommended to store the credentials using the AWS CLI for ease of access in an emergency:
 
 ```bash 
 aws configure set aws_access_key_id [access_key] --profile emergency-login   
