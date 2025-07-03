@@ -36,7 +36,7 @@ To manage emergency access:
 ```
 
 >[!NOTE]
-> You will need composer AWS credentials with login config bucket write permissions to use this script. Readonly credentials are not sufficient to update the emergency switch.**
+> You will need composer AWS credentials with login config bucket write permissions to use this script. Readonly credentials are not sufficient to update the emergency switch.
 
 The switch takes time to update after changes are made - **up to 60 seconds** for the application to pick up the new state. You can check the current switch state at: https://login.code.dev-gutools.co.uk/switches
 
