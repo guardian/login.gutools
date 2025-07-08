@@ -105,12 +105,12 @@ quotes which will use up the token and require the user to request another one.
 An Engineering Manager of the Journalism Stream can provide an emergency access key to users as required.
 
 The manager can create a new user in AWS IAM as part of the `emergency-login-switch-users-PROD` group. It is recommended 
-to affix `emergency-login` to the end of the name. The `GoogleUsername` tag should be used on any created account for 
+to affix `-emergency-login` to the end of the name. The `GoogleUsername` tag should be used on any created account for 
 ease of identifying ownership. An access key can then be created and shared with the user. 
 
 It is recommended to store the credentials using the AWS CLI for ease of access in an emergency:
 
 ```bash 
 aws configure set aws_access_key_id [access_key] --profile emergency-login   
-aws configure set aws_secret_access_key [secret_access_key] --profile login
+aws configure set aws_secret_access_key [secret_access_key] --profile emergency-login
 ```
