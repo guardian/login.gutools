@@ -25,29 +25,6 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
 
   def allSwitches: Map[String, SwitchState] = atomicSwitchMap.get()
 
-  def setEmergencySwitch(state: SwitchState): Option[Unit] = {
-    val name = "emergency"
-    val newStates = allSwitches + (name -> state)
-    val json = Json.toJson(newStates)
-    val jsonString = Json.stringify(json)
-    val metaData = new ObjectMetadata()
-    metaData.setContentLength(jsonString.getBytes("UTF-8").length)
-
-    try {
-      val request = new PutObjectRequest(config.switchBucket, fileName, new StringInputStream(jsonString), metaData)
-      s3Client.putObject(request)
-      log.info(s"$name has been updated to ${state.name}")
-      atomicSwitchMap.set(newStates)
-      notifier.sendStateChangeNotification(name, state)
-      Some(())
-    } catch {
-      case e: Exception => {
-        log.error(s"Unable to update switch $name ${state.name}", e)
-        None
-      }
-    }
-  }
-
   def start(): Unit = {
     log.info("Starting switches scheduled task")
 
@@ -68,9 +45,23 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
       val result = s3Client.getObject(request)
       val source = Source.fromInputStream(result.getObjectContent).mkString
       val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
+      
+      val currentSwitches = atomicSwitchMap.get()
 
       atomicSwitchMap.set(statesInS3)
       result.close()
+
+      // Check for any state changes and notify
+      statesInS3.foreach { case (switchName, newState) =>
+        currentSwitches.get(switchName) match {
+          case Some(oldState) if oldState != newState =>
+            notifier.sendStateChangeNotification(switchName, newState)
+            log.info(s"$switchName has been changed to ${newState.name}")
+          case None if newState == On => 
+            notifier.sendStillActiveNotification(switchName)
+          case _  => 
+        }
+      }
     }
     catch {
       case e: Exception =>

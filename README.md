@@ -21,24 +21,62 @@ If users do not have a cookie issued, they can request an email with a link for 
 
 If a lot users are requesting new cookies, we might have to increase the read/write capacity of the dynamo table where cookie tokens are stored.
 
-There will be a limited number of users that can switch emergency access on and off. This will be required if Google Auth
-is down.
+#### Managing emergency access
 
-Users that can change the switch will have their userId and a password hash stored in DynamoDB.
+Emergency access is configured using an S3-based configuration file, which is updated via the `emergency-access` script. This replaces the previous approach for emergency access management and provides a simple command-line interface to enable or disable emergency access.
 
-`userId` is the username of a Guardian email address e.g joe.bloggs if the email address is joe.bloggs@guardian.co.uk
-`passwordHash` is generated using [bCrypt](https://github.com/t3hnar/scala-bcrypt). To generate a hash, checkout this repository and run:
-```
-sbt console
-import com.github.t3hnar.bcrypt._
-"[password-value]".boundedBcrypt
-```
-Add a new item to the Composer DynamoDB table `login.gutools-emergency-access-[STAGE]` containing the userId and password hash.
+There are three ways to authorise enabling the switch:
+- [Composer janus credentials](#composer-janus-credentials)
+- [Emergency login switch access key](#emergency-login-switch-access-key)
+- [Using break-glass credentials](#using-break-glass-credentials)
 
-To turn a switch on or off run:
+The switch takes time to update after changes are made - **up to 60 seconds** for the application to pick up the new state. You can check the current switch state at: https://login.gutools.co.uk/switches.
+
+#### Composer janus credentials
+
+If you can access Janus or already have access to Composer credentials with login config bucket write permissions, you can run the script using those credentials.
+
+```bash
+# Enable emergency access for a stage (with composer aws credentials)
+./script/emergency-access enable PROD --profile composer
+
+# Disable emergency access for a stage (with composer aws credentials)
+./script/emergency-access disable PROD --profile composer
 ```
-curl -X POST 'https://[login-domain]/switches/emergency/[on|off]' -k -H 'Authorization: Basic [firstname.lastname]@guardian.co.uk:[password]'
+
+#### Emergency login switch access key
+
+If you have been [issued an emergency login access key](#provisioning-emergency-access-keys) you can run the script using those credentials.
+
+```bash
+# Enable emergency access for a stage (with emergency-login aws credentials)
+./script/emergency-access enable PROD --profile emergency-login
+
+# Disable emergency access for a stage (with emergency-login aws credentials)
+./script/emergency-access disable PROD --profile emergency-login
 ```
+
+#### Using break-glass credentials
+
+If access to AWS via Janus is an issue and no access keys are available, break-glass credentials may need to be used. To get an access key:
+
+1. Access the [AWS console](https://console.aws.amazon.com/) using break glass credentials
+2. Go to your AWS IAM user page
+3. Navigate to "Security credentials"
+4. Go to "Access keys"
+5. Create a new access key
+6. Remove the key once access is no longer needed
+
+Set the following environment variables with your break-glass credentials and omit the `--profile` option when running the script:
+
+```bash
+export AWS_ACCESS_KEY_ID=your_access_key_id
+export AWS_SECRET_ACCESS_KEY=your_secret_access_key
+
+./script/emergency-access enable PROD
+```
+
+#### Emergency comms
 
 Central Production will send comms to all users letting them know what to do:
 
@@ -52,7 +90,7 @@ Central Production will send comms to all users letting them know what to do:
 >   https://login.gutools.co.uk/emergency/request-cookie
 
 In the event that Gmail is also down and users can't receive emails, you can fish out a login token to send to them by other means.
-You will need `composer` Janus credentials, or potentially regular IAM crediations (aka break-glass credentials) if you cannot log in
+You will need `composer` Janus credentials, or potentially regular IAM credentials (aka break-glass credentials) if you cannot log in
 to Janus. Once they have visited the `/emergency/request-cookie` endpoint:
 
 ```
@@ -61,3 +99,18 @@ to Janus. Once they have visited the `/emergency/request-cookie` endpoint:
 
 Be careful when sharing the link using WhatsApp etc. They will ping the link to build a preview unless it is sent in
 quotes which will use up the token and require the user to request another one.
+
+### Provisioning emergency access keys
+
+An Engineering Manager of the Journalism Stream can provide an emergency access key to users as required.
+
+The manager can create a new user in AWS IAM as part of the `emergency-login-switch-users-PROD` group. It is recommended 
+to affix `-emergency-login` to the end of the name. The `GoogleUsername` tag should be used on any created account for 
+ease of identifying ownership. An access key can then be created and shared with the user. 
+
+It is recommended to store the credentials using the AWS CLI for ease of access in an emergency:
+
+```bash 
+aws configure set aws_access_key_id [access_key] --profile emergency-login   
+aws configure set aws_secret_access_key [secret_access_key] --profile emergency-login
+```
