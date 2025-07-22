@@ -10,7 +10,6 @@ case class LoginConfig(
   desktopDomain: String,
   host: String,
   appName: String,
-  emergencyAccessTableName: String,
   tokensTableName: String,
   tokenReissueUri: String,
   emailSettings: Map[String, String],
@@ -35,7 +34,6 @@ object LoginConfig {
     val host = "https://login." + domain
     val appName = "login.gutools"
     val tokensTableName = s"login.gutools-tokens-${stage.toUpperCase}"
-    val emergencyAccessTableName = s"login.gutools-emergency-access-${stage.toUpperCase}"
     val tokenReissueUri = host + "/emergency/new-cookie/"
     val emailSettings = Map(
       "from" -> "editorial.tools.dev@theguardian.com",
@@ -53,7 +51,6 @@ object LoginConfig {
       desktopDomain = desktopDomain,
       host = host,
       appName = appName,
-      emergencyAccessTableName = emergencyAccessTableName,
       tokensTableName = tokensTableName,
       tokenReissueUri = tokenReissueUri,
       emailSettings = emailSettings,
