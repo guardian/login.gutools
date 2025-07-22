@@ -22,7 +22,7 @@ libraryDependencies ++= Seq(
   jdbc,
   ws,
   "com.gu" %% "pan-domain-auth-play_3-0" % "10.0.0",
-  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
+  "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "14.4.0",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
