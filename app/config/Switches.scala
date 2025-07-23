@@ -1,21 +1,28 @@
 package config
 
-import java.util.concurrent.{Executors, TimeUnit}
-import _root_.utils.Notifier
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.model.{GetObjectRequest, ObjectMetadata, PutObjectRequest}
-import com.amazonaws.util.StringInputStream
-import utils.Loggable
+import _root_.utils.{Loggable, Notifier}
+import com.gu.etagcaching.ETagCache
+import com.gu.etagcaching.FreshnessPolicy.TolerateOldValueWhileRefreshing
+import com.gu.etagcaching.aws.s3.ObjectId
+import com.gu.etagcaching.aws.sdkv2.s3.S3ObjectFetching
 import play.api.libs.json.{Format, JsString, JsValue, Json}
+import software.amazon.awssdk.services.s3.S3AsyncClient
 
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.{Executors, TimeUnit}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.io.Source
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
-class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
+class Switches(config: LoginConfig, s3AsyncClient: S3AsyncClient) extends Loggable {
 
   type SwitchMap = Map[String, SwitchState]
-  private val atomicSwitchMap: AtomicReference[SwitchMap] = new AtomicReference[SwitchMap](Map.empty)
+  val switchMapCache: ETagCache[ObjectId, SwitchMap] = new ETagCache(
+    S3ObjectFetching.byteArraysWith(s3AsyncClient)
+      .thenParsing(Json.parse(_).as[SwitchMap])
+      .onUpdate { update => logSwitchDiff(update.oldV,update.newV) },
+    TolerateOldValueWhileRefreshing,
+    _.maximumSize(1).refreshAfterWrite(1.minute)
+  )
 
   private val scheduler = Executors.newScheduledThreadPool(2)
 
@@ -23,12 +30,11 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
 
   val fileName = s"${config.stage.toUpperCase}/switches.json"
 
-  def allSwitches: Map[String, SwitchState] = atomicSwitchMap.get()
+  def allSwitches: Future[Map[String, SwitchState]] =
+    switchMapCache.get(ObjectId(config.switchBucket, fileName)).map(_.getOrElse(Map.empty))
 
   def start(): Unit = {
     log.info("Starting switches scheduled task")
-
-    scheduler.scheduleAtFixedRate(() => refresh(), 0, 1, TimeUnit.MINUTES)
     scheduler.scheduleAtFixedRate(() => notifyIfSwitchStillActive(), 0, 1, TimeUnit.HOURS)
   }
 
@@ -37,41 +43,24 @@ class Switches(config: LoginConfig, s3Client: AmazonS3) extends Loggable {
     scheduler.shutdown()
   }
 
-  def refresh(): Unit = {
-    log.debug("Refreshing switches agent")
-
-    try {
-      val request = new GetObjectRequest(config.switchBucket, fileName)
-      val result = s3Client.getObject(request)
-      val source = Source.fromInputStream(result.getObjectContent).mkString
-      val statesInS3 = Json.parse(source).as[Map[String, SwitchState]]
-      
-      val currentSwitches = atomicSwitchMap.get()
-
-      atomicSwitchMap.set(statesInS3)
-      result.close()
-
-      // Check for any state changes and notify
-      statesInS3.foreach { case (switchName, newState) =>
-        currentSwitches.get(switchName) match {
+  private def logSwitchDiff(oldSwitchesOpt: Option[SwitchMap], newSwitchesOpt: Option[SwitchMap]): Unit = {
+    newSwitchesOpt.fold {
+      log.error(s"Unable to get an updated version of switches.json from S3 ${config.switchBucket} $fileName. The switches map is likely to be stale.")
+    } { _.foreach { case (switchName, newState) =>
+        oldSwitchesOpt.flatMap(_.get(switchName)) match {
           case Some(oldState) if oldState != newState =>
             notifier.sendStateChangeNotification(switchName, newState)
             log.info(s"$switchName has been changed to ${newState.name}")
-          case None if newState == On => 
+          case None if newState == On =>
             notifier.sendStillActiveNotification(switchName)
-          case _  => 
+          case _  =>
         }
       }
     }
-    catch {
-      case e: Exception =>
-        log.error(s"Unable to get an updated version of switches.json from S3 ${config.switchBucket} $fileName. The switches map is likely to be stale. ", e)
-    }
   }
 
-  def notifyIfSwitchStillActive(): Unit = {
-    atomicSwitchMap.get.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification)
-  }
+  def notifyIfSwitchStillActive(): Unit =
+    allSwitches.foreach(_.filter(_._2 == On).keys.foreach(notifier.sendStillActiveNotification))
 }
 
 sealed trait SwitchState {
