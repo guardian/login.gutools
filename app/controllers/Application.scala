@@ -23,10 +23,16 @@ class Application(
     }
   }
 
-  def healthCheck() = Action { implicit request => {
-    log.info("Responding from the healthcheck")
-    Ok(Json.parse(BuildInfo.toJson))
-  }}
+  def healthCheck() = Action {
+    if (deps.switches.allSwitches.isEmpty) {
+      val warning = "No switch data loaded"
+      log.warn(warning)
+      ServiceUnavailable(warning)
+    } else {
+      log.info("Responding from the healthcheck")
+      Ok(Json.parse(BuildInfo.toJson))
+    }
+  }
 
   def index() = Action { implicit request => Ok("A small application to login a user via pan-domain-auth and redirect them.")}
 }
