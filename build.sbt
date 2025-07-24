@@ -2,7 +2,7 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.14"
+scalaVersion := "2.13.16"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
@@ -31,11 +31,11 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
-  "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
-  "com.github.nscala-time" %% "nscala-time" % "2.32.0",
+  "net.logstash.logback" % "logstash-logback-encoder" % "7.4",
+  "com.github.nscala-time" %% "nscala-time" % "2.34.0",
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
-  "org.scanamo" %% "scanamo" % "1.0.0-M17",
-  "org.scalatest" %% "scalatest" % "3.2.17" % Test,
+  "org.scanamo" %% "scanamo" % "1.0.4",
+  "org.scalatest" %% "scalatest" % "3.2.19" % Test,
   "com.gu" %% "anghammarad-client" % "1.8.1"
 )
 
