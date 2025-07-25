@@ -2,7 +2,7 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.14"
+scalaVersion := "2.13.16"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
@@ -24,9 +24,9 @@ libraryDependencies ++= Seq(
   "com.gu" %% "pan-domain-auth-play_3-0" % "7.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
+  "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "8.2.0-PREVIEW.support-logging-on-changed-values.2025-07-25T1842.a02f3b6f",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-autoscaling" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
