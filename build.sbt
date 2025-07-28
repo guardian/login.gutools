@@ -2,7 +2,7 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.14"
+scalaVersion := "2.13.16"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
@@ -15,6 +15,7 @@ scalacOptions := Seq(
 // Scanamo whilst avoiding overhauling the whole app to V2.
 val awsSdkVersion = "1.12.130"
 val awsSdkVersionV2 = "2.31.19"
+val jacksonVersion = "2.19.2"
 
 resolvers ++= Resolver.sonatypeOssRepos("releases")
 
@@ -36,7 +37,16 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
   "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-  "com.gu" %% "anghammarad-client" % "1.8.1"
+  "com.gu" %% "anghammarad-client" % "1.8.1",
+  // Jackson library version addressing vulnerable dependencies
+  "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
+  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+  "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
+  "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
+  "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
 
 def env(propName: String): Option[String] = sys.env.get(propName).filter(_.trim.nonEmpty)
