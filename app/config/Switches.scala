@@ -35,12 +35,18 @@ class Switches(config: LoginConfig, s3AsyncClient: S3AsyncClient) extends Loggab
 
   def start(): Unit = {
     log.info("Starting switches scheduled task")
+    scheduler.scheduleAtFixedRate(() => refresh(), 0, 1, TimeUnit.MINUTES)
     scheduler.scheduleAtFixedRate(() => notifyIfSwitchStillActive(), 0, 1, TimeUnit.HOURS)
   }
 
   def stop(): Unit = {
     log.info("Stopping switches scheduled task")
     scheduler.shutdown()
+  }
+
+  def refresh(): Unit = {
+    log.debug("Refreshing switches")
+    allSwitches // reading the value to ensure that if the switch value changes, it is logged
   }
 
   private def logSwitchDiff(oldSwitchesOpt: Option[SwitchMap], newSwitchesOpt: Option[SwitchMap]): Unit = {
