@@ -1,4 +1,3 @@
-import com.gu.pandomainauth.S3BucketLoader.forAwsSdkV1
 import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings, S3BucketLoader, Settings}
 import config.{AWS, LoginConfig, Switches}
 import controllers._
@@ -10,9 +9,12 @@ import scala.concurrent.Future
 class AppComponents(context: Context) extends LoginControllerComponents(context, new AWS()) {
   override def config = LoginConfig.forStage(asgTags.map(_.stage))
 
-  override val switches = new Switches(config, aws.s3Client)
+  def s3BucketLoaderForAwsSdkV2(bucketName: String): S3BucketLoader = (key: String) =>
+    aws.s3SyncClient.getObject(_.bucket(bucketName).key(key))
 
-  private val s3BucketLoader: S3BucketLoader = forAwsSdkV1(aws.s3Client, "pan-domain-auth-settings")
+  override val switches = new Switches(config, aws.s3AsyncClient)
+
+  private val s3BucketLoader: S3BucketLoader = s3BucketLoaderForAwsSdkV2("pan-domain-auth-settings")
 
   private lazy val panDomainSettings: PanDomainAuthSettingsRefresher = PanDomainAuthSettingsRefresher(
     domain = config.domain,

@@ -17,7 +17,7 @@ class Emergency(
    deps: LoginControllerComponents,
    sesClient: AmazonSimpleEmailService,
    panDomainSettings: PanDomainAuthSettingsRefresher
-) extends LoginController(deps, panDomainSettings) with Loggable {
+) extends LoginController(deps, panDomainSettings)(deps.executionContext) with Loggable {
 
   private val cookieLifetime = 1.day
 

@@ -17,17 +17,15 @@ val awsSdkVersion = "1.12.130"
 val awsSdkVersionV2 = "2.31.19"
 val jacksonVersion = "2.19.2"
 
-resolvers ++= Resolver.sonatypeOssRepos("releases")
-
 libraryDependencies ++= Seq(
   jdbc,
   ws,
   "com.gu" %% "pan-domain-auth-play_3-0" % "7.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
+  "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "8.2.0",
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-autoscaling" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
