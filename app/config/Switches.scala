@@ -21,7 +21,7 @@ class Switches(config: LoginConfig, s3AsyncClient: S3AsyncClient) extends Loggab
       .thenParsing(Json.parse(_).as[SwitchMap])
       .onUpdate { update => logSwitchDiff(update.oldV,update.newV) },
     TolerateOldValueWhileRefreshing,
-    _.maximumSize(1).refreshAfterWrite(1.minute)
+    _.maximumSize(1).refreshAfterWrite(10.seconds)
   )
 
   private val scheduler = Executors.newScheduledThreadPool(2)
