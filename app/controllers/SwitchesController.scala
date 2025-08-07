@@ -1,13 +1,14 @@
 package controllers
 
 import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
-import config.{Off, On, SwitchState}
 
 class SwitchesController(
   deps: LoginControllerComponents, panDomainSettings: PanDomainAuthSettingsRefresher
 ) extends LoginController(deps, panDomainSettings) {
 
-  def index = AuthAction { req =>
-    Ok(views.html.switches.switchValues(switches.allSwitches))
+  def index = AuthAction.async {
+    for {
+      allSwitches <- switches.allSwitches
+    } yield Ok(views.html.switches.switchValues(allSwitches))
   }
 }

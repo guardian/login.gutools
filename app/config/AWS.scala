@@ -3,20 +3,16 @@ package config
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, SystemPropertiesCredentialsProvider}
 import com.amazonaws.regions.{Region, Regions}
-import com.amazonaws.services.autoscaling.{AmazonAutoScaling, AmazonAutoScalingClientBuilder}
 import com.amazonaws.services.autoscaling.model.{DescribeAutoScalingGroupsRequest, DescribeAutoScalingInstancesRequest}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
+import com.amazonaws.services.autoscaling.{AmazonAutoScaling, AmazonAutoScalingClientBuilder}
 import com.amazonaws.services.simpleemail.{AmazonSimpleEmailService, AmazonSimpleEmailServiceClientBuilder}
 import com.amazonaws.services.simplesystemsmanagement.{AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClientBuilder}
 import com.amazonaws.util.EC2MetadataUtils
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider => EnvironmentVariableCredentialsProviderV2, InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2, ProfileCredentialsProvider => ProfileCredentialsProviderV2}
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder
 import software.amazon.awssdk.regions.{Region => RegionV2}
-import software.amazon.awssdk.auth.credentials.{
-  AwsCredentialsProviderChain,
-  EnvironmentVariableCredentialsProvider => EnvironmentVariableCredentialsProviderV2,
-  InstanceProfileCredentialsProvider => InstanceProfileCredentialsProviderV2,
-  ProfileCredentialsProvider => ProfileCredentialsProviderV2
-}
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 
 import scala.jdk.CollectionConverters._
 
@@ -35,8 +31,6 @@ class AWS {
 
   val asgClient: AmazonAutoScaling = AmazonAutoScalingClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
   val ssmClient: AWSSimpleSystemsManagement = AWSSimpleSystemsManagementClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
-
-  val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
   val sesClient: AmazonSimpleEmailService = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(region).withCredentials(composerAwsCredentialsProvider).build()
 
   private val v2CredentialsProvider = AwsCredentialsProviderChain.builder.credentialsProviders(
@@ -45,10 +39,12 @@ class AWS {
     EnvironmentVariableCredentialsProviderV2.create()
   ).build
 
-  val dynamoDbClient: DynamoDbClient = DynamoDbClient.builder
-    .credentialsProvider(v2CredentialsProvider)
-    .region(RegionV2.EU_WEST_1)
-    .build()
+  private def setup[B <: AwsClientBuilder[B, _]](builder: B): B =
+    builder.credentialsProvider(v2CredentialsProvider).region(RegionV2.EU_WEST_1)
+
+  val s3SyncClient: S3Client = setup(S3Client.builder).build()
+  val s3AsyncClient: S3AsyncClient = setup(S3AsyncClient.builder).build()
+  val dynamoDbClient: DynamoDbClient = setup(DynamoDbClient.builder).build()
 
   def readTags(): Option[InstanceTags] = {
     // We read tags from the AutoScalingGroup rather than the instance itself to avoid problems where the

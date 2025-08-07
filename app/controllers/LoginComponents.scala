@@ -55,7 +55,7 @@ abstract class LoginControllerComponents(
 abstract class LoginController(
   deps: LoginControllerComponents,
   final override val panDomainSettings: PanDomainAuthSettingsRefresher
-) extends BaseController with AuthActions with Loggable {
+)(implicit val ec: ExecutionContext = deps.executionContext) extends BaseController with AuthActions with Loggable {
 
   final override def wsClient: WSClient = deps.wsClient
   final override def controllerComponents: ControllerComponents = deps.controllerComponents
@@ -72,12 +72,13 @@ abstract class LoginController(
     final override def parser: BodyParser[AnyContent] = deps.controllerComponents.parsers.default
     final override def executionContext: ExecutionContext = deps.executionContext
 
-    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-      switches.allSwitches.get("emergency") match {
+    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = for {
+      allSwitches <- switches.allSwitches
+      result <- allSwitches.get("emergency") match {
         case Some(On) => block(request)
         case Some(Off) => Future.successful(SeeOther("/emergency/reissue-disabled"))
         case _ => Future.successful(BadRequest("Emergency reissue config switch is not configured correctly, value must be 'on' or 'off'."))
       }
-    }
+    } yield result
   }
 }

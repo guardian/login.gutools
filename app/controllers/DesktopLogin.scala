@@ -17,9 +17,6 @@ class DesktopLogin(
 
   override lazy val authCallbackUrl: String = deps.config.host + "/desktop/oauthCallback"
 
-  implicit private val ec: ExecutionContext = deps.executionContext
-
-
   def clientSideRedirectToDesktopLogin = Action {
     val desktopLoginUrl = controllers.routes.DesktopLogin.desktopLogin().url
     Ok(views.html.clientSideRedirectToLogin(desktopLoginUrl))
