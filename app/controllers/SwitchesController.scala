@@ -2,11 +2,9 @@ package controllers
 
 import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
 
-import scala.concurrent.ExecutionContext
-
 class SwitchesController(
   deps: LoginControllerComponents, panDomainSettings: PanDomainAuthSettingsRefresher
-)(implicit ec: ExecutionContext) extends LoginController(deps, panDomainSettings) {
+) extends LoginController(deps, panDomainSettings) {
 
   def index = AuthAction.async {
     for {

@@ -6,7 +6,7 @@ import play.api.mvc._
 
 class Login(
   deps: LoginControllerComponents, panDomainSettings: PanDomainAuthSettingsRefresher
-) extends LoginController(deps, panDomainSettings)(deps.executionContext) {
+) extends LoginController(deps, panDomainSettings) {
   private val defaultAllowHeaders = List("X-Requested-With","Origin","Accept","Content-Type")
 
   def oauthCallback = Action.async { implicit request =>

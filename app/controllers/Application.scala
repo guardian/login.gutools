@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 class Application(
   deps: LoginControllerComponents,
   panDomainSettings: PanDomainAuthSettingsRefresher
-) extends LoginController(deps, panDomainSettings)(deps.executionContext) with Logging {
+) extends LoginController(deps, panDomainSettings) with Logging {
 
   def login(returnUrl: String) = AuthAction { implicit request =>
     if (LoginConfig.isValidUrl(config.domain, returnUrl)) {

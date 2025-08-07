@@ -13,7 +13,7 @@ import scala.concurrent.duration.DurationInt
 class DesktopLogin(
   deps: LoginControllerComponents,
   panDomainSettings: PanDomainAuthSettingsRefresher
-) extends LoginController(deps, panDomainSettings)(deps.executionContext) with Logging {
+) extends LoginController(deps, panDomainSettings) with Logging {
 
   override lazy val authCallbackUrl: String = deps.config.host + "/desktop/oauthCallback"
 

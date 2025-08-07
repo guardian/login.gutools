@@ -55,7 +55,7 @@ abstract class LoginControllerComponents(
 abstract class LoginController(
   deps: LoginControllerComponents,
   final override val panDomainSettings: PanDomainAuthSettingsRefresher
-)(implicit val ec: ExecutionContext) extends BaseController with AuthActions with Loggable {
+)(implicit val ec: ExecutionContext = deps.executionContext) extends BaseController with AuthActions with Loggable {
 
   final override def wsClient: WSClient = deps.wsClient
   final override def controllerComponents: ControllerComponents = deps.controllerComponents
