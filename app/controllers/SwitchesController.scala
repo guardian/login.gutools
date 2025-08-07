@@ -1,7 +1,6 @@
 package controllers
 
 import com.gu.pandomainauth.PanDomainAuthSettingsRefresher
-import config.{Off, On, SwitchState}
 
 import scala.concurrent.ExecutionContext
 
