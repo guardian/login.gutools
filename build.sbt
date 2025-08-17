@@ -20,7 +20,7 @@ val jacksonVersion = "2.19.2"
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_3-0" % "7.0.0",
+  "com.gu" %% "pan-domain-auth-play_3-0" % "10.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
   "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "8.2.0",
@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
   "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-  "com.gu" %% "anghammarad-client" % "1.8.1",
+  "com.gu" %% "anghammarad-client" % "5.0.0",
   // Jackson library version addressing vulnerable dependencies
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
