@@ -9,12 +9,9 @@ import scala.concurrent.Future
 class AppComponents(context: Context) extends LoginControllerComponents(context, new AWS()) {
   override def config = LoginConfig.forStage(asgTags.map(_.stage))
 
-  def s3BucketLoaderForAwsSdkV2(bucketName: String): S3BucketLoader = (key: String) =>
-    aws.s3SyncClient.getObject(_.bucket(bucketName).key(key))
-
   override val switches = new Switches(config, aws.s3AsyncClient)
 
-  private val s3BucketLoader: S3BucketLoader = s3BucketLoaderForAwsSdkV2("pan-domain-auth-settings")
+  private val s3BucketLoader: S3BucketLoader = S3BucketLoader.forAwsSdkV2(aws.s3SyncClient, "pan-domain-auth-settings")
 
   private lazy val panDomainSettings: PanDomainAuthSettingsRefresher = PanDomainAuthSettingsRefresher(
     domain = config.domain,
