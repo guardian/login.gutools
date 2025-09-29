@@ -4,7 +4,7 @@ import software.amazon.awssdk.services.autoscaling.model.{DescribeAutoScalingGro
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ssm.SsmClient
-import com.amazonaws.util.EC2MetadataUtils
+import software.amazon.awssdk.regions.internal.util.EC2MetadataUtils
 import com.gu.pandomainauth.S3BucketLoader
 import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder
@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 case class InstanceTags(stack: String, app: String, stage: String)
 
@@ -52,7 +53,7 @@ class AWS {
     // We read tags from the AutoScalingGroup rather than the instance itself to avoid problems where the
     // tags have not been applied to the instance before we start up (they are eventually consistent)
     for {
-      instanceId <- Option(EC2MetadataUtils.getInstanceId)
+      instanceId <-  Try(EC2MetadataUtils.getInstanceId).toOption
       asg <- getAutoscalingGroupName(instanceId)
       tags <- getTags(asg)
 

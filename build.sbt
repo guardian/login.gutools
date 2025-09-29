@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "cloudwatch" % awsSdkVersionV2,
   "software.amazon.awssdk" % "autoscaling" % awsSdkVersionV2,
   "software.amazon.awssdk" % "ses" % awsSdkVersionV2,
-  "software.amazon.awssdk" % "ssm" % awsSdkVersionV2, //Needed for Parameter Store?
+//  "software.amazon.awssdk" % "ssm" % awsSdkVersionV2, //Needed for Parameter Store?
   "software.amazon.awssdk" % "kinesis" % awsSdkVersionV2,
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
   "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-  "com.gu" %% "anghammarad-client" % "1.8.1",
+  "com.gu" %% "anghammarad-client" % "6.0.0",
   // Jackson library version addressing vulnerable dependencies
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
