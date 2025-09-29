@@ -1,11 +1,15 @@
 package utils
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
-import com.amazonaws.services.simpleemail.model._
+import software.amazon.awssdk.services.ses.SesClient
+import software.amazon.awssdk.services.ses.model._
+
 import config.LoginConfig
 
-class SES(sesClient: AmazonSimpleEmailService, loginConfig: LoginConfig) {
+class SES(sesClient: SesClient, loginConfig: LoginConfig) {
+  def buildContent(data: String) = Content.builder().charset("UTF-8").data(data).build()
+
   def sendCookieEmail(token: String, sendTo: String): Unit = {
+
 
     val uri = loginConfig.tokenReissueUri
 
@@ -25,15 +29,15 @@ class SES(sesClient: AmazonSimpleEmailService, loginConfig: LoginConfig) {
          |</div>
        """.stripMargin
 
-    sesClient.sendEmail(new SendEmailRequest()
-      .withDestination(new Destination().withToAddresses(sendTo))
-      .withMessage(new Message()
-        .withSubject(new Content("[emergency login] Guardian Editorial Tools - new cookie link"))
-        .withBody(new Body().withHtml(new Content(emailBody)))
-      )
-      .withSource(loginConfig.emailSettings("from"))
-      .withReplyToAddresses(loginConfig.emailSettings("replyTo"))
-    )
 
+    sesClient.sendEmail( SendEmailRequest.builder()
+      .destination(Destination.builder().toAddresses(sendTo).build())
+      .message(Message.builder()
+        .subject(buildContent("[emergency login] Guardian Editorial Tools - new cookie link"))
+        .body(Body.builder().html(buildContent(emailBody)).build()).build()
+      )
+      .source(loginConfig.emailSettings("from"))
+      .replyToAddresses(loginConfig.emailSettings("replyTo")).build()
+    )
   }
 }

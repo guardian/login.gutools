@@ -1,6 +1,6 @@
 package controllers
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
+import software.amazon.awssdk.services.ses.SesClient
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
@@ -15,7 +15,7 @@ import scala.util.control.NonFatal
 class Emergency(
    loginPublicSettings: PublicSettings,
    deps: LoginControllerComponents,
-   sesClient: AmazonSimpleEmailService,
+   sesClient: SesClient,
    panDomainSettings: PanDomainAuthSettingsRefresher
 ) extends LoginController(deps, panDomainSettings) with Loggable {
 

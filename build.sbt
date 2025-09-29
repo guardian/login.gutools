@@ -14,7 +14,7 @@ scalacOptions := Seq(
 // We must include both AWS SDK V1 and V2 to enable the use of latest
 // Scanamo whilst avoiding overhauling the whole app to V2.
 val awsSdkVersion = "1.12.130"
-val awsSdkVersionV2 = "2.31.19"
+val awsSdkVersionV2 = "2.34.5"
 val jacksonVersion = "2.19.2"
 
 libraryDependencies ++= Seq(
@@ -24,11 +24,12 @@ libraryDependencies ++= Seq(
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v1" % "7.1.1",
   "com.gu.play-secret-rotation" %% "play-v30" % "7.1.1",
   "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "8.2.0",
-  "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-autoscaling" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-ses" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-kinesis" % awsSdkVersion,
+  "software.amazon.awssdk" % "ec2" % awsSdkVersionV2,
+  "software.amazon.awssdk" % "cloudwatch" % awsSdkVersionV2,
+  "software.amazon.awssdk" % "autoscaling" % awsSdkVersionV2,
+  "software.amazon.awssdk" % "ses" % awsSdkVersionV2,
+  "software.amazon.awssdk" % "ssm" % awsSdkVersionV2, //Needed for Parameter Store?
+  "software.amazon.awssdk" % "kinesis" % awsSdkVersionV2,
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
   "com.github.nscala-time" %% "nscala-time" % "2.32.0",
