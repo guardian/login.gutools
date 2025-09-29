@@ -5,10 +5,12 @@ import software.amazon.awssdk.services.autoscaling.AutoScalingClient
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ssm.SsmClient
 import com.amazonaws.util.EC2MetadataUtils
-import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, SystemPropertyCredentialsProvider, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, ProfileCredentialsProvider}
+import com.gu.pandomainauth.S3BucketLoader
+import software.amazon.awssdk.auth.credentials.{AwsCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, ProfileCredentialsProvider, SystemPropertyCredentialsProvider}
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 
 import scala.jdk.CollectionConverters._
@@ -30,6 +32,15 @@ class AWS {
   val asgClient: AutoScalingClient = AutoScalingClient.builder.region(region).credentialsProvider(v2CredentialsProvider).build()
   val ssmClient: SsmClient = SsmClient.builder().region(region).credentialsProvider(v2CredentialsProvider).build()
   val sesClient: SesClient =  SesClient.builder().region(region).credentialsProvider(v2CredentialsProvider).build()
+
+  object PandaHelpers {
+    def forAwsSdkV2(anonS3Client: S3Client, bucket: String): S3BucketLoader =
+      (key: String) => {
+        anonS3Client.getObject(
+          GetObjectRequest.builder().bucket(bucket).key(key).build()
+        )
+      }
+  }
 
   private def setup[B <: AwsClientBuilder[B, _]](builder: B): B =
     builder.credentialsProvider(v2CredentialsProvider).region(region)

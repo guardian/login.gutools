@@ -9,6 +9,8 @@ import services.NewCookieIssue
 import software.amazon.awssdk.services.ses.SesClient
 import utils._
 
+import java.time.Instant.now
+import java.time.Duration
 import scala.util.Random
 import scala.util.control.NonFatal
 
@@ -19,7 +21,7 @@ class Emergency(
    panDomainSettings: PanDomainAuthSettingsRefresher
 ) extends LoginController(deps, panDomainSettings) with Loggable {
 
-  private val cookieLifetime = 1.day
+  private val cookieLifetime = Duration.ofDays(1) // 1.day
 
   def reissueDisabled: Action[AnyContent] = Action {
     Ok(views.html.emergency.reissueDisabled())
@@ -36,7 +38,7 @@ class Emergency(
         unauthorised(s"Invalid existing session, could not log you in: $tokenIntegrityFailure", reissueTopic)
       , authenticatedUser =>
         if (validateUser(authenticatedUser)) {
-          val authCookie = generateCookie(authenticatedUser.copy(expires = (DateTime.now() + cookieLifetime).getMillis))
+          val authCookie = generateCookie(authenticatedUser.copy(expires = (now().plus(cookieLifetime))))
           Ok(views.html.emergency.reissueSuccess()).withCookies(authCookie)
         } else unauthorised("Only Guardian email addresses with two-factor auth are supported.", reissueTopic)
     )).getOrElse {
@@ -85,7 +87,7 @@ class Emergency(
 
       deps.tokenDBService.expireCookieIssue(newCookieIssue)
 
-      val expires = (DateTime.now() + cookieLifetime).getMillis
+      val expires = now().plus(cookieLifetime)
       val names = newCookieIssue.email.split("\\.")
       val firstName = names(0).capitalize
       val lastName = names(1).split("@")(0).capitalize
