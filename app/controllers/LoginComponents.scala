@@ -5,7 +5,7 @@ import com.github.t3hnar.bcrypt._
 import com.gu.pandomainauth.action.AuthActions
 import com.gu.pandomainauth.model.AuthenticatedUser
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
-import com.gu.play.secretrotation.aws.parameterstore.{AwsSdkV1, SecretSupplier}
+import com.gu.play.secretrotation.aws.parameterstore
 import com.gu.play.secretrotation.{RotatingSecretComponents, SnapshotProvider, TransitionTiming}
 import config._
 import play.api.ApplicationLoader.Context
@@ -44,10 +44,10 @@ abstract class LoginControllerComponents(
     val app = asgTags.map(_.app).getOrElse("login")
     val stage = asgTags.map(_.stage).getOrElse("DEV")
 
-    new SecretSupplier(
+    new parameterstore.SecretSupplier(
       TransitionTiming(usageDelay = Duration.ofMinutes(3), overlapDuration = Duration.ofHours(2)),
       parameterName = s"/$stack/$app/$stage/play.http.secret.key",
-      AwsSdkV1(aws.ssmClient)
+      parameterstore.AwsSdkV2(aws.ssmClient)
     )
   }
 }

@@ -1,12 +1,12 @@
 package controllers
 
-import software.amazon.awssdk.services.ses.SesClient
 import com.github.nscala_time.time.Imports._
 import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
 import com.gu.pandomainauth.service.CookieUtils
 import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings}
 import play.api.mvc._
 import services.NewCookieIssue
+import software.amazon.awssdk.services.ses.SesClient
 import utils._
 
 import scala.util.Random
