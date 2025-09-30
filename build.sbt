@@ -10,10 +10,7 @@ scalacOptions := Seq(
   "-Xfatal-warnings"
 )
 
-
-// We must include both AWS SDK V1 and V2 to enable the use of latest
-// Scanamo whilst avoiding overhauling the whole app to V2.
-val awsSdkVersionV2 = "2.34.5"
+val awsSdkVersionV2 = "2.34.6"
 val jacksonVersion = "2.19.2"
 val playSecretRotationVersion = "15.1.0"
 
@@ -28,7 +25,6 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "cloudwatch" % awsSdkVersionV2,
   "software.amazon.awssdk" % "autoscaling" % awsSdkVersionV2,
   "software.amazon.awssdk" % "ses" % awsSdkVersionV2,
-//  "software.amazon.awssdk" % "ssm" % awsSdkVersionV2, //Needed for Parameter Store?
   "software.amazon.awssdk" % "kinesis" % awsSdkVersionV2,
   "software.amazon.awssdk" % "dynamodb" % awsSdkVersionV2,
   "net.logstash.logback" % "logstash-logback-encoder" % "7.3",
