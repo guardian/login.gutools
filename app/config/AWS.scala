@@ -19,7 +19,7 @@ import scala.util.Try
 case class InstanceTags(stack: String, app: String, stage: String)
 
 class AWS {
-  val region= Region.EU_WEST_1
+  val region = Region.EU_WEST_1
   val profile = "composer"
 
 

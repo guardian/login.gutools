@@ -11,7 +11,7 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
 
   override val switches = new Switches(config, aws.s3AsyncClient)
 
-  private val s3BucketLoader: S3BucketLoader =aws.PandaHelpers.forAwsSdkV2(aws.s3SyncClient, "pan-domain-auth-settings")
+  private val s3BucketLoader: S3BucketLoader = aws.PandaHelpers.forAwsSdkV2(aws.s3SyncClient, "pan-domain-auth-settings")
 
   private lazy val panDomainSettings: PanDomainAuthSettingsRefresher = PanDomainAuthSettingsRefresher(
     domain = config.domain,
