@@ -30,24 +30,14 @@ class AWS {
     EnvironmentVariableCredentialsProvider.create()
   ).build
 
-  val asgClient: AutoScalingClient = AutoScalingClient.builder.region(region).credentialsProvider(v2CredentialsProvider).build()
-  val ssmClient: SsmClient = SsmClient.builder().region(region).credentialsProvider(v2CredentialsProvider).build()
-  val sesClient: SesClient =  SesClient.builder().region(region).credentialsProvider(v2CredentialsProvider).build()
-
-  object PandaHelpers {
-    def forAwsSdkV2(anonS3Client: S3Client, bucket: String): S3BucketLoader =
-      (key: String) => {
-        anonS3Client.getObject(
-          GetObjectRequest.builder().bucket(bucket).key(key).build()
-        )
-      }
-  }
-
   private def setup[B <: AwsClientBuilder[B, _]](builder: B): B =
     builder.credentialsProvider(v2CredentialsProvider).region(region)
   val s3SyncClient: S3Client = setup(S3Client.builder).build()
   val s3AsyncClient: S3AsyncClient = setup(S3AsyncClient.builder).build()
   val dynamoDbClient: DynamoDbClient = setup(DynamoDbClient.builder).build()
+  val asgClient: AutoScalingClient = setup(AutoScalingClient.builder).build()
+  val ssmClient: SsmClient = setup(SsmClient.builder).build()
+  val sesClient: SesClient = setup(SesClient.builder).build()
 
   def readTags(): Option[InstanceTags] = {
     // We read tags from the AutoScalingGroup rather than the instance itself to avoid problems where the
