@@ -8,7 +8,7 @@ import play.api.mvc.{Action, AnyContent}
 
 import java.net.URLEncoder
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.DurationInt
+import java.time.Duration
 
 class DesktopLogin(
   deps: LoginControllerComponents,
@@ -35,7 +35,7 @@ class DesktopLogin(
         PanDomain.authStatus(token,
           verification = panDomainSettings.settings.signingAndVerification,
           validateUser = PanDomain.guardianValidation,
-          apiGracePeriod = 9.hours.toMillis,
+          apiGracePeriod = Duration.ofHours(9),
           system = panDomainSettings.system,
           cacheValidation = false,
           forceExpiry = false
