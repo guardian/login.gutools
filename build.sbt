@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "pan-domain-auth-play_3-0" % "12.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion ,
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion ,
-  "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "8.2.0",
+  "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "11.0.0-PREVIEW.rearrange-executioncontexts.2025-10-08T1413.e75cbd50",
   "software.amazon.awssdk" % "ec2" % awsSdkVersionV2,
   "software.amazon.awssdk" % "cloudwatch" % awsSdkVersionV2,
   "software.amazon.awssdk" % "autoscaling" % awsSdkVersionV2,
