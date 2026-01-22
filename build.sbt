@@ -2,7 +2,7 @@ name := "login"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.18"
+scalaVersion := "3.8.1"
 scalacOptions := Seq(
   "-unchecked",
   "-deprecation",
