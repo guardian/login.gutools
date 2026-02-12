@@ -1,9 +1,13 @@
-@()
+@(telemetryUrl: String)
 <html>
     <head>
         <title>
             Emergency reissue success
         </title>
+        <script type="module">
+            const image = new Image();
+            image.src = `@Html(telemetryUrl)&path=${window.location.pathname}`;
+        </script>
     </head>
     <body>
         <h1>Your login session has been extended</h1>

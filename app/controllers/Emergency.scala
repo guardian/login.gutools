@@ -18,7 +18,8 @@ class Emergency(
    loginPublicSettings: PublicSettings,
    deps: LoginControllerComponents,
    sesClient: SesClient,
-   panDomainSettings: PanDomainAuthSettingsRefresher
+   panDomainSettings: PanDomainAuthSettingsRefresher,
+   telemetryUrl: String
 ) extends LoginController(deps, panDomainSettings) with Loggable {
 
   private val cookieLifetime = Duration.ofDays(1) // 1.day
@@ -39,7 +40,7 @@ class Emergency(
       , authenticatedUser =>
         if (validateUser(authenticatedUser)) {
           val authCookie = generateCookie(authenticatedUser.copy(expires = (now().plus(cookieLifetime))))
-          Ok(views.html.emergency.reissueSuccess()).withCookies(authCookie)
+          Ok(views.html.emergency.reissueSuccess(telemetryUrl)).withCookies(authCookie)
         } else unauthorised("Only Guardian email addresses with two-factor auth are supported.", reissueTopic)
     )).getOrElse {
       unauthorised("No existing login session found, unable to log you in.", reissueTopic)
@@ -47,7 +48,7 @@ class Emergency(
   }
 
   def requestCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction {
-    Ok(views.html.emergency.requestNewCookie())
+    Ok(views.html.emergency.requestNewCookie(telemetryUrl))
   }
 
   def sendCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction { req =>
@@ -70,7 +71,7 @@ class Emergency(
         val ses = new SES(sesClient, config)
         ses.sendCookieEmail(token, emailAddress)
 
-        Ok(views.html.emergency.emailSent())
+        Ok(views.html.emergency.emailSent(telemetryUrl))
       }
       catch {
         case NonFatal(e) => InternalServerError(e.toString)
@@ -96,7 +97,7 @@ class Emergency(
       val authCookie = generateCookie(newAuthUser)
 
 
-      Ok(views.html.emergency.reissueSuccess()).withCookies(authCookie)
+      Ok(views.html.emergency.reissueSuccess(telemetryUrl)).withCookies(authCookie)
     }
 
     val issueNewCookieTopic = "New cookie has not been created"

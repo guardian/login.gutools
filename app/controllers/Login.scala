@@ -5,7 +5,7 @@ import config.LoginConfig
 import play.api.mvc._
 
 class Login(
-  deps: LoginControllerComponents, panDomainSettings: PanDomainAuthSettingsRefresher
+  deps: LoginControllerComponents, panDomainSettings: PanDomainAuthSettingsRefresher, telemetryUrl: String
 ) extends LoginController(deps, panDomainSettings) {
   private val defaultAllowHeaders = List("X-Requested-With","Origin","Accept","Content-Type")
 
@@ -15,7 +15,7 @@ class Login(
 
   def status = AuthAction { request =>
     val user = request.user
-    Ok(views.html.loginStatus(user.toJson))
+    Ok(views.html.loginStatus(user.toJson, telemetryUrl))
   }
 
   def logout = Action { implicit request =>

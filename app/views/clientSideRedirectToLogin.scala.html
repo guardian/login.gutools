@@ -1,10 +1,12 @@
-@(loginUrl: String)
+@(loginUrl: String, telemetryUrl: String)
 <html>
     <head>
         <title>
             Redirecting to login...
         </title>
         <script>
+            const image = new Image();
+            image.src = `@Html(telemetryUrl)&path=${window.location.pathname}`;            
             setTimeout(function() {
                 window.location.href = "@loginUrl";
             }, 250);

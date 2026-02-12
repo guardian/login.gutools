@@ -29,6 +29,8 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
     new Settings.Loader(s3BucketLoader, s"${config.domain}.settings.public")
   )
 
+  val telemetryUrl = s"https://user-telemetry.${config.domain}/guardian-tool-accessed?app=login-tool"
+
   loginPublicSettings.start()
 
   switches.start()
@@ -40,10 +42,10 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
   })
 
   private val app = new Application(this, panDomainSettings)
-  private val emergency = new Emergency(loginPublicSettings, this, aws.sesClient, panDomainSettings)
-  private val login = new Login(this, panDomainSettings)
-  private val desktopLogin = new DesktopLogin(this, desktopPanDomainSettings)
-  private val switchesController = new SwitchesController(this, panDomainSettings)
+  private val emergency = new Emergency(loginPublicSettings, this, aws.sesClient, panDomainSettings, telemetryUrl)
+  private val login = new Login(this, panDomainSettings, telemetryUrl)
+  private val desktopLogin = new DesktopLogin(this, desktopPanDomainSettings, telemetryUrl)
+  private val switchesController = new SwitchesController(this, panDomainSettings, telemetryUrl)
 
   override lazy val router = new Routes(httpErrorHandler, app, desktopLogin, login, emergency, switchesController, assets)
 }
