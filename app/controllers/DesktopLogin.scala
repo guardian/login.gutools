@@ -12,14 +12,15 @@ import java.time.Duration
 
 class DesktopLogin(
   deps: LoginControllerComponents,
-  panDomainSettings: PanDomainAuthSettingsRefresher
+  panDomainSettings: PanDomainAuthSettingsRefresher,
+  telemetryUrl: String
 ) extends LoginController(deps, panDomainSettings) with Logging {
 
   override lazy val authCallbackUrl: String = deps.config.host + "/desktop/oauthCallback"
 
   def clientSideRedirectToDesktopLogin = Action {
     val desktopLoginUrl = controllers.routes.DesktopLogin.desktopLogin().url
-    Ok(views.html.clientSideRedirectToLogin(desktopLoginUrl))
+    Ok(views.html.clientSideRedirectToLogin(desktopLoginUrl, telemetryUrl))
   }
 
   def desktopLogin: Action[AnyContent] = Action.async { implicit request =>

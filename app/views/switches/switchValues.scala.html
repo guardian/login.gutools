@@ -1,10 +1,14 @@
 @import config.SwitchState
-@(switches: Map[String, SwitchState])
+@(switches: Map[String, SwitchState], telemetryUrl: String)
 <html>
     <head>
         <title>
             Switch states
         </title>
+        <script type="module">
+            const image = new Image();
+            image.src = `@Html(telemetryUrl)&path=${window.location.pathname}`;
+        </script>
     </head>
     <body>
         <dl>

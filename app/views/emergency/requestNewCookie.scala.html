@@ -1,9 +1,13 @@
-@()
+@(telemetryUrl: String)
 <html>
 <head>
     <title>
         New cookie link request
     </title>
+    <script type="module">
+        const image = new Image();
+        image.src = `@Html(telemetryUrl)&path=${window.location.pathname}`;
+    </script>
 </head>
 <body>
 <h1>Send a link to user to obtain a new cookie</h1>
