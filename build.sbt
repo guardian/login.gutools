@@ -11,7 +11,7 @@ scalacOptions := Seq(
 )
 
 val awsSdkVersionV2 = "2.34.8"
-val jacksonVersion = "2.19.2"
+val jacksonVersion = "2.21.1"
 val playSecretRotationVersion = "15.1.0"
 
 libraryDependencies ++= Seq(
@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "anghammarad-client" % "6.0.0",
   // Jackson library version addressing vulnerable dependencies
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
-  "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
+  "com.fasterxml.jackson.core" % "jackson-annotations" % "2.21",
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
