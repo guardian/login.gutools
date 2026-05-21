@@ -10,3 +10,5 @@ target
 .bloop
 /.metals
 /.vscode
+project/project
+metals.sbt
