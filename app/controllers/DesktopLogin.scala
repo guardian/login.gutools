@@ -27,7 +27,7 @@ class DesktopLogin(
     val sessionId = OAuth.generateSessionId()
     val antiForgeryToken = OAuth.generateAntiForgeryToken()
     OAuth.redirectToOAuthProvider(sessionId, antiForgeryToken)(ec) map { _.withSession {
-      request.session + (ANTI_FORGERY_KEY -> antiForgeryToken)
+      request.session + (antiForgeryTokenKey(sessionId) -> antiForgeryToken)
     }}
   }
 
@@ -54,10 +54,13 @@ class DesktopLogin(
   }
 
   def desktopOauthCallback(): Action[AnyContent] = Action.async { implicit request =>
+    val sessionId = OAuth.generateSessionId()
+    val antiForgeryTokenKeyFromSession = antiForgeryTokenKey(sessionId)
+    val loginOriginKeyFromSession = loginOriginKey(sessionId)
     val token =
-      request.session.get(ANTI_FORGERY_KEY).getOrElse(throw new OAuthException("missing anti forgery token"))
+      request.session.get(antiForgeryTokenKeyFromSession).getOrElse(throw new OAuthException("missing anti forgery token"))
 
-    OAuth.validatedUserIdentity(token)(request, deps.executionContext, wsClient).map { claimedAuth =>
+    OAuth.validatedUserIdentity(sessionId, token)(request, deps.executionContext, wsClient).map { claimedAuth =>
       logger.debug("fresh user desktop login")
       val authedUserData = claimedAuth.copy(authenticatingSystem = "login-desktop", multiFactor = checkMultifactor(claimedAuth))
 
@@ -65,7 +68,7 @@ class DesktopLogin(
       if (validateUser(authedUserData)) {
         val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.signingAndVerification)
         Redirect(s"gu-panda://desktop?token=${URLEncoder.encode(token, "UTF-8")}&stage=${deps.config.stage.toLowerCase}")
-          .withSession(session = request.session - ANTI_FORGERY_KEY - LOGIN_ORIGIN_KEY)
+          .withSession(session = request.session - antiForgeryTokenKeyFromSession - loginOriginKeyFromSession)
       } else {
         showUnauthedMessage(invalidUserMessage(claimedAuth))
       }
