@@ -4,11 +4,11 @@ import com.gu.pandomainauth.model._
 import com.gu.pandomainauth.service.{CookieUtils, OAuthException}
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
 import play.api.Logging
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, RequestHeader}
 
 import java.net.URLEncoder
-import scala.concurrent.ExecutionContext
 import java.time.Duration
+import scala.concurrent.Future
 
 class DesktopLogin(
   deps: LoginControllerComponents,
@@ -53,25 +53,43 @@ class DesktopLogin(
     }
   }
 
+  private def fetchSessionIdFromState()(implicit request: RequestHeader) =
+    request.getQueryString("state") match {
+      case Some(s"$sessionId+$_") => Right(sessionId)
+      case Some(_) => Left(BadRequest("State parameter returned missing a session ID"))
+      case None => Left(BadRequest("No state parameter passed in callback"))
+    }
+
   def desktopOauthCallback(): Action[AnyContent] = Action.async { implicit request =>
-    val sessionId = OAuth.generateSessionId()
-    val antiForgeryTokenKeyFromSession = antiForgeryTokenKey(sessionId)
-    val loginOriginKeyFromSession = loginOriginKey(sessionId)
-    val token =
-      request.session.get(antiForgeryTokenKeyFromSession).getOrElse(throw new OAuthException("missing anti forgery token"))
+    (for {
+      sessionId <- fetchSessionIdFromState()
+    } yield {
+      val antiForgeryTokenKeyFromSession = antiForgeryTokenKey(sessionId)
+      val loginOriginKeyFromSession = loginOriginKey(sessionId)
+      val token =
+        request.session
+          .get(antiForgeryTokenKeyFromSession)
+          .getOrElse(throw new OAuthException("missing anti forgery token"))
 
-    OAuth.validatedUserIdentity(sessionId, token)(request, deps.executionContext, wsClient).map { claimedAuth =>
-      logger.debug("fresh user desktop login")
-      val authedUserData = claimedAuth.copy(authenticatingSystem = "login-desktop", multiFactor = checkMultifactor(claimedAuth))
+      OAuth.validatedUserIdentity(sessionId, token)(request, deps.executionContext, wsClient).map { claimedAuth =>
+        logger.debug("fresh user desktop login")
+        val authedUserData = claimedAuth.copy(
+          authenticatingSystem = "login-desktop",
+          multiFactor = checkMultifactor(claimedAuth)
+        )
 
-
-      if (validateUser(authedUserData)) {
-        val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.signingAndVerification)
-        Redirect(s"gu-panda://desktop?token=${URLEncoder.encode(token, "UTF-8")}&stage=${deps.config.stage.toLowerCase}")
-          .withSession(session = request.session - antiForgeryTokenKeyFromSession - loginOriginKeyFromSession)
-      } else {
-        showUnauthedMessage(invalidUserMessage(claimedAuth))
+        if (validateUser(authedUserData)) {
+          val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.signingAndVerification)
+          val stageName = deps.config.stage.toLowerCase
+          Redirect(s"gu-panda://desktop?token=${URLEncoder.encode(token, "UTF-8")}&stage=$stageName")
+            .withSession(session = request.session - antiForgeryTokenKeyFromSession - loginOriginKeyFromSession)
+        } else {
+          showUnauthedMessage(invalidUserMessage(claimedAuth))
+        }
       }
+    }) match {
+      case Left(failure) => Future.successful(failure)
+      case Right(eventualSuccess) => eventualSuccess
     }
   }
 }
