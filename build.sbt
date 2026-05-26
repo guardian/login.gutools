@@ -10,7 +10,7 @@ scalacOptions := Seq(
   "-Xfatal-warnings"
 )
 
-val awsSdkVersionV2 = "2.42.34"
+val awsSdkVersionV2 = "2.44.12"
 val jacksonVersion = "2.21.1"
 val playSecretRotationVersion = "15.1.0"
 
