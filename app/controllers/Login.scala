@@ -9,6 +9,11 @@ class Login(
 ) extends LoginController(deps, panDomainSettings) {
   private val defaultAllowHeaders = List("X-Requested-With","Origin","Accept","Content-Type")
 
+  override def showUnauthedMessage(message: String)(implicit request: RequestHeader): Result = {
+    if (message == "logged out") Ok(views.html.loggedout())
+    else super.showUnauthedMessage(message)
+  }
+
   def oauthCallback = Action.async { implicit request =>
     processOAuthCallback()
   }
