@@ -47,7 +47,7 @@ class Emergency(
     }
   }
 
-  def requestCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction {
+  def requestCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction { implicit request =>
     Ok(views.html.emergency.requestNewCookie(telemetryUrl))
   }
 
