@@ -5,6 +5,7 @@ import com.gu.pandomainauth.service.{CookieUtils, OAuthException}
 import com.gu.pandomainauth.{PanDomain, PanDomainAuthSettingsRefresher}
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, RequestHeader}
+import utils.DesktopTokenUtils
 
 import java.net.URLEncoder
 import java.time.Duration
@@ -80,8 +81,9 @@ class DesktopLogin(
 
         if (validateUser(authedUserData)) {
           val token = CookieUtils.generateCookieData(authedUserData, panDomainSettings.settings.signingAndVerification)
-          val stageName = deps.config.stage.toLowerCase
-          Redirect(s"gu-panda://desktop?token=${URLEncoder.encode(token, "UTF-8")}&stage=$stageName")
+          val stageName = deps.config.stage
+          val redirectUrl = DesktopTokenUtils.desktopRedirectUrl(token, stageName)
+          Redirect(redirectUrl)
             .withSession(session = request.session - antiForgeryTokenKeyFromSession - loginOriginKeyFromSession)
         } else {
           showUnauthedMessage(invalidUserMessage(claimedAuth))
