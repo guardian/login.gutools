@@ -7,7 +7,6 @@ import play.api.Logging
 import play.api.mvc.{Action, AnyContent, RequestHeader}
 import utils.DesktopTokenUtils
 
-import java.net.URLEncoder
 import java.time.Duration
 import scala.concurrent.Future
 
