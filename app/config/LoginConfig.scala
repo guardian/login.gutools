@@ -37,8 +37,6 @@ object LoginConfig {
     val tokensTableName = s"login.gutools-tokens-${stage.toUpperCase}"
     val tokenReissueUri = host + "/emergency/new-cookie/"
     val desktopTokenReissueUri = host + "/emergency/new-desktop-token/"
-    val requestCookieUri = host + "/emergency/request-cookie"
-
     val emailSettings = Map(
       "from" -> "editorial.tools.dev@theguardian.com",
       "replyTo" -> "core.central.production@guardian.co.uk"
