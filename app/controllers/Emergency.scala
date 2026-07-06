@@ -118,7 +118,7 @@ class Emergency(
           }
         } else {
           log.warn(s"Attempted to use a used token: ${tokenEntry.id}")
-          Unauthorized(views.html.emergency.newCookieFailure("Your link has already been been used"))
+          Unauthorized(views.html.emergency.newCookieFailure("Your link has already been used"))
         }
     }.getOrElse(Unauthorized("Token not found"))
   }
