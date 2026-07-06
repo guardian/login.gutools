@@ -23,6 +23,8 @@ class Emergency(
    telemetryUrl: String
 ) extends LoginController(deps, panDomainSettings) with Loggable {
 
+  private val secureRandom = SecureRandom.getInstance("NativePRNGNonBlocking")
+
   private val cookieLifetime = Duration.ofDays(1) // 1.day
 
   def reissueDisabled: Action[AnyContent] = Action {
@@ -63,7 +65,7 @@ class Emergency(
 
       val token = {
         val byteArray = new Array[Byte](60)
-        SecureRandom.getInstanceStrong.nextBytes(byteArray)
+        secureRandom.nextBytes(byteArray)
         // use UrlEncoder as this token will be transmitted in URL query params
         Base64.getUrlEncoder.encodeToString(byteArray)
       }
