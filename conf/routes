@@ -20,7 +20,6 @@ GET     /emergency/reissue           controllers.Emergency.reissue()
 GET     /emergency/reissue-disabled  controllers.Emergency.reissueDisabled()
 GET     /emergency/request-cookie    controllers.Emergency.requestCookieLink()
 GET     /emergency/new-cookie/:token controllers.Emergency.issueNewCookie(token)
-+NOCSRF
 POST    /emergency/send-cookie-link  controllers.Emergency.sendCookieLink()
 
 GET     /switches                    controllers.SwitchesController.index()

@@ -1,7 +1,7 @@
 package controllers
 
 import com.github.nscala_time.time.Imports._
-import com.gu.pandomainauth.model.{AuthenticatedUser, CookieParseException, CookieSignatureInvalidException, User}
+import com.gu.pandomainauth.model.{AuthenticatedUser, User}
 import com.gu.pandomainauth.service.CookieUtils
 import com.gu.pandomainauth.{PanDomainAuthSettingsRefresher, PublicSettings}
 import play.api.mvc._
@@ -9,9 +9,10 @@ import services.NewCookieIssue
 import software.amazon.awssdk.services.ses.SesClient
 import utils._
 
+import java.security.SecureRandom
 import java.time.Instant.now
 import java.time.Duration
-import scala.util.Random
+import java.util.Base64
 import scala.util.control.NonFatal
 
 class Emergency(
@@ -21,6 +22,8 @@ class Emergency(
    panDomainSettings: PanDomainAuthSettingsRefresher,
    telemetryUrl: String
 ) extends LoginController(deps, panDomainSettings) with Loggable {
+
+  private val secureRandom = SecureRandom.getInstance("NativePRNGNonBlocking")
 
   private val cookieLifetime = Duration.ofDays(1) // 1.day
 
@@ -47,7 +50,7 @@ class Emergency(
     }
   }
 
-  def requestCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction {
+  def requestCookieLink: Action[AnyContent] = EmergencySwitchIsOnAction { implicit request =>
     Ok(views.html.emergency.requestNewCookie(telemetryUrl))
   }
 
@@ -60,10 +63,14 @@ class Emergency(
 
       val emailAddress = s"$emailPrefix@guardian.co.uk"
 
-      val token = Random.alphanumeric.take(20).mkString
+      val token = {
+        val byteArray = new Array[Byte](60)
+        secureRandom.nextBytes(byteArray)
+        // use UrlEncoder as this token will be transmitted in URL query params
+        Base64.getUrlEncoder.encodeToString(byteArray)
+      }
 
-      val cookieIssue = NewCookieIssue(token, emailAddress,
-        tokenIssuedAt, false)
+      val cookieIssue = NewCookieIssue(token, emailAddress, tokenIssuedAt, used = false)
 
       try {
         deps.tokenDBService.createCookieIssue(cookieIssue)
