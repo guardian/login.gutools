@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(
   "com.gu" %% "anghammarad-client" % "6.0.0",
   // Jackson library version addressing vulnerable dependencies
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
-  "com.fasterxml.jackson.core" % "jackson-annotations" % "2.21",
+  "com.fasterxml.jackson.core" % "jackson-annotations" % "2.22",
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-cbor" % jacksonVersion,
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
