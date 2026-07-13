@@ -12,15 +12,15 @@ scalacOptions := Seq(
 
 val awsSdkVersionV2 = "2.47.3"
 val jacksonVersion = "2.22.1"
-val playSecretRotationVersion = "15.1.0"
+val playSecretRotationVersion = "15.2.7"
 
 libraryDependencies ++= Seq(
   jdbc,
   ws,
-  "com.gu" %% "pan-domain-auth-play_3-0" % "19.0.0",
+  "com.gu" %% "pan-domain-auth-play_3-0" % "20.0.0",
   "com.gu.play-secret-rotation" %% "aws-parameterstore-sdk-v2" % playSecretRotationVersion ,
   "com.gu.play-secret-rotation" %% "play-v30" % playSecretRotationVersion ,
-  "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "8.2.0",
+  "com.gu.etag-caching" %% "aws-s3-sdk-v2" % "17.0.0",
   "software.amazon.awssdk" % "ec2" % awsSdkVersionV2,
   "software.amazon.awssdk" % "cloudwatch" % awsSdkVersionV2,
   "software.amazon.awssdk" % "autoscaling" % awsSdkVersionV2,
@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
   "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-  "com.gu" %% "anghammarad-client" % "6.0.0",
+  "com.gu" %% "anghammarad-client" % "7.0.0",
   // Jackson library version addressing vulnerable dependencies
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % "2.21",
