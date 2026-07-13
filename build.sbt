@@ -12,7 +12,7 @@ scalacOptions := Seq(
 
 val awsSdkVersionV2 = "2.47.3"
 val jacksonVersion = "2.22.1"
-val playSecretRotationVersion = "15.1.0"
+val playSecretRotationVersion = "15.2.7"
 
 libraryDependencies ++= Seq(
   jdbc,
