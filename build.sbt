@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",
   "org.scanamo" %% "scanamo" % "1.0.0-M17",
   "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-  "com.gu" %% "anghammarad-client" % "6.0.0",
+  "com.gu" %% "anghammarad-client" % "7.0.0",
   // Jackson library version addressing vulnerable dependencies
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-annotations" % "2.21",
