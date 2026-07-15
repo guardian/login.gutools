@@ -99,7 +99,7 @@ class Emergency(
     tokenOpt.map {
       case Left(error) =>
         log.warn(s"Error when reading entry with $userToken from dynamo. A new cookie will not be issued: $error")
-        unauthorised("Checking your access token failed. You will not be issued with a new ", issueNewCookieTopic)
+        unauthorised("Checking your access token failed. You will not be issued with a new cookie", issueNewCookieTopic)
       case Right(tokenEntry: NewCookieIssue) =>
         if (!tokenEntry.used) {
           val tokenAgeInMilliseconds = DateTime.now().getMillis - tokenEntry.requested
