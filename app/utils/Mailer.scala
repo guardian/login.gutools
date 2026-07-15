@@ -9,9 +9,8 @@ class SES(sesClient: SesClient, loginConfig: LoginConfig) {
   def buildContent(data: String) = Content.builder().charset("UTF-8").data(data).build()
 
   def sendCookieEmail(token: String, sendTo: String): Unit = {
-
-
     val uri = loginConfig.tokenReissueUri
+    val desktopUri = loginConfig.desktopTokenReissueUri
 
     val emailBody =
       s"""
@@ -21,16 +20,22 @@ class SES(sesClient: SesClient, loginConfig: LoginConfig) {
          |    The Guardian's Editorial Tools are experiencing login issues. This is likely due to a Google issue (please refer to emails from Central Production). You must perform an additional step to login.
          |  </p>
          |  <p>
-         |    Click <a href=$uri$token>here</a> to login and continue using the Tools.
+         |    To continue using the Tools, <a href="$uri$token">log in here</a>.
          |  </p>
          |  <p>
-         |    <strong>Do NOT share this email with others. The link is private and for your use only.</strong>
+         |    Or, to use InCopy & InDesign, <a href="$desktopUri$token">log in here</a>.
+         |  </p>
+         |  <p>
+         |    <strong>Do NOT share this email with others. The links are private and for your use only.</strong>
+         |  </p>
+         |  <p>
+         |    You will only be able to log in using <strong>one</strong> of the above links; if you need to log in to both please request a second email.
          |  </p>
          |</div>
        """.stripMargin
 
 
-    sesClient.sendEmail( SendEmailRequest.builder()
+    sesClient.sendEmail(SendEmailRequest.builder()
       .destination(Destination.builder().toAddresses(sendTo).build())
       .message(Message.builder()
         .subject(buildContent("[emergency login] Guardian Editorial Tools - new cookie link"))

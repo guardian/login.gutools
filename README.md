@@ -19,7 +19,7 @@ If the Google Auth service goes down it is possible to use an emergency feature 
 
 If users do not have a cookie issued, they can request an email with a link for obtaining a new cookie through the `/emergency/request-cookie` endpoint.
 
-If a lot users are requesting new cookies, we might have to increase the read/write capacity of the dynamo table where cookie tokens are stored.
+If a lot of users are requesting new cookies, we might have to increase the read/write capacity of the dynamo table where cookie tokens are stored.
 
 #### Managing emergency access
 

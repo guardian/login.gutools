@@ -42,7 +42,7 @@ class AppComponents(context: Context) extends LoginControllerComponents(context,
   })
 
   private val app = new Application(this, panDomainSettings)
-  private val emergency = new Emergency(loginPublicSettings, this, aws.sesClient, panDomainSettings, telemetryUrl)
+  private val emergency = new Emergency(loginPublicSettings, this, aws.sesClient, panDomainSettings, desktopPanDomainSettings, telemetryUrl)
   private val login = new Login(this, panDomainSettings, telemetryUrl)
   private val desktopLogin = new DesktopLogin(this, desktopPanDomainSettings, telemetryUrl)
   private val switchesController = new SwitchesController(this, panDomainSettings, telemetryUrl)

@@ -20,6 +20,7 @@ class Emergency(
    deps: LoginControllerComponents,
    sesClient: SesClient,
    panDomainSettings: PanDomainAuthSettingsRefresher,
+   desktopPanDomainSettings: PanDomainAuthSettingsRefresher,
    telemetryUrl: String
 ) extends LoginController(deps, panDomainSettings) with Loggable {
 
@@ -89,35 +90,17 @@ class Emergency(
     }
   }
 
-  def issueNewCookie(userToken: String): Action[AnyContent] = EmergencySwitchIsOnAction {
-
-    def issueNewCookie(newCookieIssue: NewCookieIssue): Result = {
-
-      deps.tokenDBService.expireCookieIssue(newCookieIssue)
-
-      val expires = now().plus(cookieLifetime)
-      val names = newCookieIssue.email.split("\\.")
-      val firstName = names(0).capitalize
-      val lastName = names(1).split("@")(0).capitalize
-      val user = User(firstName, lastName, newCookieIssue.email, None)
-      val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, multiFactor = true)
-      val authCookie = generateCookie(newAuthUser)
-
-
-      Ok(views.html.emergency.reissueSuccess(telemetryUrl)).withCookies(authCookie)
-    }
-
+  def handleTokenVerification(userToken: String)(block: User => Result): Result = {
     val issueNewCookieTopic = "New cookie has not been created"
     val tenMinutesInMilliSeconds = 600000
 
     val tokenOpt = deps.tokenDBService.getCookieIssueForUserToken(userToken)
 
     tokenOpt.map {
-      case Left(error) => {
+      case Left(error) =>
         log.warn(s"Error when reading entry with $userToken from dynamo. A new cookie will not be issued: $error")
-        unauthorised("Checking your access token failed. You will not be issued with a new ", issueNewCookieTopic)
-      }
-      case Right(tokenEntry: NewCookieIssue) => {
+        unauthorised("Checking your access token failed. You will not be issued with a new cookie", issueNewCookieTopic)
+      case Right(tokenEntry: NewCookieIssue) =>
         if (!tokenEntry.used) {
           val tokenAgeInMilliseconds = DateTime.now().getMillis - tokenEntry.requested
           if (tokenAgeInMilliseconds > tenMinutesInMilliSeconds) {
@@ -125,15 +108,41 @@ class Emergency(
             Unauthorized(views.html.emergency.newCookieFailure("Your link has expired. Could not create a new cookie"))
           }
           else {
-            issueNewCookie(tokenEntry)
+            deps.tokenDBService.expireCookieIssue(tokenEntry)
+
+            val names = tokenEntry.email.split("\\.")
+            val firstName = names(0).capitalize
+            val lastName = names(1).split("@")(0).capitalize
+            val user = User(firstName, lastName, tokenEntry.email, None)
+            block(user)
           }
         } else {
           log.warn(s"Attempted to use a used token: ${tokenEntry.id}")
-          Unauthorized(views.html.emergency.newCookieFailure("Your link has already been been used"))
+          Unauthorized(views.html.emergency.newCookieFailure("Your link has already been used"))
         }
-
-      }
     }.getOrElse(Unauthorized("Token not found"))
+  }
+
+  def issueNewCookie(userToken: String): Action[AnyContent] = EmergencySwitchIsOnAction {
+    handleTokenVerification(userToken) { user =>
+      val expires = now().plus(cookieLifetime)
+      val newAuthUser = AuthenticatedUser(user, config.appName, Set(config.appName), expires, multiFactor = true)
+      val authCookie = generateCookie(newAuthUser)
+
+      Ok(views.html.emergency.reissueSuccess(telemetryUrl)).withCookies(authCookie)
+    }
+  }
+
+  def issueNewDesktopToken(userToken: String): Action[AnyContent] = EmergencySwitchIsOnAction {
+    handleTokenVerification(userToken) { user =>
+      val expires = now().plus(cookieLifetime)
+      val newAuthUser = AuthenticatedUser(user, "login-desktop", Set("login-desktop"), expires, multiFactor = true)
+      val authToken = CookieUtils.generateCookieData(newAuthUser, desktopPanDomainSettings.settings.signingAndVerification)
+      val stageName = deps.config.stage
+      val redirectUrl = DesktopTokenUtils.desktopRedirectUrl(authToken, stageName)
+
+      Redirect(redirectUrl)
+    }
   }
 
   private def unauthorised(message: String, topic: String): Result = {
