@@ -41,7 +41,9 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion,
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion,
   "com.fasterxml.jackson.module" % "jackson-module-parameter-names" % jacksonVersion,
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
+  // Addressing vulnerability in 33.4.8-jre. Check if this can be removed once there is a new release of Play
+  "com.google.guava" % "guava" % "33.8.0-jre"
 )
 
 def env(propName: String): Option[String] = sys.env.get(propName).filter(_.trim.nonEmpty)
